@@ -1,6 +1,6 @@
 import React from 'react';
 import './pages.sass'
-import Login from "../components/Login";
+import Login from "../components/login/Login";
 
 const SignInPage = () => {
     return (
