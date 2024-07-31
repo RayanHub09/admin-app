@@ -1,16 +1,37 @@
-import {createSlice} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { getAuth, signInWithEmailAndPassword, UserCredential } from "firebase/auth";
 
 interface IState {
-    email: string | null,
-    token: string | null,
+    email: string | null
+    token: string | null
     id: string | null
+    error: string | null
+    status: 'loading' | 'succeeded' | 'failed' | null
+    isAuth: boolean
 }
 
-const initialState:IState = {
-    email: 'bul@gmail.ru',
-    token: 'AMf-vBwumqQdTdcDBgQI7uyQV4raVWxL0bWTyI5Bjls9mivdW4QFWGqafpCC9AG3IVA7NDeqYAstNYlNmJjR2rpVPk0Ae8evp_pGqG-OPD27Jwo3bRNCIlplPxFstQ5bcSXO_xykK8XbbqbPlz1RJ1eULY364Ye-nZATx-nL178IyrVWY3XIS4_Pb_Z5Q_p_w6hebFe8MP9sIIuzU6auWFLl-CGQXJm2Fw',
-    id: 'vCwyqytBT4WF3MWgHVdDHn2Xhr62'
-}
+const initialState: IState = {
+    email: null,
+    token: null,
+    id: null,
+    error: null,
+    status: null,
+    isAuth: false
+};
+
+export const signIn = createAsyncThunk(
+    'user/signIn',
+    async ({ email, password }: { email: string; password: string }, thunkAPI) => {
+        try {
+            const userCredential: UserCredential = await signInWithEmailAndPassword(getAuth(), email, password)
+            const user = userCredential.user
+            const token = await user.getIdToken()
+            return { email: user.email, token, id: user.uid }
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue(error.message)
+        }
+    }
+);
 
 const workerSlice = createSlice({
     name: 'worker',
@@ -26,12 +47,27 @@ const workerSlice = createSlice({
             state.email = null
             state.token = null
         }
-    }
-})
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(signIn.pending, (state) => {
+                state.status = 'loading'
+            })
+            .addCase(signIn.fulfilled, (state, action) => {
+                state.status = 'succeeded'
+                state.email = action.payload.email
+                state.token = action.payload.token
+                state.id = action.payload.id
+                state.isAuth = true
+            })
+            .addCase(signIn.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.payload as string ?? "Unknown error occurred"
+                state.isAuth = false
+            });
+    },
+});
 
-export const {
-    setWorker,
-    removeWorker
-} = workerSlice.actions
+export const { setWorker, removeWorker } = workerSlice.actions;
 
-export const workerReducer = workerSlice.reducer
+export const workerReducer = workerSlice.reducer;
