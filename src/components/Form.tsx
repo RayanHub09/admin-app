@@ -1,25 +1,16 @@
 import React, {FC, useState} from 'react';
 import './components.sass'
+import {options, IRole} from "./managers/roleList";
 
 interface FormProps {
     text_button: string,
     isCreate: boolean
     handleClick: (email: string, password: string, role?: string | undefined) => void;
 }
-interface ISelect {
-    spare_parts : string,
-    yahoo_auctions: string,
-    parcels : string,
-    accounting : string
-}
+
 
 const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
-    const options: ISelect = {
-        spare_parts: 'Запчасти',
-        yahoo_auctions: 'Yahoo аукционы',
-        parcels: 'Посылки',
-        accounting: 'Бухгалтерия'
-    }
+
     const [password, setPassword] = useState('')
     const [email, setEmail] = useState('')
     const [role, setRole] = useState<string|undefined>('Выберете роль')
@@ -53,7 +44,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     className={'choose_role'}>
                     <option disabled={true}>Выберете роль</option>
                     {Object.keys(options).map((key, index) =>
-                        <option value={key} key={index}>{options[key as keyof ISelect]}</option>
+                        <option value={key} key={index}>{options[key as keyof IRole]}</option>
                     )}
                 </select>
             }

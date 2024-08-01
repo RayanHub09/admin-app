@@ -1,0 +1,15 @@
+@mixin default_container($flex-direction: row, $row_gap)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  display: flex
+
+.items_list_container
+  @include default_container(column, 5px)
+
+.items_list
+  @include default_container(column, 0px)
+  display: grid
+  grid-template-columns: repeat(6, 1fr)
+  border: 1px rgba(128, 128, 128, 0.4) solid
+
+

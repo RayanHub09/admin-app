@@ -1,0 +1,17 @@
+@mixin default_container($flex-direction: row, $row_gap)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  display: flex
+.order_item
+  display: grid
+  grid-template-columns: auto auto
+  border: 1px rgba(128, 128, 128, 0.4) solid
+.orders_list_container
+  @include default_container(column, 100px)
+.field_order,  .label_order
+  border-bottom: 1px rgba(128, 128, 128, 0.5) solid
+  padding: 10px
+.field_order
+  border-left: 1px rgba(128, 128, 128, 0.4) solid
+.order_item_container
+  @include default_container(column, 10px)
