@@ -57,7 +57,6 @@ export const fetchSignIn = createAsyncThunk(
             thunkAPI.dispatch(setManager(Manager[0]))
 
         } catch (error: any) {
-            console.log(error)
             return thunkAPI.rejectWithValue(error.message)
         }
     }
@@ -82,6 +81,7 @@ const ManagerSlice = createSlice({
             state.manager.id = null
             state.manager.email = null
             state.token = null
+            state.status = null
             state.isAuth = false
         }
     },

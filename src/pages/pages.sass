@@ -2,13 +2,18 @@
   flex-direction: $flex-direction
   row-gap: $row_gap
   display: flex
+
+.signin_page_container, .not_found_page_container, .container
+  @include default_container(column, 20px)
+  width: 100%
+  height: 100%
   align-items: center
   justify-content: center
-.signin_container
-  @include default_container(column, 20px)
-  height: 100%
-.managers_container
-  width: 100%
-  @include default_container(column, 10px)
 
+.managers_page_container
+  @include default_container(column, 10px)
+  padding: 20px
+  height: 100%
+.orders_page_container
+  @include default_container(column, 10px)
 

@@ -3,16 +3,37 @@
   border: none
   font-size: 16px
   transition: all 1s
+  cursor: pointer
+  border-radius: 5px
+@mixin default_container($flex-direction: row, $row_gap)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  display: flex
 
-.create_workers_container
+.add_form_container
   align-self: center
-  width: 100%
-
 .hidden_add_form_container
   display: none
 .add_workers_button
   @extend %button
+  align-self: center
   padding: 10px
-  width: 100%
+  background: rgba(106, 106, 106, 0.36)
   &:hover
     background: rgba(0, 0, 0, 0.11)
+.managers_list_container
+  @include default_container(column, 20px)
+
+.managers_list
+  @include default_container(column, 10px)
+
+.manager_item
+  @include default_container(row, 0px)
+  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.2)
+  padding: 10px
+  font-size: 20px
+  column-gap: 10px
+  cursor: pointer
+  transition: all 1s
+  &:hover
+    box-shadow: 0px 2px 10px 4px rgba(0, 0, 0, 0.3)

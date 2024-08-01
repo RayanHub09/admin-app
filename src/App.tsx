@@ -1,21 +1,25 @@
-import React, {createContext} from 'react';
+import React, {useEffect} from 'react';
 import './App.sass';
 import Router from "./components/router/Router";
 import Header from "./components/Header";
-import NavBar from "./components/NavBar";
-import {useAppSelector} from "./hooks/redux-hooks";
+import {useAppDispatch, useAppSelector} from "./hooks/redux-hooks";
+import {fetchGetAllManagers} from "./store/slices/managers";
+import {fetchGetAllOrders} from "./store/slices/orders";
 
-interface AuthContextType {
-    isAuth: boolean;
-}
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 function App() {
+    const dispatch = useAppDispatch()
     const isAuth = useAppSelector(state => state.manager.isAuth)
+    useEffect(() => {
+        if (isAuth) {
+            dispatch(fetchGetAllManagers())
+            dispatch(fetchGetAllOrders())
+        }
+    }, [isAuth])
 
     return (
         <div className={'App'}>
-            {isAuth && <Header/>}
+            <Header />
             <Router />
         </div>
     )

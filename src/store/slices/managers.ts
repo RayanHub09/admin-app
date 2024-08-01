@@ -1,43 +1,59 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
-import {collection, db, addDoc} from "../../firebase";
+import {collection, db, addDoc, query, getDocs} from "../../firebase";
 
 
-interface IWorker {
+interface IManager {
     id: string | null
     email: string | null
     role: string | null
 }
 
 interface IState {
-    managers: IWorker[]
+    managers: IManager[]
     error: string | null
-    status: string | null
+    status: 'loading' | 'succeeded' | 'failed' | null
 }
 
-const initialState:IState = {
+const initialState: IState = {
     managers: [],
     error: null,
     status: null
 }
 export const fetchSignUpManager = createAsyncThunk(
     'worker/fetchCreateWorker',
-    async ({ email, password, role }: { email: string; password: string; role: string }, thunkAPI) => {
+    async ({email, password, role}: { email: string; password: string; role: string }, thunkAPI) => {
         try {
-            console.log(0)
             const userCredential: UserCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
-            const newManager: IWorker = {
+            const newManager: IManager = {
                 id: userCredential.user.uid,
                 email,
                 role,
-            };
-
+            }
             await addDoc(collection(db, "managers"), newManager);
             thunkAPI.dispatch(addWorker(newManager));
         } catch (error: any) {
-            console.log(error)
             return thunkAPI.rejectWithValue(error.message);
         }
+    }
+)
+
+export const fetchGetAllManagers = createAsyncThunk(
+    'managers/fetchGetAllManagers',
+    async (arg, thunkAPI) => {
+        try {
+            const q = query(collection(db, "managers"))
+            const querySnapshot = await getDocs(q)
+            const managers:IManager[] = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                email: doc.data().email,
+                role: doc.data().role
+            }))
+            return managers
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue(error.message);
+        }
+
     }
 )
 
@@ -47,10 +63,18 @@ const ManagersSlice = createSlice({
     reducers: {
         addWorker(state, action) {
             state.managers = [...state.managers, action.payload]
+        },
+        getAllManagers(state, action) {
+            state.managers = action.payload
         }
     },
     extraReducers: (builder) => {
         builder
+            .addCase(fetchGetAllManagers.fulfilled, (state, action) => {
+                state.managers = action.payload
+                state.status = 'succeeded'
+                state.error = null
+            })
             .addMatcher(
                 (action) =>
                     [fetchSignUpManager.pending.type].includes(action.type),
@@ -60,7 +84,7 @@ const ManagersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [fetchSignUpManager.fulfilled.type].includes(action.type),
+                    [fetchSignUpManager.fulfilled.type, fetchGetAllManagers.fulfilled.type].includes(action.type),
                 (state) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -68,8 +92,8 @@ const ManagersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [fetchSignUpManager.rejected.type].includes(action.type),
-                (state, action:PayloadAction<string>) => {
+                    [fetchSignUpManager.rejected.type, fetchGetAllManagers.rejected.type].includes(action.type),
+                (state, action: PayloadAction<string>) => {
                     state.status = 'failed'
                     state.error = action.payload as string
                 }
@@ -78,4 +102,4 @@ const ManagersSlice = createSlice({
 })
 
 export const ManagersReducer = ManagersSlice.reducer
-export const {addWorker} = ManagersSlice.actions
+export const {addWorker, getAllManagers} = ManagersSlice.actions

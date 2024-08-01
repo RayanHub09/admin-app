@@ -3,6 +3,7 @@ import Form from "../Form";
 import {fetchSignIn} from "../../store/slices/manager";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {useNavigate} from "react-router-dom";
+import {fetchGetAllManagers} from "../../store/slices/managers";
 
 
 const Login = () => {
@@ -12,7 +13,7 @@ const Login = () => {
 
     const loginWorker = (email: string, password: string) => {
         dispatch(fetchSignIn({ email, password }))
-            .then(() =>  navigation('/orders'))
+            .then(() =>  navigation('/managers'))
     }
     return (
         <>
