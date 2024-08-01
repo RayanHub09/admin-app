@@ -3,14 +3,14 @@ import { getAuth, signInWithEmailAndPassword, UserCredential, createUserWithEmai
 import { db, collection, query, where, getDocs } from "../../firebase";
 
 
-interface IWorker {
+interface IManager {
     id: string | null
     email: string | null
     role: string | null
 }
 
 interface IState {
-    worker: IWorker
+    manager: IManager
     error: string | null
     status: 'loading' | 'succeeded' | 'failed' | null
     isAuth: boolean
@@ -18,7 +18,7 @@ interface IState {
 }
 
 const initialState: IState = {
-    worker: {
+    manager: {
         id: null,
         email: null,
         role: null
@@ -29,23 +29,6 @@ const initialState: IState = {
     isAuth: false
 }
 
-
-export const fetchUserByEmail = createAsyncThunk(
-    "user/fetchUserByEmail",
-    async (email: string, thunkAPI) => {
-            const q = query(collection(db, "workers"), where("email", "==", email));
-            const querySnapshot = await getDocs(q);
-            const userData: IWorker = querySnapshot.docs.map((doc) => {
-                const data = doc.data() as IWorker; // Приведение типа данных
-                return {
-                    id: doc.id,
-                    email: data.email,
-                    role: data.role
-                };
-            })[0];
-            thunkAPI.dispatch(setWorker(userData))
-    }
-);
 
 
 export const fetchSignIn = createAsyncThunk(
@@ -60,42 +43,44 @@ export const fetchSignIn = createAsyncThunk(
                 token,
                 email: user.email
             }))
-            fetchUserByEmail(email)
+            const q = query(collection(db, "managers"));
+            const querySnapshot = await getDocs(q);
+            const userData: IManager[] = querySnapshot.docs.map((doc) => {
+                const data = doc.data() as IManager;
+                return {
+                    id: doc.id,
+                    email: data.email,
+                    role: data.role
+                };
+            });
+            const Manager = userData.filter((item, index) => item.email === email)
+            thunkAPI.dispatch(setManager(Manager[0]))
+
         } catch (error: any) {
+            console.log(error)
             return thunkAPI.rejectWithValue(error.message)
         }
     }
 );
 
-export const fetchCreateWorker = createAsyncThunk(
-    'worker/fetchCreateWorker',
-    async ({ email, password }: { email: string; password: string }, thunkAPI) => {
-        try {
-            const userCredential: UserCredential =  await createUserWithEmailAndPassword(getAuth(), email, password)
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.message)
-        }
 
-    }
-)
-
-const workerSlice = createSlice({
-    name: 'worker',
+const ManagerSlice = createSlice({
+    name: 'Manager',
     initialState,
     reducers: {
         signIn(state, action) {
-            state.worker.id = action.payload.id
-            state.worker.email = action.payload.email
+            state.manager.id = action.payload.id
+            state.manager.email = action.payload.email
             state.token = action.payload.token
         },
-        setWorker(state, action) {
-            state.worker.id = action.payload.id
-            state.worker.email = action.payload.email
-            state.worker.role = action.payload.role
+        setManager(state, action) {
+            state.manager.id = action.payload.id
+            state.manager.email = action.payload.email
+            state.manager.role = action.payload.role
         },
-        removeWorker(state) {
-            state.worker.id = null
-            state.worker.email = null
+        removeManager(state) {
+            state.manager.id = null
+            state.manager.email = null
             state.token = null
             state.isAuth = false
         }
@@ -104,14 +89,14 @@ const workerSlice = createSlice({
         builder
             .addMatcher(
                 (action) =>
-                    [fetchCreateWorker.pending.type, fetchSignIn.pending.type].includes(action.type),
+                    [fetchSignIn.pending.type].includes(action.type),
                 (state) => {
                     state.status = 'loading'
                 }
             )
             .addMatcher(
                 (action) =>
-                    [fetchCreateWorker.fulfilled.type, fetchSignIn.fulfilled.type].includes(action.type),
+                    [fetchSignIn.fulfilled.type].includes(action.type),
                 (state) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -119,7 +104,8 @@ const workerSlice = createSlice({
                 }
             )
             .addMatcher(
-                (action) => [fetchCreateWorker.rejected.type, fetchSignIn.rejected.type].includes(action.type),
+                (action) =>
+                    [ fetchSignIn.rejected.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -130,6 +116,6 @@ const workerSlice = createSlice({
     },
 });
 
-export const { setWorker, removeWorker, signIn } = workerSlice.actions;
+export const { setManager, removeManager, signIn } = ManagerSlice.actions;
 
-export const workerReducer = workerSlice.reducer;
+export const ManagerReducer = ManagerSlice.reducer;

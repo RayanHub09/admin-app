@@ -1,2 +1,18 @@
+%button
+  background: none
+  border: none
+  font-size: 16px
+  transition: all 1s
+
 .create_workers_container
   align-self: center
+  width: 100%
+
+.hidden_add_form_container
+  display: none
+.add_workers_button
+  @extend %button
+  padding: 10px
+  width: 100%
+  &:hover
+    background: rgba(0, 0, 0, 0.11)

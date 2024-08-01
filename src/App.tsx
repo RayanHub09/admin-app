@@ -11,7 +11,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 function App() {
-    const isAuth = useAppSelector(state => state.worker.isAuth)
+    const isAuth = useAppSelector(state => state.manager.isAuth)
 
     return (
         <div className={'App'}>

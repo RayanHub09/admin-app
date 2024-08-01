@@ -1,10 +1,12 @@
 import {configureStore} from "@reduxjs/toolkit";
-import {workerReducer} from "./slices/worker";
+import {ManagerReducer} from "./slices/manager";
+import {ManagersReducer} from "./slices/managers";
 
 
 export const store = configureStore({
     reducer: {
-        worker: workerReducer
+        manager: ManagerReducer,
+        managers: ManagersReducer
     }
 })
 

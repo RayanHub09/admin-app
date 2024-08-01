@@ -1,19 +1,18 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import SignInPage from "../../pages/SignInPage";
-import MainPage from "../../pages/MainPage";
-import CreateManagers from "../managers/CreateManagers";
 import ManagersPage from "../../pages/ManagersPage";
 import OrdersPage from "../../pages/OrdersPage";
 import PrivateRouter from "./PrivateRouter";
+import {useAppSelector} from "../../hooks/redux-hooks";
 
 const Router = () => {
+    const isAdmin = useAppSelector(state => state.manager.manager.role) === 'admin'
     return (
         <Routes>
-            <Route path="/signin" element={<SignInPage />} />
-            <Route path={'/managers'} element={<PrivateRouter element={<ManagersPage />} /> } />
+            <Route path="/" element={<SignInPage />} />
+            {isAdmin && <Route path={'/managers'} element={<PrivateRouter element={<ManagersPage />} /> } />}
             <Route path={'/orders'} element={<PrivateRouter element={<OrdersPage />} /> } />
-            {/*<PrivateRouter element={<Route path="/managers" element={} />} />*/}
         </Routes>
     );
 };

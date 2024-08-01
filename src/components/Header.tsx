@@ -2,19 +2,18 @@ import React from 'react';
 import './components.sass'
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 
-import {removeWorker} from "../store/slices/worker";
+import {removeManager} from "../store/slices/manager";
 import NavBar from "./NavBar";
 const Header = () => {
     const dispatch = useAppDispatch()
-    const worker = useAppSelector(state => state.worker.worker)
+    const worker = useAppSelector(state => state.manager.manager)
     return (
         <header>
-            <h2>{worker.email}/</h2>
-            <span>{worker.role}</span>
+            <h2>{worker.email}</h2>
             <NavBar />
             <button
                 className={'button_out'}
-                onClick={() => dispatch(removeWorker())}
+                onClick={() => dispatch(removeManager())}
             >Выйти</button>
         </header>
     );

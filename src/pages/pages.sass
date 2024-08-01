@@ -1,11 +1,14 @@
-%container
-  row-gap: 20px
+@mixin default_container($flex-direction: row, $row_gap)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
   display: flex
-  flex-direction: column
   align-items: center
   justify-content: center
-
 .signin_container
-  @extend %container
+  @include default_container(column, 20px)
   height: 100%
+.managers_container
+  width: 100%
+  @include default_container(column, 10px)
+
 

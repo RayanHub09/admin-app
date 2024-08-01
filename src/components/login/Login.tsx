@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import Form from "../Form";
-import {fetchSignIn, fetchUserByEmail, signIn} from "../../store/slices/worker";
+import {fetchSignIn} from "../../store/slices/manager";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {useNavigate} from "react-router-dom";
 
@@ -8,7 +8,7 @@ import {useNavigate} from "react-router-dom";
 const Login = () => {
     const dispatch = useAppDispatch()
     const navigation = useNavigate()
-    const error = useAppSelector(state => state.worker.error)
+    const error = useAppSelector(state => state.manager.error)
 
     const loginWorker = (email: string, password: string) => {
         dispatch(fetchSignIn({ email, password }))

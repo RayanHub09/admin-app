@@ -1,21 +1,32 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './managers.sass'
 import Form from "../Form";
 import {useAppDispatch} from "../../hooks/redux-hooks";
-import {fetchCreateWorker} from "../../store/slices/worker";
+import {fetchSignUpManager} from "../../store/slices/managers";
+
 const CreateManagers = () => {
     const dispatch = useAppDispatch()
-    function createWorker(email: string, password: string) {
-        dispatch(fetchCreateWorker({email, password}))
+    const [additionForm, setAdditionForm] = useState(false)
+
+    function createWorker(email: string, password: string, role?: string) {
+        if (role) dispatch(fetchSignUpManager({email, password, role}))
+        setAdditionForm(!additionForm)
+
     }
+
     return (
-        <div className={'create_workers_container'}>
-            <h2>Добавление нового менеджера</h2>
-            <Form
-                text_button={'Добавить'}
-                isCreate={true}
-                handleClick={createWorker} />
-        </div>
+        <>
+            <button className={'add_workers_button'} onClick={() => setAdditionForm(!additionForm)}>{
+                !additionForm ? 'Добавить менеджера' : 'Закрыть'
+            }</button>
+            {
+                <div className={additionForm ? 'add_form_container' : 'hidden_add_form_container'}>
+                    <Form
+                        text_button={'Добавить'}
+                        isCreate={true}
+                        handleClick={createWorker}/>
+                </div>}
+        </>
     );
 };
 

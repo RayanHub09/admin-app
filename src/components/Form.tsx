@@ -4,7 +4,7 @@ import './components.sass'
 interface FormProps {
     text_button: string,
     isCreate: boolean
-    handleClick: (email: string, password: string) => void;
+    handleClick: (email: string, password: string, role?: string | undefined) => void;
 }
 interface ISelect {
     spare_parts : string,
@@ -22,8 +22,15 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
     }
     const [password, setPassword] = useState('')
     const [email, setEmail] = useState('')
-    const [role, setRole] = useState('Выберете роль')
+    const [role, setRole] = useState<string|undefined>('Выберете роль')
     const [visibilityPassword, setVisibilityPassword] = useState(false)
+
+    function clickFunction() {
+        setRole('Выберете роль')
+        setEmail('')
+        setPassword('')
+        handleClick(email, password, role)
+    }
 
     return (
         <div className={'form'}>
@@ -45,8 +52,8 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     onChange={event => setRole(event.target.value)}
                     className={'choose_role'}>
                     <option disabled={true}>Выберете роль</option>
-                    {Object.keys(options).map(key =>
-                        <option value={key}>{options[key as keyof ISelect]}</option>
+                    {Object.keys(options).map((key, index) =>
+                        <option value={key} key={index}>{options[key as keyof ISelect]}</option>
                     )}
                 </select>
             }
@@ -62,7 +69,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
             }
             <button
                 className={'default_button'}
-                onClick={() => handleClick(email, password)}
+                onClick={clickFunction}
             >
                 {text_button}
             </button>
