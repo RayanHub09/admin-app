@@ -1,13 +1,7 @@
 import {createSlice, createAsyncThunk, PayloadAction} from "@reduxjs/toolkit";
 import { getAuth, signInWithEmailAndPassword, UserCredential, createUserWithEmailAndPassword } from "firebase/auth";
 import { db, collection, query, where, getDocs } from "../../firebase";
-
-
-interface IManager {
-    id: string | null
-    email: string | null
-    role: string | null
-}
+import {IManager} from "../../interfaces";
 
 interface IState {
     manager: IManager
@@ -21,7 +15,8 @@ const initialState: IState = {
     manager: {
         id: null,
         email: null,
-        role: null
+        role: null,
+        name: null
     },
     error: null,
     status: null,
@@ -50,7 +45,8 @@ export const fetchSignIn = createAsyncThunk(
                 return {
                     id: doc.id,
                     email: data.email,
-                    role: data.role
+                    role: data.role,
+                    name: data.name
                 };
             });
             const Manager = userData.filter((item, index) => item.email === email)
@@ -76,6 +72,7 @@ const ManagerSlice = createSlice({
             state.manager.id = action.payload.id
             state.manager.email = action.payload.email
             state.manager.role = action.payload.role
+            state.manager.name = action.payload.name
         },
         removeManager(state) {
             state.manager.id = null

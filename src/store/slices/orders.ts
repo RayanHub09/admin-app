@@ -2,58 +2,19 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, getDocs, query} from "../../firebase";
 import { Timestamp } from "firebase/firestore";
 import serializeData from "../../Serializer";
+import {IOrder} from "../../interfaces";
 
-interface IPart {
-    discontinued: boolean
-    discontinuedTitleEn: string
-    discontinuedTitleRu: string
-    markName: string
-    name: string
-    nameEn: string
-    nameRu: string
-    notOriginalReplacements: string[]
-    oldPartNumbers: string[]
-    partNo: string
-    priceEur: number
-    priceRub: number
-    priceUsd: number
-    priceYen: number
-    sameTimeReplacements: string[]
-    weight: number
-}
-
-interface IItem {
-    id: string
-    amount: number
-    comment: string
-    part: IPart
-    selected: boolean
-}
-interface IStatus {
-    archived: false
-    date: any
-    readyToPackage: boolean
-    statusName: string
-}
-interface IOrder {
-    id: string
-    comment: string
-    date: any
-    items: IItem[]
-    itemsCnt: number
-    number: string
-    priceRu: number
-    priceYen: number
-    status: IStatus
-    uid: string
-}
 interface IState {
     orders: IOrder[]
+    filteredOrders: IOrder[]
+    isSearching: boolean
     error: string|null
     status: 'loading' | 'succeeded' | 'failed' | null
 }
 const initialState:IState = {
     orders: [],
+    filteredOrders: [],
+    isSearching: false,
     error: null,
     status: null
 }
@@ -92,6 +53,16 @@ const OrdersSlice = createSlice({
     reducers: {
         getAllOrders(state, action) {
             state.orders = [...action.payload]
+        },
+        searchOrder(state, action: PayloadAction<string>) {
+            const query = action.payload;
+            if (query === '') state.isSearching = false
+            else {
+                state.filteredOrders = state.orders.filter(order =>
+                    order.number.includes(query)
+                )
+                state.isSearching = true
+            }
         }
     },
     extraReducers: builder => {
@@ -116,4 +87,4 @@ const OrdersSlice = createSlice({
 })
 
 export const OrderReducer = OrdersSlice.reducer
-export const {getAllOrders} = OrdersSlice.actions
+export const {getAllOrders, searchOrder} = OrdersSlice.actions

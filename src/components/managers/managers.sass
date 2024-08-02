@@ -9,7 +9,6 @@
   flex-direction: $flex-direction
   row-gap: $row_gap
   display: flex
-
 .add_form_container
   align-self: center
 .hidden_add_form_container
@@ -25,18 +24,24 @@
   @include default_container(column, 20px)
 
 .managers_list
-  @include default_container(column, 10px)
+  @include default_container(column, 0px)
+
 
 .manager_item
   @include default_container(row, 0px)
-  box-shadow: 0px 1px 10px 0px rgba(0, 0, 0, 0.2)
+  border-bottom: 3px rgba(128, 128, 128, 0.25) solid
   padding: 10px
   font-size: 20px
   column-gap: 10px
   cursor: pointer
   transition: all 1s
   &:hover
-    box-shadow: 0px 2px 10px 4px rgba(0, 0, 0, 0.3)
+    background: rgba(128, 128, 128, 0.25)
 .link_item
   text-decoration: none
   color: black
+  font-size: 20px
+
+.manager_item_container
+  @include default_container(column, 10px)
+  font-size: 20px

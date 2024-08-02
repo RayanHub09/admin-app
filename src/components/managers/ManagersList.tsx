@@ -1,16 +1,11 @@
-import React, {useEffect} from 'react';
-import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
+import React from 'react';
+import {useAppSelector} from "../../hooks/redux-hooks";
 import ManagerItem from "./ManagerItem";
-import {fetchGetAllManagers} from "../../store/slices/managers";
+import {IManager} from "../../interfaces";
 
-interface IManager {
-    id: string | null
-    email: string | null
-    role: string | null
-}
 
 const ManagersList = () => {
-    const managers:IManager[] = useAppSelector(state => state.managers.managers)
+    const managers:IManager[] = useAppSelector(state => state.managers.managers).filter(item => item.role !== 'admin')
 
     return (
         <div className={'managers_list_container'}>

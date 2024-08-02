@@ -1,3 +1,4 @@
+
 export interface IPart {
     discontinued: boolean
     discontinuedTitleEn: string
@@ -43,4 +44,11 @@ export interface IOrder {
     priceYen: number
     status: IStatus
     uid: string
+}
+
+export interface IManager {
+    id: string | null
+    email: string | null
+    role: string | null
+    name: string | null
 }

@@ -1,13 +1,14 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
 import {collection, db, addDoc, query, getDocs} from "../../firebase";
+import {IManager} from "../../interfaces";
 
-
-interface IManager {
+interface IAuthManager {
     id: string | null
     email: string | null
     role: string | null
 }
+
 
 interface IState {
     managers: IManager[]
@@ -25,10 +26,10 @@ export const fetchSignUpManager = createAsyncThunk(
     async ({email, password, role}: { email: string; password: string; role: string }, thunkAPI) => {
         try {
             const userCredential: UserCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
-            const newManager: IManager = {
+            const newManager: IAuthManager = {
                 id: userCredential.user.uid,
                 email,
-                role,
+                role
             }
             await addDoc(collection(db, "managers"), newManager);
             thunkAPI.dispatch(addWorker(newManager));
@@ -47,7 +48,8 @@ export const fetchGetAllManagers = createAsyncThunk(
             const managers:IManager[] = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 email: doc.data().email,
-                role: doc.data().role
+                role: doc.data().role,
+                name: doc.data().name
             }))
             return managers
         } catch (error: any) {
