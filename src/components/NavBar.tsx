@@ -3,16 +3,18 @@ import './components.sass'
 import {Link} from "react-router-dom";
 import {useAppSelector} from "../hooks/redux-hooks";
 interface ILinks {
-    orders: string,
-    managers?: string,
+    orders: string
+    managers?: string
     messages: string
+    deliveries: string
 }
 const NavBar = () => {
     const isAdmin = useAppSelector(state => state.manager.manager.role) === 'admin'
     const links : ILinks = {
         orders: 'Заказы',
+        deliveries: 'Посылки',
         managers: isAdmin ? 'Менеджеры' : '' ,
-        messages: 'Сообщения'
+        messages: 'Сообщения',
     }
     return (
         <nav className={'navbar'}>

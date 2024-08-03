@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 import {Link} from "react-router-dom";
-import {IRole, options} from "./roleList";
+import {IRole, options} from "../../lists/roleList";
 import {IManager} from "../../interfaces";
 
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import './components.sass'
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 
@@ -11,8 +11,11 @@ const Header = () => {
     const isAuth = useAppSelector(state => state.manager.isAuth)
     const worker = useAppSelector(state => state.manager.manager)
     const navigation = useNavigate()
+
+    // useEffect(() => {console.log(0)})
     return (
         <header>
+
             <h2>{worker.email}</h2>
             {isAuth && <NavBar/>}
             {isAuth &&

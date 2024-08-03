@@ -11,6 +11,7 @@
   display: flex
 .add_form_container
   align-self: center
+  @include default_container(row, 10px)
 .hidden_add_form_container
   display: none
 .add_workers_button
@@ -41,7 +42,9 @@
   text-decoration: none
   color: black
   font-size: 20px
-
+.create_form_container
+  @include default_container(column, 10px)
+  align-items: center
 .manager_item_container
   @include default_container(column, 10px)
   font-size: 20px

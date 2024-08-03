@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, getDocs, query} from "../../firebase";
+import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
 import { Timestamp } from "firebase/firestore";
 import serializeData from "../../Serializer";
 import {IOrder} from "../../interfaces";
@@ -47,6 +47,21 @@ export const fetchGetAllOrders = createAsyncThunk(
     }
 )
 
+export const fetchChangeStatusOrder = createAsyncThunk(
+    'orders/fetchChangeStatusOrder',
+    async ({orderId, newStatus} : {orderId: string, newStatus: string}, thunkAPI) => {
+        const orderDocRef = doc(db, 'orders', orderId);
+        try {
+            await updateDoc(orderDocRef, {
+                'status.statusName': newStatus
+            })
+            thunkAPI.dispatch(changeStatusOrder({orderId, newStatus}))
+        } catch (error:any) {
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+)
+
 const OrdersSlice = createSlice({
     name: 'orders',
     initialState,
@@ -63,6 +78,12 @@ const OrdersSlice = createSlice({
                 )
                 state.isSearching = true
             }
+        },
+        changeStatusOrder(state, action) {
+            const { orderId, newStatus } = action.payload
+            state.orders = state.orders.map(order =>
+                order.id === orderId ? { ...order, status: { statusName: newStatus } } : order
+            ) as IOrder[]
         }
     },
     extraReducers: builder => {
@@ -71,12 +92,19 @@ const OrdersSlice = createSlice({
                 state.status = 'loading';
             })
             .addCase(fetchGetAllOrders.fulfilled, (state, action) => {
-                state.status = 'succeeded';
+                state.status = null
+                state.error = null
+            })
+            .addCase(fetchChangeStatusOrder.pending, (state) => {
+                state.status = 'loading'
+            })
+            .addCase(fetchChangeStatusOrder.fulfilled, (state, action) => {
+                state.status = null
                 state.error = null
             })
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.rejected.type].includes(action.type),
+                    [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -87,4 +115,4 @@ const OrdersSlice = createSlice({
 })
 
 export const OrderReducer = OrdersSlice.reducer
-export const {getAllOrders, searchOrder} = OrdersSlice.actions
+export const {getAllOrders, searchOrder, changeStatusOrder} = OrdersSlice.actions

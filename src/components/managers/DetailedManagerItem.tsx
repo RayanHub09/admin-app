@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
 import {IManager} from "../../interfaces";
-import {IRole, options} from "./roleList";
+import {IRole, options} from "../../lists/roleList";
 
 interface DetailedManagerItemProps {
     manager: IManager

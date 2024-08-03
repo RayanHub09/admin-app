@@ -22,6 +22,11 @@
   width: 200px
   border-radius: 10px
   background: white
+.form_row
+  display: grid
+  grid-template-columns: repeat(4, 1fr)
+  gap: 10px
+
 
 .visibility_password
   @include default_container()
@@ -69,7 +74,15 @@ header
   width: 260px
   border: 2px rgba(255, 0, 0, 0.34) solid
   border-radius: 5px
-
+  display: flex
+  flex-direction: column
+  row-gap: 10px
+.error_button
+  @extend %button
+  background: rgba(255, 0, 0, 0.5)
+  color: white
+  &:hover
+    background: rgba(255, 0, 0)
 .navbar
   @include default_container()
   column-gap: 20px

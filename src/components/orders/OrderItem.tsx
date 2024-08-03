@@ -1,41 +1,52 @@
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import './orders.sass'
 import {IOrder} from "../../interfaces";
-import ItemsList from "./items/ItemsList";
 import {Link} from "react-router-dom";
-
-
+import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
+import {fetchChangeStatusOrder} from "../../store/slices/orders";
 
 interface OrderItemProps {
     order: IOrder
 }
 
+const statusOrder:string[] = ['Не оплачен', 'В обработке', 'Обработка в Японии',
+    'На складе в Японии', 'Ожидает упаковки', 'Упакован', 'Ожидает отправки из Японии',
+    'Отправлен из Японии', 'Доставлен во Владивосток', 'Отправлен по России',
+    'Доставлен получателю', 'Ожидает подтверждения', 'Отменен', 'Утилизирован']
+
+
 const OrderItem: FC<OrderItemProps> = ({order}) => {
 
-    function getDate(str: string): string[] {
-        const date = str.split('T')[0]
-        const time = str.split('T')[1].toString().slice(0, -5)
-        return [time, date]
+    const statusFetch = useAppSelector(state => state.orders.status)
+    const [isDisabled, setIsDisabled] = useState(false)
+
+    const dispatch = useAppDispatch()
+
+    function getNewStatus(oldStatus:string):number {
+        return statusOrder.findIndex(status => status === oldStatus) + 1
     }
 
+    function changeStatusOrder() {
+        setIsDisabled(true)
+        const numberNewStatus = getNewStatus(order.status.statusName)
+        dispatch(fetchChangeStatusOrder({orderId:order.id, newStatus:statusOrder[numberNewStatus]}))
+            .then(() => setIsDisabled(false))
+    }
     return (
         <div className={'order_item_container'}>
-            <Link to={`/orders/${order.id}`} className={'link_item'} style={{alignSelf: 'flex-start', borderRadius: '10px', background: '#006bae', padding: '10px', color: 'white'}}>Заказ № {order.number}</Link>
             <div className={'order_item'}>
-                <h3 className={'label_order'}>Номер</h3>
-                <span className={'field_order'}>{order.number}</span>
-                <h3 className={'label_order'}>Статус</h3>
-                <span className={'field_order'}>{order.status.statusName}</span>
-                <h3 className={'label_order'}>Кол-во товара (шт.)</h3>
-                <span className={'field_order'}>{order.itemsCnt}</span>
-                <h3 className={'label_order'}>Стоимость</h3>
-                <span className={'field_order'} style={{fontWeight:'500'}}>{order.priceYen}¥ ({order.priceRu}₽)</span>
-                <h3 className={'label_order'}>Примерный вес</h3>
-                <span className={'field_order'}>{''}</span>
-                <h3 className={'label_order'}>Дата заказа</h3>
-                <span className={'field_order'}>{getDate(order.date)[1]}, {getDate(order.date)[0]}</span>
-                <h3 className={'label_order'}>Комментарий</h3>
-                <span className={'field_order'}>{order.comment}</span>
+                <h4>{order.number}</h4>
+                <span>{order.uid}</span>
+            </div>
+            <span>Статус: {order.status.statusName}</span>
+            <div className={'fast_actions'}>
+                <Link to={`/orders/${order.id}`} className={'link_item'}>Перейти в заказ</Link>
+                <button
+                    onClick={changeStatusOrder}
+                    disabled={isDisabled}
+                    className={'promote_button'}>
+                    {!isDisabled ? 'Продвинуть' : 'загрузка...'}
+                </button>
             </div>
         </div>
     );

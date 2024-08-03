@@ -1,6 +1,6 @@
 import React, {FC, useState} from 'react';
 import './components.sass'
-import {options, IRole} from "./managers/roleList";
+import {options, IRole} from "../lists/roleList";
 
 interface FormProps {
     text_button: string,
@@ -13,6 +13,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
 
     const [password, setPassword] = useState('')
     const [email, setEmail] = useState('')
+    const [name, setName] = useState('')
     const [role, setRole] = useState<string|undefined>('Выберете роль')
     const [visibilityPassword, setVisibilityPassword] = useState(false)
 
@@ -24,7 +25,16 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
     }
 
     return (
-        <div className={'form'}>
+        <div className={!isCreate ? 'form' : 'form_row'}>
+            {
+                isCreate &&
+                <input
+                    value={name}
+                    onChange={event => setName(event.target.value)}
+                    type={'text'}
+                    placeholder={'Введите имя'}
+                />
+            }
             <input
                 placeholder={'Введите email'}
                 type={'email'}
@@ -33,7 +43,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
             />
             <input
                 placeholder={'Введите пароль'}
-                type={visibilityPassword || isCreate ? 'email' : 'password'}
+                type={visibilityPassword || isCreate ? 'text' : 'password'}
                 value={password}
                 onChange={event => setPassword(event.target.value)}
             />

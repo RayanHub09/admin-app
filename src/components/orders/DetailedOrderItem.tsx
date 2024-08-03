@@ -15,9 +15,9 @@ const DetailedOrderItem: FC<OrderItemProps> = ({order}) => {
         return [time, date]
     }
     return (
-        <div className={'order_item_container'}>
+        <div className={'detailed_order_item_container'}>
             <h2>Заказ № {order.number}</h2>
-            <div className={'order_item'}>
+            <div className={'detailed_order_item'}>
                 <h3 className={'label_order'}>Номер</h3>
                 <span className={'field_order'}>{order.number}</span>
                 <h3 className={'label_order'}>Статус</h3>

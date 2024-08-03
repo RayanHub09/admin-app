@@ -2,20 +2,55 @@
   flex-direction: $flex-direction
   row-gap: $row_gap
   display: flex
-.order_item
-  display: grid
-  grid-template-columns: auto auto
-  border: 1px rgba(128, 128, 128, 0.4) solid
+%button
+  padding: 7px
+  border-radius: 5px
+  font-size: 16px
+  border: none
+  transition: all 1s
+  cursor: pointer
+
+.order_item, .fast_actions
+  @include default_container(row, 10px)
+  column-gap: 20px
+
 .orders_list_container
-  @include default_container(column, 50px)
+  @include default_container(column, 10px)
+
 .field_order,  .label_order
   border-bottom: 1px rgba(128, 128, 128, 0.5) solid
   padding: 10px
+
 .field_order
   border-left: 1px rgba(128, 128, 128, 0.4) solid
 .order_item_container
-  @include default_container(column, 10px)
+  @include default_container(row, 10px)
+  font-size: 20px
+  column-gap: 10px
+  justify-content: space-between
+  border: #a5a5a5 2px solid
+  padding: 20px
+  align-items: center
 
 .nothing_found
   align-self: center
   text-align: center
+.promote_button
+  @extend %button
+  background: #006bae
+  color: white
+  &:hover
+    background: rgba(0, 107, 174, 0.5)
+.link_item
+  @extend %button
+  background: rgba(165, 165, 165, 0.5)
+  &:hover
+    background: rgba(165, 165, 165, 1)
+
+.detailed_order_item
+  display: grid
+  grid-template-columns: repeat(2, 1fr)
+  border: 1px rgba(128, 128, 128, 0.5) solid
+
+.detailed_order_item_container
+  @include default_container(column, 20px)

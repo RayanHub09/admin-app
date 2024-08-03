@@ -1,4 +1,3 @@
-
 export interface IPart {
     discontinued: boolean
     discontinuedTitleEn: string
@@ -51,4 +50,54 @@ export interface IManager {
     email: string | null
     role: string | null
     name: string | null
+}
+
+export interface ICustomer {
+    address: string
+    city: string
+    index: string
+    name: string
+    patronymic: string
+    phoneNumber: string
+    region: string
+    surname: string
+}
+
+export interface IPassport {
+    number: string
+    series: string
+}
+
+export interface IRuDelivery {
+    damageInsured: boolean
+    deliveryFromTC: string
+    method: string
+    passport: IPassport
+    tcInsured: boolean
+    terminalName: string
+    transportCompany: string
+    type: string
+}
+
+export interface IDeliveryStatus {
+    date: string
+    readyToBuy: boolean
+    statusName: string
+}
+
+export interface IDelivery {
+    id: string
+    comment: string
+    country: string
+    creationDate: string
+    customer: ICustomer
+    deliveryCost: null
+    deliveryCostYen: null
+    number: string
+    orders: IOrder[]
+    partsCostRu: number
+    partsCostYen: number
+    ruDelivery: IRuDelivery
+    status: IDeliveryStatus
+    uid: string
 }

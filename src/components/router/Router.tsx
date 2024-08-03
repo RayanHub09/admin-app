@@ -9,6 +9,7 @@ import NotFoundPage from "../../pages/NotFoundPage";
 import MessagesPage from "../../pages/MessagesPage";
 import ManagerPage from "../../pages/ManagerPage";
 import OrderPage from "../../pages/OrderPage";
+import DeliveriesPage from "../../pages/DeliveriesPage";
 
 
 const Router = () => {
@@ -19,6 +20,7 @@ const Router = () => {
             <Route path={'/managers'} element={<PrivateRouter element={<ManagersPage />} /> } />
             <Route path={'/orders'} element={<PrivateRouter element={<OrdersPage />} /> } />
             <Route path={'/messages'} element={<PrivateRouter element={<MessagesPage />} /> } />
+            <Route path={'/deliveries'} element={<PrivateRouter element={<DeliveriesPage />} /> } />
             <Route path={'/managers/:id'} element={<PrivateRouter element={<ManagerPage />} /> } />
             <Route path={'/orders/:id'} element={<PrivateRouter element={<OrderPage />} /> } />
             <Route path="*" element={<NotFoundPage />} />

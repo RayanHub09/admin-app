@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
 import './managers.sass'
 import Form from "../Form";
-import {useAppDispatch} from "../../hooks/redux-hooks";
-import {fetchSignUpManager} from "../../store/slices/managers";
+import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
+import {fetchSignUpManager, setError} from "../../store/slices/managers";
 
 const CreateManagers = () => {
     const dispatch = useAppDispatch()
     const [additionForm, setAdditionForm] = useState(false)
+    const status = useAppSelector(state => state.managers.status)
 
     function createWorker(email: string, password: string, role?: string) {
         if (role) dispatch(fetchSignUpManager({email, password, role}))
@@ -15,7 +16,7 @@ const CreateManagers = () => {
     }
 
     return (
-        <>
+        <div className={'create_form_container'}>
             <button className={'add_workers_button'} onClick={() => setAdditionForm(!additionForm)}>{
                 !additionForm ? 'Добавить менеджера' : 'Закрыть'
             }</button>
@@ -25,8 +26,15 @@ const CreateManagers = () => {
                         text_button={'Добавить'}
                         isCreate={true}
                         handleClick={createWorker}/>
-                </div>}
-        </>
+                </div>
+            }
+            {status === 'failed' && <p className={'error'}>Произошла ошибка. Пользователь не добавлен.
+                <button
+                    className={'error_button'}
+                    onClick={() => dispatch(setError())}>Закрыть</button>
+            </p> }
+
+        </div>
     );
 };
 

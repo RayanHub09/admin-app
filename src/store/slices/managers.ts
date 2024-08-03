@@ -68,6 +68,10 @@ const ManagersSlice = createSlice({
         },
         getAllManagers(state, action) {
             state.managers = action.payload
+        },
+        setError(state) {
+            state.error = null
+            state.status = null
         }
     },
     extraReducers: (builder) => {
@@ -104,4 +108,4 @@ const ManagersSlice = createSlice({
 })
 
 export const ManagersReducer = ManagersSlice.reducer
-export const {addWorker, getAllManagers} = ManagersSlice.actions
+export const {addWorker, getAllManagers, setError} = ManagersSlice.actions
