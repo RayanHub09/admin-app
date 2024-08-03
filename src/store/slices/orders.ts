@@ -88,20 +88,21 @@ const OrdersSlice = createSlice({
     },
     extraReducers: builder => {
         builder
-            .addCase(fetchGetAllOrders.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchGetAllOrders.fulfilled, (state, action) => {
-                state.status = null
-                state.error = null
-            })
-            .addCase(fetchChangeStatusOrder.pending, (state) => {
-                state.status = 'loading'
-            })
-            .addCase(fetchChangeStatusOrder.fulfilled, (state, action) => {
-                state.status = null
-                state.error = null
-            })
+            .addMatcher(
+                (action) =>
+                    [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type].includes(action.type),
+                (state, action:PayloadAction<string> ) => {
+                    state.status = 'loading'
+                }
+            )
+            .addMatcher(
+                (action) =>
+                    [ fetchGetAllOrders.fulfilled.type, fetchChangeStatusOrder.fulfilled.type].includes(action.type),
+                (state, action:PayloadAction<string> ) => {
+                    state.status = null
+                    state.error = null
+                }
+            )
             .addMatcher(
                 (action) =>
                     [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type].includes(action.type),

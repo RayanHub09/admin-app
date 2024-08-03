@@ -93,6 +93,7 @@ export interface IDelivery {
     customer: ICustomer
     deliveryCost: null
     deliveryCostYen: null
+    deliveryMethod: string
     number: string
     orders: IOrder[]
     partsCostRu: number

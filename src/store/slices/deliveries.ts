@@ -1,8 +1,8 @@
 import {IDelivery, IOrder} from "../../interfaces"
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, getDocs, query} from "../../firebase";
 import serializeData from "../../Serializer";
-import {getAllOrders} from "./orders";
+import {fetchChangeStatusOrder, fetchGetAllOrders, getAllOrders} from "./orders";
 
 interface IState {
     deliveries: IDelivery[]
@@ -27,17 +27,18 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                 const serializedData = serializeData(
                     {
                         id: doc.id,
-                        creationDate: data.date.seconds,
-                        ...doc.data(),
+                        creationDate: data.creationDate.seconds,
+                        ...data,
                         status: {
                             date: data.status.date.seconds,
-                            ...doc.data().status,
+                            ...data.status,
                         }
                     }
                 )
                 return serializedData as IDelivery
             })
-            thunkAPI.dispatch(getAllOrders(deliveries))
+            thunkAPI.dispatch(getAllDeliveries(deliveries))
+
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }
@@ -49,8 +50,30 @@ const DeliveriesSlice = createSlice({
     initialState,
     reducers: {
         getAllDeliveries(state, action) {
-            state.deliveries = [...action.payload]
+            state.deliveries = action.payload
         }
+    },
+    extraReducers: builder => {
+        builder
+            .addCase(fetchGetAllDeliveries.fulfilled, (state, action) => {
+                state.status = null;
+                state.error = null;
+            })
+            .addMatcher(
+                (action) =>
+                    [ fetchGetAllDeliveries.rejected.type].includes(action.type),
+                (state, action:PayloadAction<string> ) => {
+                    state.status = 'loading'
+                }
+            )
+            .addMatcher(
+                (action) =>
+                    [ fetchGetAllDeliveries.rejected.type].includes(action.type),
+                (state, action:PayloadAction<string> ) => {
+                    state.status = 'failed'
+                    state.error = action.payload as string
+                }
+            )
     }
 })
 
