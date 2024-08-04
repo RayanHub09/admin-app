@@ -50,6 +50,8 @@ export interface IManager {
     email: string | null
     role: string | null
     name: string | null
+    [key: string]: string | null | boolean
+
 }
 
 export interface ICustomer {

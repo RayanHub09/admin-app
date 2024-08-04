@@ -9,10 +9,14 @@ const CreateManagers = () => {
     const [additionForm, setAdditionForm] = useState(false)
     const status = useAppSelector(state => state.managers.status)
 
-    function createWorker(email: string, password: string, role?: string, name: string = '') {
-        if (role) dispatch(fetchSignUpManager({email, password, role, name}))
+    function createWorker(email: string, password: string, role?: string, name: string = '',
+                          checkboxes?: { [key: string]: boolean }) {
+        if (!checkboxes) return
+        //
+        // const [changeOrderNumber, writeComments, cancelDelivery, changeStatusDelivery]: boolean[] =
+        //     Object.values(checkboxes);
+        if (role) dispatch(fetchSignUpManager({email, password, role, name, checkboxes}))
             .then(() => setAdditionForm(!additionForm))
-
 
     }
 

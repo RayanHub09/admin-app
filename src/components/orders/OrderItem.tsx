@@ -14,9 +14,8 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
 
     const statusFetch = useAppSelector(state => state.orders.status)
     const [isDisabled, setIsDisabled] = useState(false)
-
+    const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
     const dispatch = useAppDispatch()
-
 
     function changeStatusOrder() {
         setIsDisabled(true)
@@ -33,12 +32,14 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
             <span>Статус: {order.status.statusName}</span>
             <div className={'fast_actions'}>
                 <Link to={`/orders/${order.id}`} className={'link_item_button'}>Перейти в заказ</Link>
-                <button
-                    onClick={changeStatusOrder}
-                    disabled={isDisabled}
-                    className={'promote_button'}>
-                    {!isDisabled ? 'Продвинуть' : 'загрузка...'}
-                </button>
+                {changeStatusDelivery &&
+                    <button
+                        onClick={changeStatusOrder}
+                        disabled={isDisabled}
+                        className={'promote_button'}>
+                        {!isDisabled ? 'Продвинуть' : 'загрузка...'}
+                    </button>
+                }
             </div>
         </div>
     );

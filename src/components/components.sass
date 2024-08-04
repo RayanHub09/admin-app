@@ -25,13 +25,16 @@
 .form_create_manager
   display: grid
   grid-template-columns: repeat(4, 1fr)
-  gap: 10px
-  grid-template-areas: '. . . .' '. . . .' '. button button .'
-
-.radio_input
+  gap: 15px
+  grid-template-areas: '. . . .' 'posibilities posibilities posibilities posibilities' '. button button .'
+.possibilities_manager_container
   display: flex
   justify-content: center
-  column-gap: 5px
+  flex-wrap: wrap
+  width: 1000px
+  gap: 10px
+  grid-area: posibilities
+
 
 .visibility_password
   @include default_container()
@@ -119,6 +122,10 @@ header
   text-decoration: none
   &:hover
     color: #a5a5a5
+
+.checkbox_input
+  display: flex
+  column-gap: 5px
 .lds-spinner
   box-sizing: border-box
 

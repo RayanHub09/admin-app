@@ -7,6 +7,9 @@ import DetailedOrderItem from "../components/orders/DetailedOrderItem";
 import ChangeDetailedOrderItem from "../components/orders/ChangeDetailedOrderItem";
 
 const OrderPage: React.FC = () => {
+    const writeComments = useAppSelector(state => state.manager.manager.writeComments)
+    const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
+    const changeOrderNumber = useAppSelector(state => state.manager.manager.changeOrderNumber)
     const [changeMode, setChangeMode] = useState(false)
     const { id } = useParams<{ id: string }>()
     const order: IOrder | undefined = useAppSelector(state =>
@@ -18,11 +21,13 @@ const OrderPage: React.FC = () => {
     }
     return (
         <div className={'order_page_container'}>
-            <button
-                onClick={() => setChangeMode(!changeMode)}
-                className={'change_button'}>
-                {changeMode ? 'Вернуться к заказу' : 'Изменить'}
-            </button>
+            {(changeStatusDelivery || changeOrderNumber || writeComments )&&
+                <button
+                    onClick={() => setChangeMode(!changeMode)}
+                    className={'change_button'}>
+                    {changeMode ? 'Вернуться к заказу' : 'Изменить'}
+                </button>
+            }
             {changeMode ? <ChangeDetailedOrderItem order={order} /> : <DetailedOrderItem order={order} />}
         </div>
     );

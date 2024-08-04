@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
-import {collection, db, addDoc, query, getDocs} from "../../firebase";
+import {addDoc, collection, db, getDocs, query} from "../../firebase";
 import {IManager} from "../../interfaces";
 
 interface IAuthManager {
@@ -24,14 +24,17 @@ const initialState: IState = {
 }
 export const fetchSignUpManager = createAsyncThunk(
     'worker/fetchCreateWorker',
-    async ({email, password, role, name}: { email: string; password: string; role: string, name: string }, thunkAPI) => {
+    async ({email, password, role, name, checkboxes}:
+               { email: string; password: string; role: string, name: string,
+                   checkboxes: { [key: string]: boolean | null }}, thunkAPI) => {
         try {
             const userCredential: UserCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
-            const newManager: IAuthManager = {
+            const newManager: IManager = {
                 id: userCredential.user.uid,
                 email,
                 role,
-                name
+                name,
+                ...checkboxes
             }
             await addDoc(collection(db, "managers"), newManager);
             thunkAPI.dispatch(addWorker(newManager));
@@ -47,13 +50,10 @@ export const fetchGetAllManagers = createAsyncThunk(
         try {
             const q = query(collection(db, "managers"))
             const querySnapshot = await getDocs(q)
-            const managers:IManager[] = querySnapshot.docs.map(doc => ({
+            return querySnapshot.docs.map(doc => ({
                 id: doc.id,
-                email: doc.data().email,
-                role: doc.data().role,
-                name: doc.data().name
-            }))
-            return managers
+                ...doc.data()
+            } as IManager))
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }

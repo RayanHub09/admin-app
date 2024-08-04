@@ -16,7 +16,11 @@ const initialState: IState = {
         id: null,
         email: null,
         role: null,
-        name: null
+        name: null,
+        changeOrderNumber: null,
+        writeComments: null,
+        cancelDelivery: null,
+        changeStatusDelivery: null
     },
     error: null,
     status: null,
@@ -46,11 +50,16 @@ export const fetchSignIn = createAsyncThunk(
                     id: doc.id,
                     email: data.email,
                     role: data.role,
-                    name: data.name
+                    name: data.name,
+                    changeOrderNumber: data.changeOrderNumber,
+                    writeComments: data.writeComments,
+                    cancelDelivery: data.cancelDelivery,
+                    changeStatusDelivery: data.changeStatusDelivery
                 };
             });
             const Manager = userData.filter((item, index) => item.email === email)
             thunkAPI.dispatch(setManager(Manager[0]))
+            console.log(Manager[0])
 
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message)
@@ -73,6 +82,10 @@ const ManagerSlice = createSlice({
             state.manager.email = action.payload.email
             state.manager.role = action.payload.role
             state.manager.name = action.payload.name
+            state.manager.cancelDelivery = action.payload.cancelDelivery
+            state.manager.changeOrderNumber = action.payload.changeOrderNumber
+            state.manager.changeStatusDelivery = action.payload.changeStatusDelivery
+            state.manager.writeComments = action.payload.writeComments
         },
         removeManager(state) {
             state.manager.id = null
@@ -98,6 +111,7 @@ const ManagerSlice = createSlice({
                     state.status = 'succeeded'
                     state.error = null
                     state.isAuth = true
+
                 }
             )
             .addMatcher(

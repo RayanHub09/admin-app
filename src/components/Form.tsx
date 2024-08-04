@@ -6,24 +6,38 @@ import {possibilitiesManager, IPossibilitiesManager} from "../lists/possibilitie
 interface FormProps {
     text_button: string,
     isCreate: boolean
-    handleClick: (email: string, password: string, role?: string | undefined, name?: string | undefined) => void;
+    handleClick: (email: string, password: string, role?: string | undefined, name?: string | undefined,
+                  checkboxes?: { [key: string]: boolean }
+    ) => void;
 }
 
 
 const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
 
     const [password, setPassword] = useState('')
+
+    const [checkboxStates, setCheckboxStates] = useState(
+        Object.keys(possibilitiesManager).reduce((acc, key) => {
+            acc[key] = false
+            return acc
+            }, {} as { [key: string] : boolean}
+        )
+    )
     const [email, setEmail] = useState('')
     const [name, setName] = useState('')
     const [role, setRole] = useState<string|undefined>('Выберете роль')
     const [visibilityPassword, setVisibilityPassword] = useState(false)
 
+    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, checked } = event.target;
+        setCheckboxStates((prevState) => ({ ...prevState, [id]: checked }));
+    };
     function clickFunction() {
         setRole('Выберете роль')
         setEmail('')
         setPassword('')
         setName('')
-        handleClick(email, password, role, name)
+        handleClick(email, password, role, name, {...checkboxStates})
     }
 
     return (
@@ -60,32 +74,22 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     )}
                 </select>
             }
-            {isCreate &&
-                <>
-                    {Object.keys(possibilitiesManager).map((key, index) =>
-                        // <option value={key} key={index}>{options[key as keyof IRole]}</option>
-                    <div className={'radio_input'} key={index}>
-                        <input
-                        value={key}
-                        type={"radio"}/>
-                        <span >{possibilitiesManager[key as keyof IPossibilitiesManager]}</span>
-                    </div>
-                    )}
-
-                    {/*<div className={'radio_input'}>*/}
-                    {/*    <span>;';l';l</span>*/}
-                    {/*    <input type={"radio"}/>*/}
-                    {/*</div>*/}
-                    {/*<div className={'radio_input'}>*/}
-                    {/*    <span>;';l';l</span>*/}
-                    {/*    <input type={"radio"}/>*/}
-                    {/*</div>*/}
-                    {/*<div className={'radio_input'}>*/}
-                    {/*    <span>;';l';l</span>*/}
-                    {/*    <input type={"radio"}/>*/}
-                    {/*</div>*/}
-                </>
-            }
+            {isCreate && (
+                <div className={'possibilities_manager_container'}>
+                    {Object.keys(possibilitiesManager).map((key) => (
+                        <div className={'checkbox_input'} key={key}>
+                            <input
+                                style={{alignSelf:'center'}}
+                                type={'checkbox'}
+                                id={key}
+                                checked={checkboxStates[key]}
+                                onChange={event => handleCheckboxChange(event)}
+                            />
+                            <label style={{paddingBottom: '5px' }}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</label>
+                        </div>
+                    ))}
+                </div>
+            )}
             { !isCreate &&
                 <span className={'visibility_password'}>
                     <label>Показать пароль</label>

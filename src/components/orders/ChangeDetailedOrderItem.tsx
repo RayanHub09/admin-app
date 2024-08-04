@@ -1,7 +1,7 @@
 import React, {FC, useState} from 'react';
 import {IOrder} from "../../interfaces";
 import {statusOrder} from "../../lists/statusOrder";
-import {useAppDispatch} from "../../hooks/redux-hooks";
+import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangeOrder} from "../../store/slices/orders";
 
 interface OrderItemProps {
@@ -14,6 +14,10 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
     const [number, setNumber] = useState(order.number)
     const [comment, setComment] = useState(order.status.statusName)
     const [status, setStatus] = useState(order.status.statusName)
+    const writeComments = useAppSelector(state => state.manager.manager.writeComments)
+    const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
+    const changeOrderNumber = useAppSelector(state => state.manager.manager.changeOrderNumber)
+
 
     function getDate(str: string): string[] {
         const date = str?.split('T')[0]
@@ -23,7 +27,8 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
     function changeOrder() {
         setIsDisabled(true)
-        dispatch(fetchChangeOrder({orderId: order.id, newStatus: status,
+        dispatch(fetchChangeOrder({
+            orderId: order.id, newStatus: status,
             newComment: comment, newNumber: number
         })).then(() => setIsDisabled(false))
 
@@ -34,26 +39,32 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
             <h2>Заказ № {order.number}</h2>
             <div className={'detailed_order_item'}>
                 <h3 className={'label_order'}>Номер</h3>
-                <input
-                    className={'input_field_order'}
-                    value={number}
-                    onChange={event => setNumber(event.target.value)}
-                />
+                {changeOrderNumber ?
+                    <input
+                        className={'input_field_order'}
+                        value={number}
+                        onChange={event => setNumber(event.target.value)}
+                    /> :
+                    <span className={'field_order'}>{order.number}</span>
+                }
                 <h3 className={'label_order'}>Статус</h3>
-                <select
-                    value={status}
-                    onChange={event => setStatus(event.target.value)}
-                    className={'input_field_order'}
-                >
-                    {statusOrder.map((item, index) =>
-                        <option
-                            key={index}
-                            className={'input_field_order'}
-                            value={item}
-                        >{item}</option>
-                    )
-                    }
-                </select>
+                {changeStatusDelivery ?
+                    <select
+                        value={status}
+                        onChange={event => setStatus(event.target.value)}
+                        className={'input_field_order'}
+                    >
+                        {statusOrder.map((item, index) =>
+                            <option
+                                key={index}
+                                className={'input_field_order'}
+                                value={item}
+                            >{item}</option>
+                        )
+                        }
+                    </select> :
+                    <span className={'field_order'}>{order.status.statusName}</span>
+                }
                 <h3 className={'label_order'}>Кол-во товара (шт.)</h3>
                 <span className={'field_order'}>{order.itemsCnt}</span>
                 <h3 className={'label_order'}>Стоимость</h3>
@@ -64,10 +75,13 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
                 <h3 className={'label_order'}>Дата заказа</h3>
                 <span className={'field_order'}>{getDate(order.date)[1]}, {getDate(order.date)[0]}</span>
                 <h3 className={'label_order'}>Комментарий</h3>
-                <input
-                    className={'input_field_order'}
-                    onChange={event => setComment(event.target.value)}
-                    value={comment}/>
+                {writeComments ?
+                    <input
+                        className={'input_field_order'}
+                        onChange={event => setComment(event.target.value)}
+                        value={comment}/>
+                    : <span className={'field_order'}>{order.comment}</span>
+                }
             </div>
             <button
                 onClick={changeOrder}
