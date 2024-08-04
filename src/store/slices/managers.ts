@@ -7,6 +7,7 @@ interface IAuthManager {
     id: string | null
     email: string | null
     role: string | null
+    name: string | null
 }
 
 
@@ -23,13 +24,14 @@ const initialState: IState = {
 }
 export const fetchSignUpManager = createAsyncThunk(
     'worker/fetchCreateWorker',
-    async ({email, password, role}: { email: string; password: string; role: string }, thunkAPI) => {
+    async ({email, password, role, name}: { email: string; password: string; role: string, name: string }, thunkAPI) => {
         try {
             const userCredential: UserCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
             const newManager: IAuthManager = {
                 id: userCredential.user.uid,
                 email,
-                role
+                role,
+                name
             }
             await addDoc(collection(db, "managers"), newManager);
             thunkAPI.dispatch(addWorker(newManager));

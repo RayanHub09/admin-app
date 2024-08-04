@@ -4,16 +4,11 @@ import {IOrder} from "../../interfaces";
 import {Link} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangeStatusOrder} from "../../store/slices/orders";
+import {getNewStatus, statusOrder} from "../../lists/statusOrder";
 
 interface OrderItemProps {
     order: IOrder
 }
-
-const statusOrder:string[] = ['Не оплачен', 'В обработке', 'Обработка в Японии',
-    'На складе в Японии', 'Ожидает упаковки', 'Упакован', 'Ожидает отправки из Японии',
-    'Отправлен из Японии', 'Доставлен во Владивосток', 'Отправлен по России',
-    'Доставлен получателю', 'Ожидает подтверждения', 'Отменен', 'Утилизирован']
-
 
 const OrderItem: FC<OrderItemProps> = ({order}) => {
 
@@ -22,9 +17,6 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
 
     const dispatch = useAppDispatch()
 
-    function getNewStatus(oldStatus:string):number {
-        return statusOrder.findIndex(status => status === oldStatus) + 1
-    }
 
     function changeStatusOrder() {
         setIsDisabled(true)
@@ -40,7 +32,7 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
             </div>
             <span>Статус: {order.status.statusName}</span>
             <div className={'fast_actions'}>
-                <Link to={`/orders/${order.id}`} className={'link_item'}>Перейти в заказ</Link>
+                <Link to={`/orders/${order.id}`} className={'link_item_button'}>Перейти в заказ</Link>
                 <button
                     onClick={changeStatusOrder}
                     disabled={isDisabled}

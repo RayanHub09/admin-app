@@ -9,16 +9,21 @@ const CreateManagers = () => {
     const [additionForm, setAdditionForm] = useState(false)
     const status = useAppSelector(state => state.managers.status)
 
-    function createWorker(email: string, password: string, role?: string) {
-        if (role) dispatch(fetchSignUpManager({email, password, role}))
-        setAdditionForm(!additionForm)
+    function createWorker(email: string, password: string, role?: string, name: string = '') {
+        if (role) dispatch(fetchSignUpManager({email, password, role, name}))
+            .then(() => setAdditionForm(!additionForm))
+
 
     }
 
     return (
         <div className={'create_form_container'}>
-            <button className={'add_workers_button'} onClick={() => setAdditionForm(!additionForm)}>{
-                !additionForm ? 'Добавить менеджера' : 'Закрыть'
+            <button
+                className={'add_workers_button'}
+                disabled={status === 'loading'}
+                onClick={() => setAdditionForm(!additionForm)}>{
+                 !additionForm ? 'Добавить менеджера' : (status === 'loading' ? 'загрузка...' : 'Закрыть')
+
             }</button>
             {
                 <div className={additionForm ? 'add_form_container' : 'hidden_add_form_container'}>

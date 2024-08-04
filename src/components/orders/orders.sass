@@ -20,7 +20,8 @@
 .field_order,  .label_order
   border-bottom: 1px rgba(128, 128, 128, 0.5) solid
   padding: 10px
-
+.input_field_order
+  border: 2px rgba(128, 128, 128, 1) solid
 .field_order
   border-left: 1px rgba(128, 128, 128, 0.4) solid
 .order_item_container
@@ -41,12 +42,31 @@
   color: white
   &:hover
     background: rgba(0, 107, 174, 0.5)
-.link_item
+  &:disabled
+    background: rgba(0, 107, 174, 0.5)
+    cursor: not-allowed
+
+.link_item_button
   @extend %button
   background: rgba(165, 165, 165, 0.5)
+  text-decoration: none
+  color: black
+  font-size: 20px
   &:hover
     background: rgba(165, 165, 165, 1)
-
+  &:disabled
+    background: rgba(165, 165, 165, 1)
+    cursor: not-allowed
+.change_button
+  @extend %button
+  background: #006bae
+  color: white
+  align-self: flex-start
+  &:hover
+    background: rgba(0, 107, 174, 0.5)
+  &:disabled
+    background: rgba(0, 107, 174, 0.5)
+    cursor: not-allowed
 .detailed_order_item
   display: grid
   grid-template-columns: repeat(2, 1fr)

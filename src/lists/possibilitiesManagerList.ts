@@ -1,4 +1,4 @@
-interface IPossibilitiesManager {
+export interface IPossibilitiesManager {
     changeOrderNumber: string
     writeComments: string
     cancelDelivery: string

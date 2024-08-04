@@ -16,17 +16,22 @@
   transition: all 1s
   cursor: pointer
 
-.form
+.form_signin
   @extend %container
   padding: 20px
   width: 200px
   border-radius: 10px
   background: white
-.form_row
+.form_create_manager
   display: grid
   grid-template-columns: repeat(4, 1fr)
   gap: 10px
+  grid-template-areas: '. . . .' '. . . .' '. button button .'
 
+.radio_input
+  display: flex
+  justify-content: center
+  column-gap: 5px
 
 .visibility_password
   @include default_container()
@@ -37,7 +42,6 @@
 input, select
   font-size: 18px
   padding: 7px
-  border-radius: 5px
   border: 1px gray solid
 
 .default_button
@@ -45,6 +49,7 @@ input, select
   width: 100%
   background: #006bae
   color: white
+  grid-area: button
 
   &:hover
     opacity: 0.6
@@ -61,7 +66,6 @@ header
 
 .button_out
   @extend %button
-
   &:hover
     background: #c0c0c0
     color: #6a6a6a
@@ -104,10 +108,17 @@ header
   background: none
   transition: all 1s
   text-decoration: none
-
   &:hover
     color: #a5a5a5
-
+.active
+  border: none
+  font-size: 20px
+  color: #949494
+  background: none
+  transition: all 1s
+  text-decoration: none
+  &:hover
+    color: #a5a5a5
 .lds-spinner
   box-sizing: border-box
 

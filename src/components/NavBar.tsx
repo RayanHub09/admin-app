@@ -1,6 +1,6 @@
 import React, {createContext, useContext} from 'react';
 import './components.sass'
-import {Link} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 import {useAppSelector} from "../hooks/redux-hooks";
 interface ILinks {
     orders: string
@@ -10,6 +10,7 @@ interface ILinks {
 }
 const NavBar = () => {
     const isAdmin = useAppSelector(state => state.manager.manager.role) === 'admin'
+    const location = useLocation();;
     const links : ILinks = {
         orders: 'Заказы',
         deliveries: 'Посылки',
@@ -19,7 +20,9 @@ const NavBar = () => {
     return (
         <nav className={'navbar'}>
             {Object.keys(links).map((key) =>
-                <Link className={'link'} key={key} to={`/${key}`}>{links[key as keyof ILinks]}</Link>
+                <Link className={location.pathname ===  `/${key}` ? 'active' : 'link'}
+                      key={key}
+                      to={`/${key}`}>{links[key as keyof ILinks]}</Link>
             )}
         </nav>
     );

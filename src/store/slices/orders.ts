@@ -62,6 +62,26 @@ export const fetchChangeStatusOrder = createAsyncThunk(
     }
 )
 
+export const fetchChangeOrder = createAsyncThunk(
+    'orders/fetchChangeOrder',
+    async ({orderId, newStatus, newComment, newNumber} : {orderId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
+        const orderDocRef = doc(db, 'orders', orderId);
+        try {
+            const updateData: { [key: string]: any } = {};
+            if (newStatus !== undefined) updateData['status.statusName'] = newStatus;
+            if (newComment !== undefined) updateData['comment'] = newComment;
+            if (newNumber !== undefined) updateData['number'] = newNumber;
+            await updateDoc(orderDocRef, updateData)
+            const updatedOrder = { orderId, newStatus, newComment, newNumber };
+            thunkAPI.dispatch(changeOrder(updatedOrder))
+            return updatedOrder;
+        } catch (error:any) {
+            console.log(error)
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+)
+
 const OrdersSlice = createSlice({
     name: 'orders',
     initialState,
@@ -84,20 +104,30 @@ const OrdersSlice = createSlice({
             state.orders = state.orders.map(order =>
                 order.id === orderId ? { ...order, status: { statusName: newStatus } } : order
             ) as IOrder[]
+        },
+        changeOrder(state, action) {
+            const { orderId, newStatus, newComment, newNumber } = action.payload
+            state.orders = state.orders.map(order =>
+                order.id === orderId ? { ...order, status: { statusName: newStatus }, comment: newComment, number: newNumber } : order
+            ) as IOrder[]
         }
     },
     extraReducers: builder => {
         builder
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type].includes(action.type),
+                    [ fetchGetAllOrders.pending.type, fetchChangeStatusOrder.pending.type,
+                        fetchChangeOrder.pending.type
+                    ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'loading'
                 }
             )
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.fulfilled.type, fetchChangeStatusOrder.fulfilled.type].includes(action.type),
+                    [ fetchGetAllOrders.fulfilled.type, fetchChangeStatusOrder.fulfilled.type,
+                        fetchChangeOrder.fulfilled.type
+                    ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = null
                     state.error = null
@@ -105,7 +135,9 @@ const OrdersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type].includes(action.type),
+                    [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type,
+                        fetchChangeOrder.rejected.type
+                    ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -116,4 +148,4 @@ const OrdersSlice = createSlice({
 })
 
 export const OrderReducer = OrdersSlice.reducer
-export const {getAllOrders, searchOrder, changeStatusOrder} = OrdersSlice.actions
+export const {getAllOrders, searchOrder, changeStatusOrder, changeOrder} = OrdersSlice.actions
