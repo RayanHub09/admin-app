@@ -1,13 +1,13 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
-import {addDoc, collection, db, getDocs, query} from "../../firebase";
-import {IManager} from "../../interfaces";
+import {addDoc, collection, db, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
+import {IManager, IOrder} from "../../interfaces";
 
 interface IAuthManager {
-    id: string | null
     email: string | null
     role: string | null
     name: string | null
+    [key: string]: string | null | boolean
 }
 
 
@@ -29,15 +29,15 @@ export const fetchSignUpManager = createAsyncThunk(
                    checkboxes: { [key: string]: boolean | null }}, thunkAPI) => {
         try {
             const userCredential: UserCredential = await createUserWithEmailAndPassword(getAuth(), email, password);
-            const newManager: IManager = {
-                id: userCredential.user.uid,
+            const newManager: IAuthManager = {
                 email,
                 role,
                 name,
                 ...checkboxes
             }
-            await addDoc(collection(db, "managers"), newManager);
-            thunkAPI.dispatch(addWorker(newManager));
+            await setDoc(doc(collection(db, "managers"), userCredential.user.uid), newManager)
+            thunkAPI.dispatch(addWorker({...newManager, id: userCredential.user.uid} ));
+
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }
@@ -61,6 +61,19 @@ export const fetchGetAllManagers = createAsyncThunk(
     }
 )
 
+export const fetchChangePossibilitiesManager = createAsyncThunk(
+    'managers/fetchChangePossibilitiesManager',
+    async ({managerId, checkboxes} : {managerId: string, checkboxes: { [key: string]: boolean | null }}, thunkAPI) => {
+        const managerDocRef = doc(db, 'managers', managerId)
+        try {
+            await updateDoc(managerDocRef, checkboxes)
+            thunkAPI.dispatch(changePossibilitiesManager({managerId, checkboxes}))
+        } catch (error:any) {
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+)
+
 const ManagersSlice = createSlice({
     name: 'Managers',
     initialState,
@@ -74,6 +87,12 @@ const ManagersSlice = createSlice({
         setError(state) {
             state.error = null
             state.status = null
+        },
+        changePossibilitiesManager(state, action) {
+            const { managerId, checkboxes } = action.payload
+            state.managers = state.managers.map(manager =>
+                manager.id === managerId ? { ...manager, ...checkboxes } : manager
+            ) as IManager[]
         }
     },
     extraReducers: (builder) => {
@@ -85,14 +104,15 @@ const ManagersSlice = createSlice({
             })
             .addMatcher(
                 (action) =>
-                    [fetchSignUpManager.pending.type].includes(action.type),
+                    [fetchSignUpManager.pending.type, fetchChangePossibilitiesManager.pending.type].includes(action.type),
                 (state) => {
                     state.status = 'loading'
                 }
             )
             .addMatcher(
                 (action) =>
-                    [fetchSignUpManager.fulfilled.type, fetchGetAllManagers.fulfilled.type].includes(action.type),
+                    [fetchSignUpManager.fulfilled.type, fetchGetAllManagers.fulfilled.type, fetchChangePossibilitiesManager.fulfilled.type
+                    ].includes(action.type),
                 (state) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -100,7 +120,8 @@ const ManagersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [fetchSignUpManager.rejected.type, fetchGetAllManagers.rejected.type].includes(action.type),
+                    [fetchSignUpManager.rejected.type, fetchGetAllManagers.rejected.type, fetchChangePossibilitiesManager.rejected.type
+                    ].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -110,4 +131,4 @@ const ManagersSlice = createSlice({
 })
 
 export const ManagersReducer = ManagersSlice.reducer
-export const {addWorker, getAllManagers, setError} = ManagersSlice.actions
+export const {addWorker, getAllManagers, setError, changePossibilitiesManager} = ManagersSlice.actions

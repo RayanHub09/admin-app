@@ -76,7 +76,6 @@ export const fetchChangeOrder = createAsyncThunk(
             thunkAPI.dispatch(changeOrder(updatedOrder))
             return updatedOrder;
         } catch (error:any) {
-            console.log(error)
             return thunkAPI.rejectWithValue(error.message);
         }
     }
@@ -129,7 +128,7 @@ const OrdersSlice = createSlice({
                         fetchChangeOrder.fulfilled.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
-                    state.status = null
+                    state.status = 'succeeded'
                     state.error = null
                 }
             )

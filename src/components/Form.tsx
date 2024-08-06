@@ -79,7 +79,6 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     {Object.keys(possibilitiesManager).map((key) => (
                         <div className={'checkbox_input'} key={key}>
                             <input
-                                style={{alignSelf:'center'}}
                                 type={'checkbox'}
                                 id={key}
                                 checked={checkboxStates[key]}

@@ -11,7 +11,7 @@ const SignInPage = () => {
             {status === 'loading' &&
                 <Loading />
             }
-            {status === 'failed' || status === null &&
+            {(status === 'failed' || status === null )&&
                 <div className={'signin_page_container'}>
                     <h1>Авторизация</h1>
                     <Login />

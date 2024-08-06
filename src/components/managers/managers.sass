@@ -5,6 +5,7 @@
   transition: all 1s
   cursor: pointer
   border-radius: 5px
+  padding: 10px
 
 @mixin default_container($flex-direction: row, $row_gap)
   flex-direction: $flex-direction
@@ -45,7 +46,15 @@
   &:disabled
     background: rgba(128, 128, 128, 0.25)
     cursor: not-allowed
-
+.change_possibilities_button
+  @extend %button
+  background: #006bae
+  color: white
+  &:hover
+    background: rgba(0, 107, 174, 0.5)
+  &:disabled
+    background: rgba(0, 107, 174, 0.5)
+    cursor: not-allowed
 .link_item
   text-decoration: none
   color: black
@@ -56,3 +65,7 @@
 .manager_item_container
   @include default_container(column, 10px)
   font-size: 20px
+  align-items: center
+.possibilities_manager_item_container
+  display: flex
+  flex-direction: column
