@@ -8,7 +8,7 @@ const OrdersList = () => {
     const orders = useAppSelector(state => state.orders.orders)
     const filtered_orders = useAppSelector(state => state.orders.filteredOrders)
     const isSearching = useAppSelector(state => state.orders.isSearching)
-    const status = useAppSelector(state => state.orders.status)
+    const status = useAppSelector(state => state.orders.statusGet)
 
     return (
         <>

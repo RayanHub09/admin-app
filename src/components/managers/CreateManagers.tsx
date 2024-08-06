@@ -12,8 +12,8 @@ const CreateManagers = () => {
     function createWorker(email: string, password: string, role?: string, name: string = '',
                           checkboxes?: { [key: string]: boolean }) {
         if (!checkboxes) return
+        setAdditionForm(!additionForm)
         if (role) dispatch(fetchSignUpManager({email, password, role, name, checkboxes}))
-            .then(() => setAdditionForm(!additionForm))
 
     }
 
@@ -23,7 +23,7 @@ const CreateManagers = () => {
                 className={'add_workers_button'}
                 disabled={status === 'loading'}
                 onClick={() => setAdditionForm(!additionForm)}>{
-                 !additionForm ? 'Добавить менеджера' : (status === 'loading' ? 'загрузка...' : 'Закрыть')
+                additionForm ? 'Закрыть' : (status === 'loading' ? 'загрузка...' : 'Добавить менеджера')
 
             }</button>
             {

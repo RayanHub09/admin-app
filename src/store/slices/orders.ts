@@ -3,6 +3,7 @@ import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
 import { Timestamp } from "firebase/firestore";
 import serializeData from "../../Serializer";
 import {IOrder} from "../../interfaces";
+import {fetchGetAllManagers} from "./managers";
 
 interface IState {
     orders: IOrder[]
@@ -10,13 +11,15 @@ interface IState {
     isSearching: boolean
     error: string|null
     status: 'loading' | 'succeeded' | 'failed' | null
+    statusGet: 'loading' | 'succeeded' | 'failed' | null
 }
 const initialState:IState = {
     orders: [],
     filteredOrders: [],
     isSearching: false,
     error: null,
-    status: null
+    status: null,
+    statusGet: null
 }
 
 export const fetchGetAllOrders = createAsyncThunk(
@@ -113,9 +116,20 @@ const OrdersSlice = createSlice({
     },
     extraReducers: builder => {
         builder
+            .addCase(fetchGetAllOrders.pending, (state, action) => {
+                state.statusGet = 'loading'
+            })
+            .addCase(fetchGetAllOrders.rejected, (state, action) => {
+                state.statusGet = 'failed'
+                state.error = action.payload as string
+            })
+            .addCase(fetchGetAllOrders.fulfilled, (state, action) => {
+                state.statusGet = 'succeeded'
+                state.error = null
+            })
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.pending.type, fetchChangeStatusOrder.pending.type,
+                    [ fetchChangeStatusOrder.pending.type,
                         fetchChangeOrder.pending.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
@@ -124,7 +138,7 @@ const OrdersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.fulfilled.type, fetchChangeStatusOrder.fulfilled.type,
+                    [ fetchChangeStatusOrder.fulfilled.type,
                         fetchChangeOrder.fulfilled.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
@@ -134,7 +148,7 @@ const OrdersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [ fetchGetAllOrders.rejected.type, fetchChangeStatusOrder.rejected.type,
+                    [fetchChangeStatusOrder.rejected.type,
                         fetchChangeOrder.rejected.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
