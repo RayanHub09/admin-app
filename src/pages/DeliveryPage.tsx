@@ -49,8 +49,7 @@ const DeliveryPage = () => {
                     <button
                         onClick={deleteDeliveryItem}
                         className={'change_button'}>
-                        {status === null && 'Удалить'}
-                        {status === 'loading' && 'загрузка...'}
+                        {status === 'loading' ? 'загрузка...' : 'Удалить'}
                     </button>
                 }
                 {calculateDeliveryCost && !changeMode && !delivery?.deliveryCost &&

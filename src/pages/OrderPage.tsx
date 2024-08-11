@@ -47,8 +47,7 @@ const OrderPage: React.FC = () => {
                     <button
                         onClick={deleteOrderItem}
                         className={'change_button'}>
-                        {status === null && 'Удалить'}
-                        {status === 'loading' && 'загрузка...'}
+                        {status === 'loading' ? 'загрузка...' : 'Удалить'}
                     </button>
                 }
             </div>
