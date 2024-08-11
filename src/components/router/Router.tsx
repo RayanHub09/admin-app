@@ -10,6 +10,7 @@ import MessagesPage from "../../pages/MessagesPage";
 import ManagerPage from "../../pages/ManagerPage";
 import OrderPage from "../../pages/OrderPage";
 import DeliveriesPage from "../../pages/DeliveriesPage";
+import DeliveryPage from "../../pages/DeliveryPage";
 
 
 const Router = () => {
@@ -21,6 +22,7 @@ const Router = () => {
             <Route path={'/orders'} element={<PrivateRouter element={<OrdersPage />} /> } />
             <Route path={'/messages'} element={<PrivateRouter element={<MessagesPage />} /> } />
             <Route path={'/deliveries'} element={<PrivateRouter element={<DeliveriesPage />} /> } />
+            <Route path={'/deliveries/:id'} element={<PrivateRouter element={<DeliveryPage />} /> } />
             <Route path={'/managers/:id'} element={<PrivateRouter element={<ManagerPage />} /> } />
             <Route path={'/orders/:id'} element={<PrivateRouter element={<OrderPage />} /> } />
             <Route path="*" element={<NotFoundPage />} />

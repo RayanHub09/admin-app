@@ -1,14 +1,18 @@
-import React, {useState} from 'react';
+import React, {FC, useState} from 'react';
 import {useAppDispatch} from "../hooks/redux-hooks";
 import {searchOrder} from "../store/slices/orders";
 
-const Search = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const dispatch = useAppDispatch()
+interface ISearchProps {
+    funcSearch: (searchTerm:string) => void
+}
+
+
+const Search:FC<ISearchProps> = ({funcSearch}) => {
+    const [searchTerm, setSearchTerm] = useState('')
+
     function search(event: string) {
         setSearchTerm(event)
-        console.log(event)
-        dispatch(searchOrder(event))
+        funcSearch(event)
     }
 
     return (
@@ -16,7 +20,7 @@ const Search = () => {
             <input
                 value={searchTerm}
                 onChange={event => search(event.target.value)}
-                placeholder={'Введите номер заказа'}/>
+                placeholder={'Введите номер'}/>
         </div>
     );
 };

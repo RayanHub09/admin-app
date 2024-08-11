@@ -1,10 +1,12 @@
 import React, {useEffect} from 'react';
-import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
-import {fetchGetAllOrders} from "../store/slices/orders";
-import {fetchGetAllDeliveries} from "../store/slices/deliveries";
 import DeliveriesList from "../components/deliveries/DeliveriesList";
+import {useAppDispatch} from "../hooks/redux-hooks";
+import {clearSearch} from "../store/slices/deliveries";
 
 const DeliveriesPage = () => {
+    const dispatch = useAppDispatch()
+    useEffect(() => {dispatch(clearSearch())}, [])
+
     return (
         <div className={'deliveries_page_container'}>
             <DeliveriesList />

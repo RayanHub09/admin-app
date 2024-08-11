@@ -19,11 +19,12 @@
 
 .field_order,  .label_order
   border-bottom: 1px rgba(128, 128, 128, 0.5) solid
+  border-right: 1px rgba(128, 128, 128, 0.4) solid
   padding: 10px
+
 .input_field_order
   border: 2px rgba(128, 128, 128, 1) solid
-.field_order
-  border-left: 1px rgba(128, 128, 128, 0.4) solid
+
 .order_item_container
   @include default_container(row, 10px)
   font-size: 20px
@@ -75,3 +76,8 @@
 .detailed_order_item_container
   @include default_container(column, 20px)
   width: 100%
+.buttons_change_container
+  display: flex
+  justify-content: flex-start
+  width: 100%
+  column-gap: 10px

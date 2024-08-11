@@ -1,9 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
-import { Timestamp } from "firebase/firestore";
-import serializeData from "../../Serializer";
-import {IOrder} from "../../interfaces";
-import {fetchGetAllManagers} from "./managers";
+import {collection, db, deleteDoc, doc, getDocs, query, updateDoc} from "../../firebase";
+import serializeData from "../../Serializer"
+import {IOrder} from "../../interfaces"
 
 interface IState {
     orders: IOrder[]
@@ -70,7 +68,7 @@ export const fetchChangeOrder = createAsyncThunk(
     async ({orderId, newStatus, newComment, newNumber} : {orderId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
         const orderDocRef = doc(db, 'orders', orderId);
         try {
-            const updateData: { [key: string]: any } = {};
+            const updateData: { [key: string]: string } = {};
             if (newStatus !== undefined) updateData['status.statusName'] = newStatus;
             if (newComment !== undefined) updateData['comment'] = newComment;
             if (newNumber !== undefined) updateData['number'] = newNumber;
@@ -83,7 +81,18 @@ export const fetchChangeOrder = createAsyncThunk(
         }
     }
 )
-
+export const fetchDeleteOrder = createAsyncThunk(
+    'orders/fetchDeleteOrder',
+    async (orderId: string, thunkAPI) => {
+        try {
+            const orderDocRef = doc(db, 'orders', orderId)
+            // await deleteDoc(orderDocRef)
+            thunkAPI.dispatch(deleteOrder({orderId}))
+        } catch (e:any) {
+            thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
 const OrdersSlice = createSlice({
     name: 'orders',
     initialState,
@@ -92,12 +101,14 @@ const OrdersSlice = createSlice({
             state.orders = [...action.payload]
         },
         searchOrder(state, action: PayloadAction<string>) {
-            const query = action.payload;
-            if (query === '') state.isSearching = false
+            const query = action.payload.trim()
+            if (query === '') {
+                state.isSearching = false
+                state.filteredOrders = state.orders
+            }
             else {
                 state.filteredOrders = state.orders.filter(order =>
-                    order.number.includes(query)
-                )
+                    order.number.includes(query))
                 state.isSearching = true
             }
         },
@@ -106,12 +117,26 @@ const OrdersSlice = createSlice({
             state.orders = state.orders.map(order =>
                 order.id === orderId ? { ...order, status: { statusName: newStatus } } : order
             ) as IOrder[]
+            state.filteredOrders = state.filteredOrders.map(order =>
+                order.id === orderId ? { ...order, status: { statusName: newStatus } } : order
+            ) as IOrder[]
         },
         changeOrder(state, action) {
             const { orderId, newStatus, newComment, newNumber } = action.payload
             state.orders = state.orders.map(order =>
                 order.id === orderId ? { ...order, status: { statusName: newStatus }, comment: newComment, number: newNumber } : order
             ) as IOrder[]
+        },
+        clearSearch(state) {
+            state.isSearching = false
+            state.filteredOrders = []
+        },
+        deleteOrder(state, action) {
+            const {orderId} = action.payload
+            state.orders = state.orders.filter( order => order.id !== orderId)
+        },
+        resetStatus(state) {
+            state.status = null
         }
     },
     extraReducers: builder => {
@@ -129,7 +154,7 @@ const OrdersSlice = createSlice({
             })
             .addMatcher(
                 (action) =>
-                    [ fetchChangeStatusOrder.pending.type,
+                    [ fetchChangeStatusOrder.pending.type, fetchDeleteOrder.pending.type,
                         fetchChangeOrder.pending.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
@@ -138,7 +163,7 @@ const OrdersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [ fetchChangeStatusOrder.fulfilled.type,
+                    [ fetchChangeStatusOrder.fulfilled.type, fetchDeleteOrder.fulfilled.type,
                         fetchChangeOrder.fulfilled.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
@@ -148,7 +173,7 @@ const OrdersSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [fetchChangeStatusOrder.rejected.type,
+                    [fetchChangeStatusOrder.rejected.type, fetchDeleteOrder.rejected.type,
                         fetchChangeOrder.rejected.type
                     ].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
@@ -161,4 +186,6 @@ const OrdersSlice = createSlice({
 })
 
 export const OrderReducer = OrdersSlice.reducer
-export const {getAllOrders, searchOrder, changeStatusOrder, changeOrder} = OrdersSlice.actions
+export const {getAllOrders, searchOrder, changeStatusOrder, changeOrder,
+                clearSearch, deleteOrder, resetStatus}
+    = OrdersSlice.actions

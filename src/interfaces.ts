@@ -93,14 +93,14 @@ export interface IDelivery {
     country: string
     creationDate: string
     customer: ICustomer
-    deliveryCost: null
-    deliveryCostYen: null
+    deliveryCost: null | number
+    deliveryCostYen: null | number
     deliveryMethod: string
     number: string
     orders: IOrder[]
     partsCostRu: number
     partsCostYen: number
-    ruDelivery: IRuDelivery
+    ruDelivery: IRuDelivery | null
     status: IDeliveryStatus
     uid: string
 }

@@ -2,6 +2,7 @@ import React, {FC} from 'react';
 import {Link} from "react-router-dom";
 import {IOrder} from "../../interfaces";
 import ItemsList from "./items/ItemsList";
+import {getDate} from "../../functions/newDate";
 
 interface OrderItemProps {
     order: IOrder
@@ -9,11 +10,7 @@ interface OrderItemProps {
 
 const DetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
-    function getDate(str: string): string[] {
-        const date = str?.split('T')[0]
-        const time = str?.split('T')[1].toString().slice(0, -5)
-        return [time, date]
-    }
+
     return (
         <div className={'detailed_order_item_container'}>
             <h2>Заказ № {order.number}</h2>

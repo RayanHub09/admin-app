@@ -1,13 +1,23 @@
 export interface IPossibilitiesManager {
     changeOrderNumber: string
-    writeComments: string
+    changeDeliveryNumber: string
+    writeCommentsOrder: string
+    writeCommentsDelivery: string
+    cancelOrder: string
     cancelDelivery: string
     changeStatusDelivery: string
+    changeStatusOrders: string
+    calculateDeliveryCost: string
 }
 
 export const possibilitiesManager:IPossibilitiesManager = {
-    cancelDelivery: 'отмена посылок',
-    writeComments: 'добавление комментариев',
+    cancelOrder: 'отмена заказа',
+    cancelDelivery: 'отмена доставки',
+    writeCommentsOrder: 'добавление комментариев к заказу',
+    writeCommentsDelivery: 'добавление комментариев к доставке',
     changeOrderNumber: 'изменение номера заказа',
-    changeStatusDelivery: 'изменение статуса заказа',
+    changeDeliveryNumber: 'изменение номера доставки',
+    changeStatusDelivery: 'изменение статуса доставки',
+    changeStatusOrders: 'изменение статуса заказа',
+    calculateDeliveryCost: 'расчет стоимости доставки'
 }

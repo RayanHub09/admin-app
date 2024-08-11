@@ -27,7 +27,7 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
         <div className={'order_item_container'}>
             <div className={'order_item'}>
                 <h4>{order.number}</h4>
-                <span>{order.uid}</span>
+                {/*<span>{order.uid}</span>*/}
             </div>
             <span>Статус: {order.status.statusName}</span>
             <div className={'fast_actions'}>
@@ -37,7 +37,7 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
                         onClick={changeStatusOrder}
                         disabled={isDisabled}
                         className={'promote_button'}>
-                        {!isDisabled ? 'Продвинуть' : 'загрузка...'}
+                        {!isDisabled ? 'Продвинуть'  : 'загрузка...'}
                     </button>
                 }
             </div>

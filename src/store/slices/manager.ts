@@ -18,9 +18,14 @@ const initialState: IState = {
         role: null,
         name: null,
         changeOrderNumber: null,
-        writeComments: null,
+        changeDeliveryNumber: null,
+        writeCommentsOrder: null,
+        writeCommentsDelivery: null,
+        cancelOrder: null,
         cancelDelivery: null,
-        changeStatusDelivery: null
+        changeStatusDelivery: null,
+        changeStatusOrders: null,
+        calculateDeliveryCost: null
     },
     error: null,
     status: null,
@@ -45,21 +50,13 @@ export const fetchSignIn = createAsyncThunk(
             const q = query(collection(db, "managers"));
             const querySnapshot = await getDocs(q);
             const userData: IManager[] = querySnapshot.docs.map((doc) => {
-                const data = doc.data() as IManager;
                 return {
                     id: doc.id,
-                    email: data.email,
-                    role: data.role,
-                    name: data.name,
-                    changeOrderNumber: data.changeOrderNumber,
-                    writeComments: data.writeComments,
-                    cancelDelivery: data.cancelDelivery,
-                    changeStatusDelivery: data.changeStatusDelivery
-                };
+                    ...doc.data()
+                } as IManager
             });
             const Manager = userData.filter((item, index) => item.email === email)
             thunkAPI.dispatch(setManager(Manager[0]))
-            console.log(Manager[0])
 
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message)
@@ -78,14 +75,7 @@ const ManagerSlice = createSlice({
             state.token = action.payload.token
         },
         setManager(state, action) {
-            state.manager.id = action.payload.id
-            state.manager.email = action.payload.email
-            state.manager.role = action.payload.role
-            state.manager.name = action.payload.name
-            state.manager.cancelDelivery = action.payload.cancelDelivery
-            state.manager.changeOrderNumber = action.payload.changeOrderNumber
-            state.manager.changeStatusDelivery = action.payload.changeStatusDelivery
-            state.manager.writeComments = action.payload.writeComments
+            state.manager = action.payload
         },
         removeManager(state) {
             state.manager.id = null

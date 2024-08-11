@@ -1,9 +1,8 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Form from "../Form";
 import {fetchSignIn} from "../../store/slices/manager";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {useNavigate} from "react-router-dom";
-import {fetchGetAllManagers} from "../../store/slices/managers";
 
 
 const Login = () => {
