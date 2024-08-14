@@ -12,7 +12,6 @@ interface OrderItemProps {
 
 const OrderItem: FC<OrderItemProps> = ({order}) => {
 
-    const statusFetch = useAppSelector(state => state.orders.status)
     const [isDisabled, setIsDisabled] = useState(false)
     const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
     const dispatch = useAppDispatch()
@@ -25,17 +24,16 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
     }
     return (
         <div className={'order_item_container'}>
-            <div className={'order_item'}>
+            <div className={order.status.statusName !== 'Отменен' ? 'order_item' : 'order_item cancel_field'}>
                 <h4>{order.number}</h4>
-                {/*<span>{order.uid}</span>*/}
             </div>
-            <span>Статус: {order.status.statusName}</span>
+            <span className={order.status.statusName !== 'Отменен' ? '' : 'cancel_field'}>Статус: {order.status.statusName}</span>
             <div className={'fast_actions'}>
                 <Link to={`/orders/${order.id}`} className={'link_item_button'}>Перейти в заказ</Link>
                 {changeStatusDelivery &&
                     <button
                         onClick={changeStatusOrder}
-                        disabled={isDisabled}
+                        disabled={isDisabled || order.status.statusName === 'Отменен'}
                         className={'promote_button'}>
                         {!isDisabled ? 'Продвинуть'  : 'загрузка...'}
                     </button>

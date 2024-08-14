@@ -3,7 +3,7 @@ import {IOrder} from "../../interfaces";
 import {statusOrder} from "../../lists/statusOrder";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangeOrder} from "../../store/slices/orders";
-import {getDate} from "../../functions/newDate";
+import {getDate} from "../../functions/changeDate";
 
 interface OrderItemProps {
     order: IOrder
@@ -32,59 +32,59 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
     return (
         <div className={'detailed_order_item_container'}>
+            <button
+                onClick={changeOrder}
+                className={'change_button'}
+                disabled={isDisabled}>
+                {!isDisabled ? 'Сохранить' : 'загрузка...'}</button>
             <h2>Заказ № {order.number}</h2>
             <div className={'detailed_order_item'}>
                 <h3 className={'label_order'}>Номер</h3>
                 {changeOrderNumber ?
                     <input
-                        className={'input_field_order'}
+                        className={'input_field'}
                         value={number}
                         onChange={event => setNumber(event.target.value)}
                     /> :
-                    <span className={'field_order'}>{order.number}</span>
+                    <span className={'field'}>{order.number}</span>
                 }
                 <h3 className={'label_order'}>Статус</h3>
                 {changeStatusDelivery ?
                     <select
                         value={status}
                         onChange={event => setStatus(event.target.value)}
-                        className={'input_field_order'}
+                        className={'input_field'}
                     >
                         {statusOrder.map((item, index) =>
                             <option
                                 key={index}
-                                className={'input_field_order'}
+                                className={'input_field'}
                                 value={item}
                             >{item}</option>
                         )
                         }
                     </select> :
-                    <span className={'field_order'}>{order.status.statusName}</span>
+                    <span className={'field'}>{order.status.statusName}</span>
                 }
                 <h3 className={'label_order'}>Кол-во товара (шт.)</h3>
-                <span className={'field_order'}>{order.itemsCnt}</span>
+                <span className={'field'}>{order.itemsCnt}</span>
                 <h3 className={'label_order'}>Стоимость</h3>
-                <span className={'field_order'} style={{fontWeight: '500'}}>{order.priceYen}¥ ({order.priceRu}₽)</span>
+                <span className={'field'} style={{fontWeight: '500'}}>{order.priceYen}¥ ({order.priceRu}₽)</span>
                 <h3 className={'label_order'}>Примерный вес</h3>
                 <span
-                    className={'field_order'}>{order.items.reduce((acc, item) => acc = acc + item.part.weight, 0)}</span>
+                    className={'field'}>{order.items.reduce((acc, item) => acc = acc + item.part.weight, 0)}</span>
                 <h3 className={'label_order'}>Дата заказа</h3>
-                <span className={'field_order'}>{getDate(order.date)[1]}, {getDate(order.date)[0]}</span>
+                <span className={'field'}>{getDate(order.date)[1]}, {getDate(order.date)[0]}</span>
                 <h3 className={'label_order'}>Комментарий</h3>
                 {writeCommentsOrder ?
                     <input
-                        className={'input_field_order'}
+                        className={'input_field'}
                         onChange={event => setComment(event.target.value)}
                         value={comment}/>
-                    : <span className={'field_order'}>{order.comment}</span>
+                    : <span className={'field'}>{order.comment}</span>
                 }
             </div>
-            <button
-                onClick={changeOrder}
-                className={'change_button'}
-                disabled={isDisabled}
-                style={{alignSelf: 'flex-end'}}>
-                {!isDisabled ? 'Сохранить' : 'загрузка...'}</button>
+
         </div>
     )
 };

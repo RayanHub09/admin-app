@@ -3,6 +3,7 @@ import {ManagerReducer} from "./slices/manager";
 import {ManagersReducer} from "./slices/managers";
 import {OrderReducer} from "./slices/orders";
 import {DeliveriesReducer} from "./slices/deliveries";
+import {ItemsReducer} from "./slices/items";
 
 
 export const store = configureStore({
@@ -10,7 +11,8 @@ export const store = configureStore({
         manager: ManagerReducer,
         managers: ManagersReducer,
         orders: OrderReducer,
-        deliveries: DeliveriesReducer
+        deliveries: DeliveriesReducer,
+        items: ItemsReducer
     }
 })
 

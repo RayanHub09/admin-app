@@ -1,8 +1,8 @@
-import {IDelivery, IOrder} from "../../interfaces"
+import {IDelivery} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, deleteDoc, doc, getDocs, query, updateDoc} from "../../firebase";
+import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
 import serializeData from "../../Serializer";
-import {fetchChangeStatusOrder, fetchGetAllOrders, getAllOrders} from "./orders";
+import {convertStringToDate, getDate} from "../../functions/changeDate";
 
 interface IState {
     deliveries: IDelivery[]
@@ -86,13 +86,13 @@ export const  fetchCalculateDeliveryCost = createAsyncThunk(
     }
 )
 
-export const fetchDeleteDelivery = createAsyncThunk(
+export const fetchCancelDelivery = createAsyncThunk(
     'deliveries/fetchDeleteDelivery',
     async (deliveryId:string, thunkAPI) => {
        try {
            const deliveryDocRef = doc(db, 'deliveries', deliveryId)
-           // await deleteDoc(deliveryDocRef)
-           thunkAPI.dispatch(deleteDelivery({deliveryId}))
+           await updateDoc(deliveryDocRef, {['status.statusName'] : 'Отменен'})
+           thunkAPI.dispatch(cancelDelivery({deliveryId}))
        } catch (e:any) {
            thunkAPI.rejectWithValue(e.message)
        }
@@ -106,18 +106,21 @@ const DeliveriesSlice = createSlice({
         getAllDeliveries(state, action) {
             state.deliveries = action.payload
         },
-        searchDelivery(state, action: PayloadAction<string>) {
-            const query = action.payload.trim()
-            if (query === '') {
+        searchDelivery(state, action) {
+            const [number, startDate, endDate, status, methods] = action.payload
+            if (number === '' && startDate === '' && endDate === '' && !Object.values(status).includes(true) && !Object.values(methods).includes(true)) {
                 state.isSearching = false
-                state.filteredDeliveries = state.deliveries
+                return
             }
-            else {
-                state.filteredDeliveries = state.deliveries.filter(delivery =>
-                    delivery.number.includes(query)
-                )
-                state.isSearching = true
-            }
+            state.isSearching = true
+            state.filteredDeliveries = state.deliveries.filter(delivery => {
+                const orderDate = convertStringToDate(getDate(delivery.creationDate)[1]).getTime()
+                return (number === '' || delivery.number.includes(number)) &&
+                    (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
+                    (endDate === '' || orderDate <= convertStringToDate(endDate ).getTime()) &&
+                    (!Object.values(status).includes(true)   || status[delivery.status.statusName]) &&
+                    (!Object.values(methods).includes(true)   || methods[delivery.deliveryMethod])
+            })
         },
         clearSearch(state) {
             state.isSearching = false
@@ -141,9 +144,10 @@ const DeliveriesSlice = createSlice({
             ) as IDelivery[]
             console.log(state.deliveries)
         },
-        deleteDelivery(state, action) {
+        cancelDelivery(state, action) {
             const {deliveryId} = action.payload
-            state.deliveries = state.deliveries.filter(delivery => delivery.id !== deliveryId)
+            state.deliveries = state.deliveries.map(delivery => delivery.id === deliveryId ? {...delivery, status: {statusName : 'Отменен'}} : delivery
+            ) as IDelivery[]
         }
     },
 
@@ -163,7 +167,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.pending.type, fetchCalculateDeliveryCost.pending.type,
-                    fetchDeleteDelivery.pending.type].includes(action.type),
+                    fetchCancelDelivery.pending.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'loading'
                 }
@@ -171,7 +175,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.fulfilled.type, fetchCalculateDeliveryCost.fulfilled.type,
-                    fetchDeleteDelivery.fulfilled.type].includes(action.type),
+                        fetchCancelDelivery.fulfilled.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -180,7 +184,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.rejected.type, fetchCalculateDeliveryCost.rejected.type,
-                    fetchDeleteDelivery.rejected.type].includes(action.type),
+                        fetchCancelDelivery.rejected.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -192,4 +196,4 @@ const DeliveriesSlice = createSlice({
 export const DeliveriesReducer = DeliveriesSlice.reducer
 export const {getAllDeliveries, searchDelivery, clearSearch,
                 changeDelivery, resetStatus, calculateDeliveryCost,
-                deleteDelivery} = DeliveriesSlice.actions
+                cancelDelivery} = DeliveriesSlice.actions

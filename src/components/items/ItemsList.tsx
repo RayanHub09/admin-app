@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {IItem} from "../../../interfaces";
+import {IItem} from "../../interfaces";
 import Item from "./Item";
 import './items.sass'
 

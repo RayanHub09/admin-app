@@ -1,9 +1,9 @@
 import React, {FC, useState} from 'react';
 import {IDelivery} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
-import {statusDelivery} from "../../lists/statusDelivery";
+import {statusesOfDelivery} from "../../lists/dateOfDelivery";
 import {fetchChangeDelivery, resetStatus} from "../../store/slices/deliveries";
-import {getDate} from "../../functions/newDate";
+import {getDate} from "../../functions/changeDate";
 
 interface IDeliveryProps {
     delivery: IDelivery
@@ -41,15 +41,15 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                     <input
                         value={number}
                         onChange={(event) => setNumber(event.target.value)}
-                        className={'input_field_order'}/> :
-                    <span className={'field_order'}>{delivery.number}</span>
+                        className={'input_field'}/> :
+                    <span className={'field'}>{delivery.number}</span>
                 }
                 <h3 className={'label_order'}>Способ</h3>
-                <span className={'field_order'}>{delivery.deliveryMethod}</span>
+                <span className={'field'}>{delivery.deliveryMethod}</span>
                 {delivery.ruDelivery !== null &&
                     <>
                         <h3 className={'label_order'}>Транспортная компания</h3>
-                        <span className={'field_order'}>{delivery.ruDelivery.deliveryFromTC}</span>
+                        <span className={'field'}>{delivery.ruDelivery.deliveryFromTC}</span>
                     </>
                 }
                 <h3 className={'label_order'}>Статус</h3>
@@ -57,51 +57,51 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                     <select
                         value={status}
                         onChange={event => setStatus(event.target.value)}
-                        className={'input_field_order'}>
-                        {statusDelivery.map((item, index) =>
+                        className={'input_field'}>
+                        {statusesOfDelivery.map((item, index) =>
                             <option
                                 key={index}
-                                className={'input_field_order'}
+                                className={'input_field'}
                                 value={item}>
                                 {item}</option>
                         )}
                     </select> :
-                    <span className={'field_order'}>{delivery.status.statusName}</span>}
+                    <span className={'field'}>{delivery.status.statusName}</span>}
                 <h3 className={'label_order'}>Кол-во товара</h3>
-                <span className={'field_order'}>{delivery.orders.reduce((acc, item) =>
+                <span className={'field'}>{delivery.orders.reduce((acc, item) =>
                     acc += item.itemsCnt, 0)}</span>
                 <h3 className={'label_order'}>Вес</h3>
-                <span className={'field_order'}>{}</span>
+                <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Стоимость доставки</h3>
                 {delivery.deliveryCost && delivery.deliveryCostYen &&  <span
                     style={{fontWeight: '500'}}
-                    className={'field_order'}>
+                    className={'field'}>
                         {delivery.deliveryCostYen}¥ ({delivery.deliveryCost}₽)
                 </span>}
-                {!delivery.deliveryCost && !delivery.deliveryCostYen &&  <span className={'field_order'}></span>}
+                {!delivery.deliveryCost && !delivery.deliveryCostYen &&  <span className={'field'}></span>}
                 <h3 className={'label_order'}>Стоимость товара</h3>
-                <span className={'field_order'}
+                <span className={'field'}
                       style={{fontWeight: '500'}}>
                     {delivery.partsCostYen}¥ ({delivery.partsCostRu}₽)</span>
                 <h3 className={'label_order'}>Декларируемая стоимость</h3>
-                <span className={'field_order'}>{}</span>
+                <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Время создания</h3>
-                <span className={'field_order'}>{getDate(delivery.creationDate)[1]}, {getDate(delivery.creationDate)[0]}</span>
+                <span className={'field'}>{getDate(delivery.creationDate)[1]}, {getDate(delivery.creationDate)[0]}</span>
                 <h3 className={'label_order'}>ФИО</h3>
-                <span className={'field_order'}>{delivery.customer.name} {delivery.customer.surname}</span>
+                <span className={'field'}>{delivery.customer.name} {delivery.customer.surname}</span>
                 <h3 className={'label_order'}>Адрес</h3>
-                <span className={'field_order'}>{delivery.customer.address}</span>
+                <span className={'field'}>{delivery.customer.address}</span>
                 <h3 className={'label_order'}>Телефон</h3>
-                <span className={'field_order'}>{delivery.customer.phoneNumber}</span>
+                <span className={'field'}>{delivery.customer.phoneNumber}</span>
                 <h3 className={'label_order'}>Номера накладных</h3>
-                <span className={'field_order'}>{}</span>
+                <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Комментарий</h3>
                 {writeCommentsDelivery ?
                     <input
                         value={comment}
                         onChange={(event) => setComment(event.target.value)}
-                        className={'input_field_order'}/> :
-                    <span className={'field_order'}>{delivery.comment}</span>
+                        className={'input_field'}/> :
+                    <span className={'field'}>{delivery.comment}</span>
                 }
             </div>
         </div>

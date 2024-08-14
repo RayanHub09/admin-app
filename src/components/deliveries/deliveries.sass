@@ -1,7 +1,11 @@
-.deliveries_list_container
+@mixin default_container($flex-direction, $row_gap, $column_gap)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  column-gap: $column_gap
   display: flex
-  flex-direction: column
-  row-gap: 10px
+
+.deliveries_list_container
+  @include default_container(column, 10px, 0px)
 .deliveries_list
   display: grid
   grid-template-columns: repeat(7, 1fr)
@@ -11,9 +15,7 @@
   display: grid
   grid-template-columns: repeat(7, 1fr)
 .detailed_delivery_item_container
-  display: flex
-  flex-direction: column
-  row-gap: 20px
+  @include default_container(column, 20px, 0px)
 .detailed_delivery_item
   display: grid
   grid-template-columns: repeat(2, 1fr)
@@ -21,11 +23,14 @@
   border-left: 1px rgba(128, 128, 128, 0.5) solid
 
 .calculate_delivery_container
-  flex-direction: column
+  @include default_container(column, 10px, 0px)
   align-items: center
-  row-gap: 10px
-
+.cancel_field
+  color: #cc5600
 .cost_container
-  display: flex
+  @include default_container(row, 0px, 10px)
   font-size: 25px
-  column-gap: 10px
+
+.search_delivery_container
+  @include default_container(column, 20px, 0px)
+  align-items: center

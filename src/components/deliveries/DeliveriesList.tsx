@@ -2,8 +2,8 @@ import React, {useEffect} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import DeliveryItem from "./DeliveryItem";
 import './deliveries.sass'
-import Search from "../Search";
 import {clearSearch, searchDelivery} from "../../store/slices/deliveries";
+import SearchDelivery from "./SearchDelivery";
 
 const DeliveriesList = () => {
     const dispatch = useAppDispatch()
@@ -21,7 +21,7 @@ const DeliveriesList = () => {
     return (
 
         <div className={'deliveries_list_container'}>
-            <Search funcSearch={search} />
+            <SearchDelivery/>
             {(searchDeliveries.length === 0 && isSearching)? (<h2 className={'nothing_found'}>Ничего не найдено.<br/><br/>Проверьте номер <br/> и попробуйте еще раз.</h2>) :
                 <div className={'deliveries_list'}>
                     <h3 className={'label_order'}>Номер</h3>

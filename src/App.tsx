@@ -6,6 +6,8 @@ import {useAppDispatch, useAppSelector} from "./hooks/redux-hooks";
 import {fetchGetAllManagers} from "./store/slices/managers";
 import {fetchGetAllOrders} from "./store/slices/orders";
 import {fetchGetAllDeliveries} from "./store/slices/deliveries";
+import {getAllItems} from "./store/slices/items";
+import {IItem, IOrder} from "./interfaces";
 
 
 function App() {
@@ -16,7 +18,11 @@ function App() {
         if (isAuth) {
             dispatch(fetchGetAllManagers())
             dispatch(fetchGetAllOrders())
+                .then(data => data.payload as IOrder[])
+                .then(orders => orders.reduce((acc, order) => acc = [...acc, ...order.items], [] as IItem[]))
+                .then(items => dispatch(getAllItems(items)))
             dispatch(fetchGetAllDeliveries())
+
         }
     }, [isAuth])
 

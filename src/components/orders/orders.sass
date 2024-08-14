@@ -1,6 +1,7 @@
-@mixin default_container($flex-direction: row, $row_gap)
+@mixin default_container($flex-direction: row, $row_gap, $column_gap: 0px)
   flex-direction: $flex-direction
   row-gap: $row_gap
+  column-gap: $column_gap
   display: flex
 %button
   padding: 7px
@@ -17,12 +18,12 @@
 .orders_list_container
   @include default_container(column, 10px)
 
-.field_order,  .label_order
+.field,  .label_order
   border-bottom: 1px rgba(128, 128, 128, 0.5) solid
   border-right: 1px rgba(128, 128, 128, 0.4) solid
   padding: 10px
 
-.input_field_order
+.input_field
   border: 2px rgba(128, 128, 128, 1) solid
 
 .order_item_container
@@ -77,7 +78,27 @@
   @include default_container(column, 20px)
   width: 100%
 .buttons_change_container
-  display: flex
+  @include default_container(row, 0, 10px)
   justify-content: flex-start
   width: 100%
-  column-gap: 10px
+.search_orders_container
+  @include default_container(column, 10px)
+
+  align-items: center
+.label_search
+  font-size: 18px
+  font-weight: 500
+.fields_search_container
+  @include default_container(row, 10px, 10px)
+  flex-wrap: wrap
+  max-width: 900px
+  justify-content: center
+.field_search
+  @include default_container(column, 5px)
+.statuses_container
+  @include default_container(row, 10px, 10px)
+  justify-content: center
+  flex-wrap: wrap
+  max-width: 900px
+.status_container
+  @include default_container(row, 0px, 5px)

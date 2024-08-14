@@ -1,0 +1,19 @@
+@mixin default_container($flex-direction: row, $row_gap, $column_gap)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  column-gap: $column_gap
+  display: flex
+
+.items_list_container
+  @include default_container(column, 5px, 0px)
+
+.items_list
+  display: grid
+  grid-template-columns: repeat(6, 1fr)
+  border: 1px rgba(128, 128, 128, 0.4) solid
+.search_items_container
+  @include default_container(column, 20px, 0px)
+  //max-width: 400px
+  align-items: center
+
+

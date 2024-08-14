@@ -2,6 +2,7 @@ import React, {FC, useState} from 'react';
 import './components.sass'
 import {options, IRole} from "../lists/roleList";
 import {possibilitiesManager, IPossibilitiesManager} from "../lists/possibilitiesManagerList";
+import {generatePassword} from "../functions/generatePassword";
 
 interface FormProps {
     text_button: string,
@@ -18,20 +19,21 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
 
     const [checkboxStates, setCheckboxStates] = useState(
         Object.keys(possibilitiesManager).reduce((acc, key) => {
-            acc[key] = false
-            return acc
-            }, {} as { [key: string] : boolean}
+                acc[key] = false
+                return acc
+            }, {} as { [key: string]: boolean }
         )
     )
     const [email, setEmail] = useState('')
     const [name, setName] = useState('')
-    const [role, setRole] = useState<string|undefined>('Выберете роль')
+    const [role, setRole] = useState<string | undefined>('Выберете роль')
     const [visibilityPassword, setVisibilityPassword] = useState(false)
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, checked } = event.target;
-        setCheckboxStates((prevState) => ({ ...prevState, [id]: checked }));
+        const {id, checked} = event.target;
+        setCheckboxStates((prevState) => ({...prevState, [id]: checked}));
     };
+
     function clickFunction() {
         setRole('Выберете роль')
         setEmail('')
@@ -57,13 +59,25 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                 value={email}
                 onChange={event => setEmail(event.target.value)}
             />
-            <input
-                placeholder={'Введите пароль'}
-                type={visibilityPassword || isCreate ? 'text' : 'password'}
-                value={password}
-                onChange={event => setPassword(event.target.value)}
-            />
-            { isCreate &&
+            {!isCreate &&
+                <input
+                    placeholder={'Введите пароль'}
+                    type={visibilityPassword || isCreate ? 'text' : 'password'}
+                    value={password}
+                    onChange={event => setPassword(event.target.value)}
+                />}
+            {isCreate && (password === '' ? <button
+                onClick={() => setPassword(generatePassword(10))}
+                    style={{border: '1px black solid', borderRadius: '0px'}}
+                    className={'button_out'}>Сгенерировать пароль</button>
+                : <input
+                    placeholder={'Введите пароль'}
+                    type={visibilityPassword || isCreate ? 'text' : 'password'}
+                    value={password}
+                    onChange={event => setPassword(event.target.value)}
+                />)}
+
+            {isCreate &&
                 <select
                     value={role}
                     onChange={event => setRole(event.target.value)}
@@ -84,12 +98,13 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                                 checked={checkboxStates[key]}
                                 onChange={event => handleCheckboxChange(event)}
                             />
-                            <label style={{paddingBottom: '5px' }}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</label>
+                            <label
+                                style={{paddingBottom: '5px'}}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</label>
                         </div>
                     ))}
                 </div>
             )}
-            { !isCreate &&
+            {!isCreate &&
                 <span className={'visibility_password'}>
                     <label>Показать пароль</label>
                     <input
@@ -108,6 +123,4 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
         </div>
     );
 };
-// bul@mail.ru
-// 1234457
 export default Form;

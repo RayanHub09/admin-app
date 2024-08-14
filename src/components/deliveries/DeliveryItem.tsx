@@ -14,13 +14,13 @@ const DeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
     }
     return (
         <>
-            <span className={'field_order'}><Link to={`/deliveries/${delivery.id}`} className={'link_item'}>{delivery.number}</Link></span>
-            <span className={'field_order'}>{delivery.deliveryMethod}</span>
-            <span className={'field_order'}>{delivery.status.statusName}</span>
-            <span className={'field_order'}>{getDate(delivery.creationDate)[1]}, {getDate(delivery.deliveryMethod)[0]}</span>
-            <span className={'field_order'}>{delivery.deliveryCost}</span>
-            <span className={'field_order'}>{delivery.partsCostRu}</span>
-            <span className={'field_order'}>{delivery.orders.reduce((acc, item) => acc + item.itemsCnt, 0)}</span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}><Link to={`/deliveries/${delivery.id}`} className={delivery.status.statusName !== 'Отменен' ? 'link_item' : 'link_item cancel_field'}>{delivery.number}</Link></span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{delivery.deliveryMethod}</span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{delivery.status.statusName}</span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{getDate(delivery.creationDate)[1]}, {getDate(delivery.creationDate)[0]}</span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{delivery.deliveryCost}</span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{delivery.partsCostRu}</span>
+            <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{delivery.orders.reduce((acc, item) => acc + item.itemsCnt, 0)}</span>
         </>
     );
 };

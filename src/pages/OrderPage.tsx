@@ -4,7 +4,7 @@ import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 import { IOrder } from "../interfaces";
 import DetailedOrderItem from "../components/orders/DetailedOrderItem";
 import ChangeDetailedOrderItem from "../components/orders/ChangeDetailedOrderItem";
-import {fetchDeleteOrder, resetStatus} from "../store/slices/orders";
+import {fetchCancelOrder, resetStatus} from "../store/slices/orders";
 
 const OrderPage: React.FC = () => {
     const writeCommentsOrder = useAppSelector(state => state.manager.manager.writeCommentsOrder)
@@ -22,7 +22,7 @@ const OrderPage: React.FC = () => {
 
     function deleteOrderItem() {
         if (id != null) {
-            dispatch(fetchDeleteOrder(id))
+            dispatch(fetchCancelOrder(id))
                 .then(() => dispatch(resetStatus()))
                 .then(() => navigation('/orders'))
         }
@@ -43,11 +43,11 @@ const OrderPage: React.FC = () => {
                         {changeMode ? 'Вернуться к заказу' : 'Изменить'}
                     </button>
                 }
-                {cancelOrder &&
+                {cancelOrder && order.status.statusName !== 'Отменен' && !changeMode &&
                     <button
                         onClick={deleteOrderItem}
                         className={'change_button'}>
-                        {status === 'loading' ? 'загрузка...' : 'Удалить'}
+                        {status === 'loading' ? 'загрузка...' : 'Отменить'}
                     </button>
                 }
             </div>

@@ -5,7 +5,7 @@ import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 import {IDelivery} from "../interfaces";
 import ChangeDetailedDeliveryItem from "../components/deliveries/ChangeDetailedDeliveryItem";
 import CalculateDeliveryCost from "../components/deliveries/CalculateDeliveryCost";
-import {fetchDeleteDelivery, resetStatus} from "../store/slices/deliveries";
+import {fetchCancelDelivery, resetStatus} from "../store/slices/deliveries";
 
 
 const DeliveryPage = () => {
@@ -27,7 +27,7 @@ const DeliveryPage = () => {
 
     function deleteDeliveryItem() {
         if (id != null) {
-            dispatch(fetchDeleteDelivery(id))
+            dispatch(fetchCancelDelivery(id))
                 .then(() => dispatch(resetStatus()))
                 .then(() => navigation('/deliveries'))
         }
@@ -45,11 +45,11 @@ const DeliveryPage = () => {
                         {changeMode ? 'Вернуться к заказу' : 'Изменить'}
                     </button>
                 }
-                {cancelDelivery && !changeMode &&
+                {cancelDelivery && !changeMode && delivery.status.statusName !== 'Отменен'  &&
                     <button
                         onClick={deleteDeliveryItem}
                         className={'change_button'}>
-                        {status === 'loading' ? 'загрузка...' : 'Удалить'}
+                        {status === 'loading' ? 'загрузка...' : 'Отменить посылку'}
                     </button>
                 }
                 {calculateDeliveryCost && !changeMode && !delivery?.deliveryCost &&
