@@ -56,7 +56,7 @@ const SearchDelivery = () => {
                             type={"text"}/>
                     </div>
                     <div className={'field_search'}>
-                        <label className={'label_search'}>Дата заказа от </label>
+                        <label className={'label_search'}>Дата формирования от </label>
                         <input
                             value={startDate}
                             onChange={event => setStartDate(event.target.value)}

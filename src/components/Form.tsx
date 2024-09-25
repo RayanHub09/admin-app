@@ -69,7 +69,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
             {isCreate && (password === '' ? <button
                 onClick={() => setPassword(generatePassword(10))}
                     style={{border: '1px black solid', borderRadius: '0px'}}
-                    className={'button_out'}>Сгенерировать пароль</button>
+                    className={'button_generate'}>Сгенерировать пароль</button>
                 : <input
                     placeholder={'Введите пароль'}
                     type={visibilityPassword || isCreate ? 'text' : 'password'}

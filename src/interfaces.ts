@@ -25,6 +25,17 @@ export interface IItem {
     selected: boolean
 }
 
+export interface IReItem {
+    id: string
+    dateOrder: string
+    numberOrder: string
+    numberDelivery: string
+    statusOrder: string
+    amount: number
+    comment: string
+    part: IPart
+    selected: boolean
+}
 export interface IStatus {
     archived: false
     date: string
@@ -34,6 +45,19 @@ export interface IStatus {
 
 export interface IOrder {
     id: string
+    comment: string
+    date: string
+    items: IItem[]
+    itemsCnt: number
+    number: string
+    priceRu: number
+    priceYen: number
+    status: IStatus
+    uid: string
+}
+export interface IReOrder {
+    id: string
+    numberDelivery: string
     comment: string
     date: string
     items: IItem[]
@@ -103,4 +127,13 @@ export interface IDelivery {
     ruDelivery: IRuDelivery | null
     status: IDeliveryStatus
     uid: string
+}
+
+export interface IMessage {
+    id: string
+    text: string
+    date: string
+    isSeen: boolean
+    idSender: string
+    idRecipient: string
 }

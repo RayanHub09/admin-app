@@ -9,11 +9,15 @@
 
 .items_list
   display: grid
-  grid-template-columns: repeat(6, 1fr)
+  grid-template-columns: repeat(8, 1fr)
   border: 1px rgba(128, 128, 128, 0.4) solid
+@media (max-width: 950px)
+    .items_list
+      overflow: scroll
 .search_items_container
   @include default_container(column, 20px, 0px)
-  //max-width: 400px
   align-items: center
+.items_list_all_container
+  @include default_container(column, 20px, 0px)
 
 

@@ -1,26 +1,49 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
-import {statusOrder} from "../../lists/statusOrder";
+
+import {searchItem} from "../../store/slices/items";
+import {clearSearch} from "../../store/slices/items";
+import {statusItem} from "../../lists/statusItem";
 
 interface IStatuses {
     [key: string]: boolean
 }
 
 const initializeStatuses = (): IStatuses => {
-    return statusOrder.reduce((acc, item) => {
+    return statusItem.reduce((acc, item) => {
         acc[item] = false
         return acc
     }, {} as IStatuses)
 }
 
+
 const SearchItem = () => {
     const dispatch = useAppDispatch()
-    const isSearching = useAppSelector(state => state.orders.isSearching)
+    const isSearching = useAppSelector(state => state.items.isSearching)
     const [searchNumberOrder, setSearchNumberOrder] = useState('')
     const [searchNumberDelivery, setSearchNumberDelivery] = useState('')
     const [startDate, setStartDate] = useState<string>('')
     const [endDate, setEndDate] = useState('')
     const [statuses, setStatuses] = useState<IStatuses>(initializeStatuses)
+    const [markName, setMarkName] = useState('')
+    const [name, setName] = useState('')
+
+    const searchItemF = useCallback(() => {
+        dispatch(searchItem([searchNumberOrder, searchNumberDelivery, markName, name, startDate, endDate, statuses]))
+
+    }, [dispatch, searchNumberOrder, searchNumberDelivery, markName, name, startDate, endDate, statuses])
+
+
+    const searchClearFields = useCallback(() => {
+        dispatch(clearSearch())
+        setName('')
+        setMarkName('')
+        setStartDate('')
+        setEndDate('')
+        setSearchNumberDelivery('')
+        setSearchNumberOrder('')
+        setStatuses(initializeStatuses())
+    }, [dispatch])
 
     return (
         <div className={'search_items_container'}>
@@ -57,15 +80,15 @@ const SearchItem = () => {
                 <div className={'field_search'}>
                     <label className={'label_search'}>Производитель</label>
                     <input
-                        // value={searchNumberOrder}
-                        // onChange={event => setSearchNumberOrder(event.target.value)}
+                        value={markName}
+                        onChange={event => setMarkName(event.target.value)}
                         type={"text"}/>
                 </div>
                 <div className={'field_search'}>
                     <label className={'label_search'}>Наименование</label>
                     <input
-                        // value={searchNumberDelivery}
-                        // onChange={event => setSearchNumberDelivery(event.target.value)}
+                        value={name}
+                        onChange={event => setName(event.target.value)}
                         type={"text"}/>
                 </div>
             </div>
@@ -85,11 +108,11 @@ const SearchItem = () => {
             </div>
             <div className={'buttons_change_container'} style={{justifyContent: "center"}}>
                 <button
-                    // onClick={searchOrderItem}
+                    onClick={searchItemF}
                     className={'change_button'} >Найти</button>
                 <button
-                    // onClick={searchClearFields}
-                    disabled={! isSearching}
+                    onClick={searchClearFields}
+                    disabled={!isSearching}
                     className={'change_button'}>Сбросить</button>
             </div>
         </div>

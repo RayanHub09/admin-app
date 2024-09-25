@@ -54,8 +54,8 @@ export const fetchGetAllOrders = createAsyncThunk(
 
 export const fetchChangeStatusOrder = createAsyncThunk(
     'orders/fetchChangeStatusOrder',
-    async ({orderId, newStatus}: { orderId: string, newStatus: string }, thunkAPI) => {
-        const orderDocRef = doc(db, 'orders', orderId);
+    async ({orderId, newStatus}: { orderId: string, newStatus: string,}, thunkAPI) => {
+        const orderDocRef = doc(db, 'orders', orderId)
         try {
             await updateDoc(orderDocRef, {
                 'status.statusName': newStatus
@@ -96,6 +96,7 @@ export const fetchCancelOrder = createAsyncThunk(
         try {
             const orderDocRef = doc(db, 'orders', orderId)
             await updateDoc(orderDocRef, {['status.statusName']: 'Отменен'})
+            // await updateDoc(orderDocRef, {['items'] : })
             thunkAPI.dispatch(cancelOrder({orderId}))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
@@ -151,11 +152,15 @@ const OrdersSlice = createSlice({
         },
         cancelOrder(state, action) {
             const {orderId} = action.payload
+            // const newOrder = state.orders.filter(order => order.id === orderId)[0]
+            // newOrder.status.statusName = 'Отменен'
+            // newOrder.items.map(item => item.)
             state.orders = state.orders.map(order => order.id === orderId ? {
                     ...order,
                     status: {statusName: 'Отменен'}
                 } : order
             ) as IOrder[]
+
         },
         resetStatus(state) {
             state.status = null

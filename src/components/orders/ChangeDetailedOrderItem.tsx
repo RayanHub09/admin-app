@@ -1,12 +1,12 @@
 import React, {FC, useState} from 'react';
-import {IOrder} from "../../interfaces";
+import {IOrder, IReOrder} from "../../interfaces";
 import {statusOrder} from "../../lists/statusOrder";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangeOrder} from "../../store/slices/orders";
 import {getDate} from "../../functions/changeDate";
 
 interface OrderItemProps {
-    order: IOrder
+    order: IOrder & IReOrder
 }
 
 const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
@@ -25,8 +25,9 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
         setIsDisabled(true)
         dispatch(fetchChangeOrder({
             orderId: order.id, newStatus: status,
-            newComment: comment, newNumber: number
+            newComment: comment, newNumber: number,
         })).then(() => setIsDisabled(false))
+        // dispatch()
 
     }
 

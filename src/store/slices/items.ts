@@ -1,9 +1,10 @@
-import {IItem} from "../../interfaces";
+import {IItem, IReItem} from "../../interfaces";
 import {createSlice} from "@reduxjs/toolkit";
+import {convertStringToDate, getDate} from "../../functions/changeDate";
 
 interface IState {
-    items : IItem[]
-    filteredItems: IItem[]
+    items : IReItem[]
+    filteredItems: IReItem[]
     isSearching: boolean
 }
 
@@ -17,12 +18,34 @@ const ItemsSlice = createSlice({
     initialState,
     reducers: {
         getAllItems(state, action) {
-            console.log(0)
             state.items = [...action.payload]
+        },
+        searchItem(state, action) {
+            const [numberOrder, numberDelivery, markName, name, startDate, endDate, status] = action.payload;
+            if (numberOrder === '' && numberDelivery === '' && markName === '' && name === '' &&
+                startDate === '' && endDate === '' && !Object.values(status).includes(true)) {
+                state.isSearching = false
+                return
+            }
+            state.isSearching = true
+            state.filteredItems = state.items.filter(item => {
+                const itemDate = convertStringToDate(getDate(item.dateOrder)[1]).getTime()
+                return (numberOrder === '' || item.numberOrder.includes(numberOrder)) &&
+                    (numberDelivery === '' || item.numberDelivery.includes(numberDelivery)) &&
+                    (markName === '' || item.part.markName.includes(markName)) &&
+                    (name === '' || item.part.name.includes(name)) &&
+                    (startDate === '' || itemDate >= convertStringToDate(startDate).getTime()) &&
+                    (endDate === '' || itemDate <= convertStringToDate(endDate ).getTime()) &&
+                    (!Object.values(status).includes(true) || status[item.statusOrder]);
+            })
+        },
+        clearSearch(state) {
+            state.isSearching = false
+            state.filteredItems = []
         }
     }
 })
 
 export const ItemsReducer = ItemsSlice.reducer
 
-export const {getAllItems} = ItemsSlice.actions
+export const {getAllItems, searchItem, clearSearch} = ItemsSlice.actions

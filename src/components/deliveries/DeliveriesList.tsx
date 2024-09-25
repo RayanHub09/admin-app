@@ -22,7 +22,7 @@ const DeliveriesList = () => {
 
         <div className={'deliveries_list_container'}>
             <SearchDelivery/>
-            {(searchDeliveries.length === 0 && isSearching)? (<h2 className={'nothing_found'}>Ничего не найдено.<br/><br/>Проверьте номер <br/> и попробуйте еще раз.</h2>) :
+            {(searchDeliveries.length === 0 && isSearching)? (<h2 className={'nothing_found'}>Ничего не найдено.<br/><br/>Проверьте данные <br/> и попробуйте еще раз.</h2>) :
                 <div className={'deliveries_list'}>
                     <h3 className={'label_order'}>Номер</h3>
                     <h3 className={'label_order'}>Способ</h3>

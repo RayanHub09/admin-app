@@ -18,7 +18,7 @@ const DeliveryPage = () => {
     const [visible, setVisible] = useState(false)
     const dispatch = useAppDispatch()
     const navigation = useNavigate()
-    const status = useAppSelector(state => state.orders.status)
+    const status = useAppSelector(state => state.deliveries.status)
     const { id } = useParams<{ id: string }>()
     const delivery:IDelivery|undefined = useAppSelector(state =>
         state.deliveries.deliveries.find(delivery => delivery.id === id))
@@ -29,7 +29,7 @@ const DeliveryPage = () => {
         if (id != null) {
             dispatch(fetchCancelDelivery(id))
                 .then(() => dispatch(resetStatus()))
-                .then(() => navigation('/deliveries'))
+                // .then(() => navigation('/deliveries'))
         }
     }
     if (!delivery) {

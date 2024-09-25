@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate, useParams} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
-import { IOrder } from "../interfaces";
+import {IOrder, IReOrder} from "../interfaces";
 import DetailedOrderItem from "../components/orders/DetailedOrderItem";
 import ChangeDetailedOrderItem from "../components/orders/ChangeDetailedOrderItem";
 import {fetchCancelOrder, resetStatus} from "../store/slices/orders";
@@ -24,7 +24,8 @@ const OrderPage: React.FC = () => {
         if (id != null) {
             dispatch(fetchCancelOrder(id))
                 .then(() => dispatch(resetStatus()))
-                .then(() => navigation('/orders'))
+                // .then(() => navigation('/orders'))
+
         }
 
 
@@ -43,15 +44,15 @@ const OrderPage: React.FC = () => {
                         {changeMode ? 'Вернуться к заказу' : 'Изменить'}
                     </button>
                 }
-                {cancelOrder && order.status.statusName !== 'Отменен' && !changeMode &&
-                    <button
-                        onClick={deleteOrderItem}
-                        className={'change_button'}>
-                        {status === 'loading' ? 'загрузка...' : 'Отменить'}
-                    </button>
-                }
+                {/*{cancelOrder && order.status.statusName !== 'Отменен' && !changeMode &&*/}
+                {/*    <button*/}
+                {/*        onClick={deleteOrderItem}*/}
+                {/*        className={'change_button'}>*/}
+                {/*        {status === 'loading' ? 'загрузка...' : 'Отменить'}*/}
+                {/*    </button>*/}
+                {/*}*/}
             </div>
-            {changeMode ? <ChangeDetailedOrderItem order={order} /> : <DetailedOrderItem order={order} />}
+            {changeMode ? <ChangeDetailedOrderItem order={order as IReOrder} /> : <DetailedOrderItem order={order} />}
         </div>
     );
 };

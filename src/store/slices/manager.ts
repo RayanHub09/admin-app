@@ -1,5 +1,5 @@
 import {createSlice, createAsyncThunk, PayloadAction} from "@reduxjs/toolkit";
-import { getAuth, signInWithEmailAndPassword, UserCredential, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, UserCredential, signInWithCustomToken } from "firebase/auth";
 import { db, collection, query, where, getDocs } from "../../firebase";
 import {IManager} from "../../interfaces";
 
@@ -29,8 +29,8 @@ const initialState: IState = {
     },
     error: null,
     status: null,
-    token: null,
-    isAuth: false
+    isAuth: !!localStorage.getItem('token'),
+    token: localStorage.getItem('token')
 }
 
 
@@ -57,13 +57,43 @@ export const fetchSignIn = createAsyncThunk(
             });
             const Manager = userData.filter((item, index) => item.email === email)
             thunkAPI.dispatch(setManager(Manager[0]))
-
+            localStorage.setItem('token', token)
+            localStorage.setItem('email', email)
+            // localStorage.removeItem('token')
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message)
         }
     }
 );
 
+export const fetchAutoSignIn = createAsyncThunk(
+    'user/autoSignIn',
+    async (_, thunkAPI) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                return;
+            }
+
+            // Получаем текущего пользователя
+            const user = getAuth().currentUser;
+
+            const q = query(collection(db, "managers"));
+            const querySnapshot = await getDocs(q);
+            const userData: IManager[] = querySnapshot.docs.map((doc) => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                } as IManager
+            });
+            const Manager = userData.filter((item, index) => item.email === localStorage.getItem('email'))
+            thunkAPI.dispatch(setManager(Manager[0]))
+
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue(error.message);
+        }
+    }
+);
 
 const ManagerSlice = createSlice({
     name: 'Manager',
@@ -73,9 +103,15 @@ const ManagerSlice = createSlice({
             state.manager.id = action.payload.id
             state.manager.email = action.payload.email
             state.token = action.payload.token
+            state.isAuth = true
         },
         setManager(state, action) {
             state.manager = action.payload
+        },
+        autoSignIn(state, action) {
+            state.manager = action.payload;
+            state.token = action.payload.token;
+            state.isAuth = true;
         },
         removeManager(state) {
             state.manager.id = null
@@ -83,20 +119,21 @@ const ManagerSlice = createSlice({
             state.token = null
             state.status = null
             state.isAuth = false
+            localStorage.removeItem('token')
         }
     },
     extraReducers: (builder) => {
         builder
             .addMatcher(
                 (action) =>
-                    [fetchSignIn.pending.type].includes(action.type),
+                    [fetchSignIn.pending.type, fetchAutoSignIn.pending.type].includes(action.type),
                 (state) => {
                     state.status = 'loading'
                 }
             )
             .addMatcher(
                 (action) =>
-                    [fetchSignIn.fulfilled.type].includes(action.type),
+                    [fetchSignIn.fulfilled.type, fetchAutoSignIn.fulfilled.type].includes(action.type),
                 (state) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -106,17 +143,18 @@ const ManagerSlice = createSlice({
             )
             .addMatcher(
                 (action) =>
-                    [ fetchSignIn.rejected.type].includes(action.type),
+                    [ fetchSignIn.rejected.type, fetchAutoSignIn.rejected.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'failed'
                     state.error = action.payload as string
                     state.isAuth = false
+                    console.log(state.error)
                 }
             )
 
     },
 });
 
-export const { setManager, removeManager, signIn } = ManagerSlice.actions;
+export const { setManager, removeManager, signIn, autoSignIn } = ManagerSlice.actions;
 
 export const ManagerReducer = ManagerSlice.reducer;

@@ -2,6 +2,7 @@ import React, {FC} from 'react';
 import {IDelivery} from "../../interfaces";
 import {getDate} from "../../functions/changeDate";
 import DetailedOrderItem from "../orders/DetailedOrderItem";
+import {changeCost} from "../../functions/changeCost";
 
 interface IDeliveryProps {
     delivery: IDelivery
@@ -37,9 +38,7 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                 </span>}
                 {!delivery.deliveryCost && !delivery.deliveryCostYen && <span className={'field'}></span>}
                 <h3 className={'label_order'}>Стоимость товара</h3>
-                <span className={'field'}
-                      style={{fontWeight: '500'}}>
-                    {delivery.partsCostYen}¥ ({delivery.partsCostRu}₽)</span>
+                <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}><h4>{changeCost(delivery.partsCostYen.toString())}¥</h4>{changeCost(delivery.partsCostRu.toString())}₽</span>
                 <h3 className={'label_order'}>Декларируемая стоимость</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Время создания</h3>

@@ -1,8 +1,10 @@
-import {IDelivery} from "../../interfaces"
+import {IDelivery, IOrder} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
+import {collection, db, doc, getDoc, getDocs, query, updateDoc} from "../../firebase";
 import serializeData from "../../Serializer";
 import {convertStringToDate, getDate} from "../../functions/changeDate";
+import {RootState} from "../index";
+
 
 interface IState {
     deliveries: IDelivery[]
@@ -44,7 +46,7 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                 return serializedData as IDelivery
             })
             thunkAPI.dispatch(getAllDeliveries(deliveries))
-
+            return deliveries
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }
@@ -91,11 +93,41 @@ export const fetchCancelDelivery = createAsyncThunk(
     async (deliveryId:string, thunkAPI) => {
        try {
            const deliveryDocRef = doc(db, 'deliveries', deliveryId)
-           await updateDoc(deliveryDocRef, {['status.statusName'] : 'Отменен'})
-           thunkAPI.dispatch(cancelDelivery({deliveryId}))
+           const deliveryDoc = await getDoc(deliveryDocRef)
+           const deliveryData = deliveryDoc.data()
+           const updatedOrders = deliveryData?.orders.map((order:IOrder) => ({
+               ...order,
+               ['status.statusName'] : 'На складе в Японии'
+           }))
+           await updateDoc(deliveryDocRef, {
+               ['status.statusName'] : 'Отменен',
+               orders: updatedOrders
+           })
+           thunkAPI.dispatch(cancelDelivery({ deliveryId }));
+
        } catch (e:any) {
            thunkAPI.rejectWithValue(e.message)
        }
+    }
+)
+
+export const fetchChangeStatusOrderDelivery = createAsyncThunk(
+    'deliveries/fetchChangeNumberOrder',
+    async ({deliveryId, orderId, newStatus} : {deliveryId: string, orderId: string, newStatus: string}, thunkAPI) => {
+        try {
+            const deliveryDocRef = doc(db, 'deliveries', deliveryId);
+            const deliveryDoc = await getDoc(deliveryDocRef)
+            const deliveryData = deliveryDoc.data()
+            const orders = deliveryData?.orders || []
+            const orderIndex = orders.findIndex((order: IOrder) => order.id === orderId)
+            orders[orderIndex].status.statusName = newStatus;
+            await updateDoc(deliveryDocRef, {
+                orders: orders
+            })
+            thunkAPI.dispatch(changeStatusOrderDelivery({orderId, newStatus, deliveryId}))
+        } catch (e:any) {
+            thunkAPI.rejectWithValue(e.message)
+        }
     }
 )
 
@@ -146,9 +178,29 @@ const DeliveriesSlice = createSlice({
         },
         cancelDelivery(state, action) {
             const {deliveryId} = action.payload
-            state.deliveries = state.deliveries.map(delivery => delivery.id === deliveryId ? {...delivery, status: {statusName : 'Отменен'}} : delivery
+            const newDelivery = {...state.deliveries.filter(order => order.id === deliveryId)[0]}
+            newDelivery.status.statusName = 'Отменен'
+            newDelivery.orders.map(order => order.status.statusName = 'На складе в Японии')
+            state.deliveries = state.deliveries.map(delivery => delivery.id === deliveryId
+                ? newDelivery
+                : delivery
             ) as IDelivery[]
+        },
+        changeStatusOrderDelivery(state, action) {
+            const { orderId, newStatus, deliveryId } = action.payload
+            const delivery = state.deliveries.filter(delivery => delivery.id === deliveryId)[0]
+
+            if (delivery) {
+                const newOrders = delivery.orders.map(order =>
+                    order.id === orderId ? { ...order, status: { ...order.status, statusName: newStatus } } : order
+                )
+                const updatedDelivery = { ...delivery, orders: newOrders }
+                state.deliveries = state.deliveries.map(d =>
+                    d.id === deliveryId ? updatedDelivery : d
+                );
+            }
         }
+
     },
 
     extraReducers: builder => {
@@ -167,7 +219,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.pending.type, fetchCalculateDeliveryCost.pending.type,
-                    fetchCancelDelivery.pending.type].includes(action.type),
+                    fetchCancelDelivery.pending.type, fetchChangeStatusOrderDelivery.pending.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'loading'
                 }
@@ -175,7 +227,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.fulfilled.type, fetchCalculateDeliveryCost.fulfilled.type,
-                        fetchCancelDelivery.fulfilled.type].includes(action.type),
+                        fetchCancelDelivery.fulfilled.type, fetchChangeStatusOrderDelivery.fulfilled.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -184,7 +236,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.rejected.type, fetchCalculateDeliveryCost.rejected.type,
-                        fetchCancelDelivery.rejected.type].includes(action.type),
+                        fetchCancelDelivery.rejected.type, fetchChangeStatusOrderDelivery.rejected.type].includes(action.type),
                 (state, action:PayloadAction<string> ) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -196,4 +248,4 @@ const DeliveriesSlice = createSlice({
 export const DeliveriesReducer = DeliveriesSlice.reducer
 export const {getAllDeliveries, searchDelivery, clearSearch,
                 changeDelivery, resetStatus, calculateDeliveryCost,
-                cancelDelivery} = DeliveriesSlice.actions
+                cancelDelivery,changeStatusOrderDelivery } = DeliveriesSlice.actions

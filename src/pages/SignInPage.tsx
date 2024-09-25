@@ -6,6 +6,7 @@ import Loading from '../components/Loading';
 
 const SignInPage = () => {
     const status = useAppSelector(state => state.manager.status)
+
     return (
         <div className={'container'}>
             {status === 'loading' &&

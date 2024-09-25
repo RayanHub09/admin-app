@@ -8,23 +8,21 @@ import {useNavigate} from "react-router-dom";
 
 const Header = () => {
     const dispatch = useAppDispatch()
+    const loading = useAppSelector(state => state.manager.status)
     const isAuth = useAppSelector(state => state.manager.isAuth)
     const worker = useAppSelector(state => state.manager.manager)
     const navigation = useNavigate()
 
-    // useEffect(() => {console.log(0)})
     return (
         <header>
-
             <h2>{worker.email}</h2>
-            {isAuth && <NavBar/>}
-            {isAuth &&
+            {loading === 'succeeded' && isAuth && <NavBar/>}
+            {isAuth && loading === 'succeeded' &&
                 <button
                     className={'button_out'}
                     onClick={() => dispatch(removeManager())}
                 >Выйти</button>
             }
-
         </header>
     );
 };
