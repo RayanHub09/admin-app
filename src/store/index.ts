@@ -4,7 +4,8 @@ import {ManagersReducer} from "./slices/managers";
 import {OrderReducer} from "./slices/orders";
 import {DeliveriesReducer} from "./slices/deliveries";
 import {ItemsReducer} from "./slices/items";
-import {MessageReducer} from "./slices/messages";
+import {ChatReducer} from "./slices/messages";
+import {UserReducer} from "./slices/users";
 
 
 export const store = configureStore({
@@ -14,7 +15,8 @@ export const store = configureStore({
         orders: OrderReducer,
         deliveries: DeliveriesReducer,
         items: ItemsReducer,
-        messages: MessageReducer
+        messages: ChatReducer,
+        users: UserReducer
     }
 })
 

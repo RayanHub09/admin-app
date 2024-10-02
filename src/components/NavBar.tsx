@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState} from 'react';
 import './components.sass'
 import {Link, useLocation} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
@@ -27,13 +27,22 @@ const NavBar = () => {
     function showFullMenu() {
         setIsVisible(!isVisible)
     }
+
     return (
         <nav>
             <div className={'full_navbar'}>
                 {Object.keys(links).map((key) =>
-                    <Link className={location.pathname === `/${key}` ? 'active' : 'link'}
+                    <Link className={
+                        location.pathname === `/${key}` ||
+                            location.pathname.slice(0, 9) === '/messages' && key === 'messages' ||
+                            location.pathname.slice(0, 9) === '/managers' && key === 'managers' ||
+                            location.pathname.slice(0, 7) === '/orders' && key === 'orders' ||
+                            location.pathname.slice(0, 11) === '/deliveries' && key === 'deliveries'
+
+                            ? 'active' : 'link'}
+
                           key={key}
-                          to={`/${key}`}>{links[key as keyof ILinks]}</Link>
+                          to={key !== 'messages' ? `/${key}` : `messages/accounting`}>{links[key as keyof ILinks]}</Link>
                 )}
             </div>
             <div className="short_navbar">

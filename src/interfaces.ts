@@ -129,11 +129,30 @@ export interface IDelivery {
     uid: string
 }
 
+export interface IUser {
+    id: string
+    country: string
+    email: string
+    name: string
+    patronymic: string
+    phoneNumber: string
+    surname: string
+}
+
+export interface IChat {
+    id: string
+    department: string
+    theme: string
+    uid: string
+    creationDate: string
+    messages: IMessage[]
+}
+
 export interface IMessage {
     id: string
     text: string
-    date: string
-    isSeen: boolean
-    idSender: string
-    idRecipient: string
+    read: boolean
+    attachedFiles: string[]
+    creationTime: string
+    uid: string
 }

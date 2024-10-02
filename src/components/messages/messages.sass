@@ -1,0 +1,123 @@
+@mixin default_container($flex-direction: row, $row_gap, $column_gap: 0px)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  column-gap: $column_gap
+  display: flex
+
+.sections_list_container
+  @include default_container(row, 0px, 0px)
+  justify-content: center
+  color: white
+  cursor: pointer
+  margin-top: 10px
+  //width: 70%
+
+@media (max-width: 920px)
+  .sections_list_container
+    width: 100%
+
+.section_messages, .active_section_messages
+  transition: all 1s
+  background: rgba(0, 107, 174, 1)
+  padding: 10px 30px
+  text-decoration: none
+  color: white
+  &:hover
+    background: rgba(0, 107, 174, 0.6)
+.active_section_messages
+  background: rgba(0, 107, 174, 0.8)
+@media (max-width: 920px)
+  .section_messages, .active_section_messages
+    padding-left: 40px
+    padding-right: 40px
+@media (max-width: 800px)
+  .section_messages, .active_section_messages
+    padding-left: 30px
+    padding-right: 30px
+@media (max-width: 620px)
+  .section_messages, .active_section_messages
+    padding-left: 5px
+    padding-right: 5px
+.list_messages
+  @include default_container(column, 0px 0px)
+  //width: 70%
+
+.chat_item_container
+  @include default_container(column, 0px, 0px)
+  background: rgba(106, 106, 106, 0.15)
+  padding: 10px 15px
+  cursor: pointer
+  border-bottom: rgba(106, 106, 106, 0.25) 2px solid
+  transition: all 1s
+  &:hover
+    background: rgba(106, 106, 106, 0.3)
+.chat_list_container
+  @include default_container(column, 0px, 0px)
+  align-items: center
+  height: 100%
+.link_chat
+  text-decoration: none
+  color: black
+  font-size: 16px
+.detailed_chat_item
+  @include default_container(column, 00px, 0px)
+
+  width: 70%
+  height: 100%
+
+.chat_messages_container
+  @include default_container(column, 10px, 0px)
+  padding: 10px 30px 0px 30px
+  flex-grow: 2
+  height: 530px
+  overflow: auto
+  background: rgba(106, 106, 106, 0.23)
+  margin-bottom: 10px
+.message
+  background: rgba(148, 148, 148, 0.65)
+  padding: 5px
+.user_message
+  align-self: flex-start
+.manager_message
+  align-self: flex-end
+.send_messages_container
+  @include default_container(row, 0px 0px)
+  width: 100%
+
+.send_messages
+  flex-grow: 2
+  border: rgba(148, 148, 148, 0.65) 1px solid
+  font-size: 16px
+.button_send_messages, .custom-input-file
+  border: rgba(148, 148, 148, 0.65) 1px solid
+  background: rgba(106, 106, 106, 0.30)
+  font-size: 16px
+  color: #333b40
+  padding: 10px
+  cursor: pointer
+  transition: all 1s
+  &:hover
+    background: rgba(106, 106, 106, 0.60)
+
+::-webkit-scrollbar
+  width: 5px
+  background-color: white
+
+::-webkit-scrollbar-thumb
+  border-radius: 10px
+  background: rgba(148, 148, 148, 0.65)
+
+.chose_file
+  display: block
+
+.file-name
+  font-size: 14px
+  color: #006bae
+
+.custom-input-file
+  @include default_container(row, 0px, 10px)
+  align-items: center
+
+.button_send_messages:disabled
+  cursor: no-drop
+  background: rgba(106, 106, 106, 0.60)

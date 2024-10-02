@@ -216,5 +216,4 @@ export const OrderReducer = OrdersSlice.reducer
 export const {
     getAllOrders, searchOrder, changeStatusOrder, changeOrder,
     clearSearch, cancelOrder, resetStatus
-}
-    = OrdersSlice.actions
+} = OrdersSlice.actions

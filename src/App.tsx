@@ -10,6 +10,8 @@ import {getAllItems} from "./store/slices/items";
 import {IDelivery, IItem, IOrder, IReItem, IReOrder} from "./interfaces";
 import {fetchAutoSignIn} from "./store/slices/manager";
 import {useNavigate} from "react-router-dom";
+import {fetchGetAllChats} from "./store/slices/messages";
+import {fetchGetAllUsers} from "./store/slices/users";
 
 
 function App() {
@@ -20,7 +22,9 @@ function App() {
 
     useEffect(() => {
         if (isAuth) {
+            dispatch(fetchGetAllChats());
             dispatch(fetchGetAllManagers());
+            dispatch(fetchGetAllUsers());
             dispatch(fetchGetAllOrders());
             dispatch(fetchGetAllDeliveries())
                 .then((data) => data.payload as IDelivery[])

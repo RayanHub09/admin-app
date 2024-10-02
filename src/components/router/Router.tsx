@@ -13,6 +13,8 @@ import DeliveriesPage from "../../pages/DeliveriesPage";
 import DeliveryPage from "../../pages/DeliveryPage";
 import ItemsPage from "../../pages/ItemsPage";
 import ItemPage from "../../pages/ItemPage";
+import ChatPage from "../../pages/ChatPage";
+import SectionMessages from "../messages/SectionMessages";
 
 
 const Router = () => {
@@ -22,7 +24,9 @@ const Router = () => {
             <Route path="/" element={<SignInPage />} />
             <Route path={'/managers'} element={<PrivateRouter element={<ManagersPage />} /> } />
             <Route path={'/orders'} element={<PrivateRouter element={<OrdersPage />} /> } />
-            <Route path={'/messages'} element={<PrivateRouter element={<MessagesPage />} /> } />
+            <Route path={'/messages/:name'} element={<PrivateRouter element={<MessagesPage />} /> } />
+            <Route path={'/messages/:name/:id'} element={<PrivateRouter element={<ChatPage />} /> } />
+            {/*<Route path={'/messages/:name'} element={<PrivateRouter element={<SectionMessages />} /> } />*/}
             <Route path={'/deliveries'} element={<PrivateRouter element={<DeliveriesPage />} /> } />
             <Route path={'/items'} element={<PrivateRouter element={<ItemsPage />} /> } />
             <Route path={'/items/:id'} element={<PrivateRouter element={<ItemPage />} /> } />
