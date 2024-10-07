@@ -11,10 +11,13 @@ const SectionMessages = () => {
     const section = useLocation().pathname.slice(10)
     return (
         <div className={'chat_list_container'}>
-            {chats.map(chat => options[section as keyof IRole] === chat.department &&
-                <ChatItem
-                    key={chat.id}
-                    chat={chat} />
+            {chats.map(chat => options[section as keyof IRole] === chat?.department &&
+                <>
+                    <ChatItem
+                        key={chat.id}
+                        chat={chat} />
+                    {}
+                </>
             )}
         </div>
     );

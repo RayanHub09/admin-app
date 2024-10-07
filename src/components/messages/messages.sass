@@ -4,6 +4,7 @@
   column-gap: $column_gap
   display: flex
 
+$background_color: rgb(244, 244, 244)
 .sections_list_container
   @include default_container(row, 0px, 0px)
   justify-content: center
@@ -44,58 +45,134 @@
 
 .chat_item_container
   @include default_container(column, 0px, 0px)
-  background: rgba(106, 106, 106, 0.15)
+  background: $background_color
   padding: 10px 15px
   cursor: pointer
   border-bottom: rgba(106, 106, 106, 0.25) 2px solid
   transition: all 1s
   &:hover
     background: rgba(106, 106, 106, 0.3)
+.chat_notifications
+  position: absolute
+  right: 15px
+  top: 20px
+  color: #949494
+  background: rgba(148, 148, 148, 0.28)
+  padding: 3px 10px
+  border-radius: 19px
+
+
+.notifications_chat_item_container
+  background: rgb(230, 230, 230)
 .chat_list_container
   @include default_container(column, 0px, 0px)
-  align-items: center
+  width: 70%
   height: 100%
 .link_chat
   text-decoration: none
+  position: relative
   color: black
   font-size: 16px
 .detailed_chat_item
   @include default_container(column, 00px, 0px)
-
   width: 70%
   height: 100%
+@media (max-width: 920px)
+  .detailed_chat_item
+    width: 100%
+
 
 .chat_messages_container
-  @include default_container(column, 10px, 0px)
-  padding: 10px 30px 0px 30px
+  @include default_container(column, 15px, 0px)
+  padding: 10px 20px 0px 20px
   flex-grow: 2
-  height: 530px
+  height: 500px
   overflow: auto
-  background: rgba(106, 106, 106, 0.23)
+  background: $background_color
   margin-bottom: 10px
+  border-radius: 0px 0px 10px 10px
+
 .message
-  background: rgba(148, 148, 148, 0.65)
-  padding: 5px
+  position: relative
+  max-width: 50%
+  padding: 10px
+  background-color: white
+  @include default_container(column, 0px, 0px)
+
+.manager_message
+  border-radius:  10px 10px 0px 10px
+.user_message
+  border-radius:  10px 10px 10px 0px
+.user_message::before
+  content: ""
+  position: absolute
+  left: -8px
+  bottom: -5px
+  width: 17px
+  height: 17px
+  background-color: #fff
+  transform: rotate(60deg)
+  z-index: 2
+.user_message::after
+  content: ""
+  position: absolute
+  left: -15px
+  bottom: -15px
+  width: 15px
+  height: 30px
+  background: $background_color
+  z-index: 3
+
+.manager_message::before
+  content: ""
+  position: absolute
+  bottom: -5px
+  right: -8px
+  width: 17px
+  height: 17px
+  background-color: #fff
+  transform: rotate(30deg)
+  z-index: 2
+.manager_message::after
+  content: ""
+  position: absolute
+  bottom: -15px
+  right: -15px
+  width: 15px
+  height: 30px
+  background: $background_color
+  z-index: 3
+
+
+
 .user_message
   align-self: flex-start
 .manager_message
   align-self: flex-end
 .send_messages_container
-  @include default_container(row, 0px 0px)
+  @include default_container(row, 0px, 10px)
   width: 100%
+
+
 
 .send_messages
   flex-grow: 2
   border: rgba(148, 148, 148, 0.65) 1px solid
   font-size: 16px
+  border-radius: 10px
+
 .button_send_messages, .custom-input-file
   border: rgba(148, 148, 148, 0.65) 1px solid
-  background: rgba(106, 106, 106, 0.30)
+  background: #006bae
   font-size: 16px
-  color: #333b40
-  padding: 10px
+  display: flex
+  justify-content: center
+  align-items: center
+  color: white
+
   cursor: pointer
   transition: all 1s
+  border-radius: 10px
   &:hover
     background: rgba(106, 106, 106, 0.60)
 
@@ -105,19 +182,33 @@
 
 ::-webkit-scrollbar-thumb
   border-radius: 10px
-  background: rgba(148, 148, 148, 0.65)
+  background: rgba(148, 148, 148, 0.5)
 
 .chose_file
   display: block
 
 .file-name
   font-size: 14px
-  color: #006bae
+  color: white
 
 .custom-input-file
   @include default_container(row, 0px, 10px)
   align-items: center
-
+.button_send_messages
+  width: 40px
+  height: 40px
 .button_send_messages:disabled
-  cursor: no-drop
-  background: rgba(106, 106, 106, 0.60)
+  cursor: not-allowed
+  background: rgba(0, 107, 174, 0.8)
+.info_user
+  text-align: center
+  background: rgba(0, 107, 174, 1)
+  padding: 10px
+  color: white
+  margin-right: 4.5px
+  border-radius: 10px 10px 0px 0px
+
+.status_message
+  align-self: flex-end
+  font-size: 13px
+  color: #949494

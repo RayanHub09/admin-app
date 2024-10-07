@@ -16,16 +16,16 @@ import {fetchGetAllUsers} from "./store/slices/users";
 
 function App() {
     const dispatch = useAppDispatch()
-    const isAuth = useAppSelector(state => state.manager.isAuth)
-    const token = useAppSelector(state => state.manager.token)
+    const manager = useAppSelector(state => state.manager)
+    const uid = useAppSelector(state => state.manager?.manager?.id)
     const navigation = useNavigate()
 
     useEffect(() => {
-        if (isAuth) {
-            dispatch(fetchGetAllChats());
-            dispatch(fetchGetAllManagers());
-            dispatch(fetchGetAllUsers());
-            dispatch(fetchGetAllOrders());
+        if (manager.isAuth) {
+            dispatch(fetchGetAllManagers())
+            dispatch(fetchGetAllChats())
+            dispatch(fetchGetAllUsers())
+            dispatch(fetchGetAllOrders())
             dispatch(fetchGetAllDeliveries())
                 .then((data) => data.payload as IDelivery[])
                 .then((deliveries) => {
@@ -42,12 +42,11 @@ function App() {
                     }
                 });
         }
-    }, [isAuth]);
+    }, [manager.isAuth]);
     useEffect(() => {
-        if (token) {
+        if (manager.token) {
             navigation('/orders')
             dispatch(fetchAutoSignIn())
-                // .then(() =>  navigation('/orders'))
         }
     }, [])
 

@@ -147,12 +147,15 @@ export interface IChat {
     creationDate: string
     messages: IMessage[]
 }
-
+export interface IImg {
+    name: string
+    url: string
+}
 export interface IMessage {
     id: string
     text: string
     read: boolean
-    attachedFiles: string[]
+    attachedFiles: IImg[]
     creationTime: string
     uid: string
 }
