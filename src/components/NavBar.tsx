@@ -7,6 +7,7 @@ import {collection, getFirestore, onSnapshot} from "firebase/firestore";
 import {IChat, IMessage} from "../interfaces";
 import {pushNewMessage} from "../store/slices/messages";
 
+
 interface ILinks {
     items: string
     orders: string
@@ -110,10 +111,11 @@ const NavBar = () => {
                         <Link className={'link'}
                               key={key}
                               onClick={() => setIsVisible(false)}
-                              to={`/${key}`}>{links[key as keyof ILinks]}</Link>
+                              to={key !== 'messages' ? `/${key}` : `messages/accounting`}>
+                            {links[key as keyof ILinks]}</Link>
                     )}
                     <a
-                        className={'button_out link'}
+                        className={'button_out_ link'}
                         onClick={() => dispatch(removeManager())}
                     >Выйти</a>
                 </div>

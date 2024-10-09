@@ -4,6 +4,7 @@ import {statusOrder} from "../../lists/statusOrder";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangeOrder} from "../../store/slices/orders";
 import {getDate} from "../../functions/changeDate";
+import {fetchChangeOrderDelivery} from "../../store/slices/deliveries";
 
 interface OrderItemProps {
     order: IOrder & IReOrder
@@ -18,7 +19,13 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
     const writeCommentsOrder = useAppSelector(state => state.manager.manager.writeCommentsOrder)
     const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
     const changeOrderNumber = useAppSelector(state => state.manager.manager.changeOrderNumber)
-
+    const deliveries = useAppSelector(state => state.deliveries.deliveries)
+    const getDeliveryIdByOrderId = (): string | null => {
+        const delivery = deliveries.find(delivery =>
+            delivery.orders && delivery.orders.some(item => item.id === order.id)
+        )
+        return delivery ? delivery.id : null
+    };
 
 
     function changeOrder() {
@@ -27,7 +34,12 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
             orderId: order.id, newStatus: status,
             newComment: comment, newNumber: number,
         })).then(() => setIsDisabled(false))
-        // dispatch()
+        const deliveryId = getDeliveryIdByOrderId()
+        if (deliveryId)
+            dispatch(fetchChangeOrderDelivery({
+                deliveryId, orderId: order.id, newStatus: status,
+                newComment: comment, newNumber: number,
+            }))
 
     }
 

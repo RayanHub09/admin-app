@@ -68,6 +68,7 @@ $background_color: rgb(244, 244, 244)
   @include default_container(column, 0px, 0px)
   width: 70%
   height: 100%
+
 .link_chat
   text-decoration: none
   position: relative
@@ -78,15 +79,17 @@ $background_color: rgb(244, 244, 244)
   width: 70%
   height: 100%
 @media (max-width: 920px)
-  .detailed_chat_item
+  .detailed_chat_item, .chat_list_container
     width: 100%
+  .message
+    max-width: 100%
 
 
 .chat_messages_container
   @include default_container(column, 15px, 0px)
   padding: 10px 20px 0px 20px
   flex-grow: 2
-  height: 500px
+  height: 200px
   overflow: auto
   background: $background_color
   margin-bottom: 10px

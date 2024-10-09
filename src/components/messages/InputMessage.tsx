@@ -29,7 +29,7 @@ const InputMessage:FC<InputMessageProps> = ({uid, chat_id}) => {
                     .then(() => dispatch(removeTemporaryMessage()))
                     .then(() => setTimeout(() => {
                             dispatch(resetStatus())
-                    }, 2000))
+                    }, 1000))
                 setMessage('')
                 setImg('')
 
@@ -49,6 +49,7 @@ const InputMessage:FC<InputMessageProps> = ({uid, chat_id}) => {
                 <label htmlFor="file" className={'custom-input-file'} style={!img ? {width: '40px', padding: '4px 1px'} : {width: 'auto', padding: '10px'}}>
                     {img ? <span className={"file-name"}>{img}</span> : <span className={'chose_file'}>
                         <img
+                            title={'Выбрать файл'}
                             style={{width: '23px', paddingTop: '5px'}}
                             src={addImage}/>
                     </span>}
@@ -64,6 +65,7 @@ const InputMessage:FC<InputMessageProps> = ({uid, chat_id}) => {
                     disabled={message === '' && img === ''}
                     className={'button_send_messages'}
                 ><img
+                    title={'Отправить'}
                     src={sendImage}
                     style={{width: '20px'}}
                     alt={''}/></button>

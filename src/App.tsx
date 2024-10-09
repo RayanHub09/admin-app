@@ -31,12 +31,13 @@ function App() {
                 .then((deliveries) => {
                     if (deliveries.length > 0) {
                         const orders = deliveries.reduce((acc, delivery) => {
-                            return [...acc, ...delivery.orders.map((order) => ({ ...order, numberDelivery: delivery.number } as IReOrder))];
+                            return [...acc, ...(delivery.orders ? delivery.orders.map((order) => ({ ...order, numberDelivery: delivery.number } as IReOrder)) : [])];
                         }, [] as IReOrder[]);
 
                         const items = orders.reduce((acc, order) => {
-                            return [...acc, ...order.items.map((item) => ({ ...item, dateOrder: order.date, numberOrder: order.number, numberDelivery: order.numberDelivery, statusOrder: order.status.statusName } as IReItem))];
+                            return [...acc, ...(order.items ? order.items.map((item) => ({ ...item, dateOrder: order.date, numberOrder: order.number, numberDelivery: order.numberDelivery, statusOrder: order.status.statusName } as IReItem)) : [])];
                         }, [] as IReItem[]);
+
 
                         dispatch(getAllItems(items));
                     }

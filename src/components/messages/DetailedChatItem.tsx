@@ -4,7 +4,8 @@ import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import InputMessage from "./InputMessage";
 import 'firebase/database';
 
-import {fetchChangeReadMessage, pushNewMessage} from "../../store/slices/messages";
+import {fetchChangeReadMessage} from "../../store/slices/messages";
+import {useNavigate} from "react-router-dom";
 
 interface DetailedChatItemProps {
     chat: IChat
@@ -12,12 +13,13 @@ interface DetailedChatItemProps {
 
 const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
     const manager = useAppSelector(state => state.manager.manager)
+    const isAuth = useAppSelector(state => state.manager.isAuth)
     const temporaryMessage = useAppSelector(state => state.messages.temporaryMessage)
     const unreadMessages = useAppSelector(state => state.messages.chats.flatMap(chat => {
         return chat.messages.filter(message => message.uid !== manager.id && !message.read).map(message => message.id);
     }));
 
-
+    const navigation = useNavigate()
     const dispatch = useAppDispatch()
     const statusSendMessage = useAppSelector(state => state.messages.statusSend)
     const user: IUser | undefined = useAppSelector(state =>
@@ -36,16 +38,12 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({block: 'end', behavior: 'auto'})
         }
-        console.log(unreadMessages)
-        dispatch(fetchChangeReadMessage({chat_id: chat.id, messages_id: unreadMessages}))
+        dispatch(fetchChangeReadMessage({chat_id: chat?.id, messages_id: unreadMessages}))
     }, [])
 
-    // useEffect(() => {
-    //
-    // }, [])
 
-    if (!chat.messages) {
-        return <div>No messages</div>;
+    if (!chat?.messages) {
+        navigation('/orders')
     }
 
     return (

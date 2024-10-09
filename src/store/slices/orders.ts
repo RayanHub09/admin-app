@@ -75,8 +75,8 @@ export const fetchChangeOrder = createAsyncThunk(
                newComment,
                newNumber
            }: { orderId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
-        const orderDocRef = doc(db, 'orders', orderId);
         try {
+            const orderDocRef = doc(db, 'orders', orderId);
             const updateData: { [key: string]: string } = {};
             if (newStatus !== undefined) updateData['status.statusName'] = newStatus;
             if (newComment !== undefined) updateData['comment'] = newComment;

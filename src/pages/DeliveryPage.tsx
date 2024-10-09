@@ -5,7 +5,8 @@ import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 import {IDelivery} from "../interfaces";
 import ChangeDetailedDeliveryItem from "../components/deliveries/ChangeDetailedDeliveryItem";
 import CalculateDeliveryCost from "../components/deliveries/CalculateDeliveryCost";
-import {fetchCancelDelivery, resetStatus} from "../store/slices/deliveries";
+import {fetchCancelDelivery, fetchChangeStatusOrderDelivery, resetStatus} from "../store/slices/deliveries";
+import {fetchChangeStatusOrder} from "../store/slices/orders";
 
 
 const DeliveryPage = () => {
@@ -22,14 +23,19 @@ const DeliveryPage = () => {
     const { id } = useParams<{ id: string }>()
     const delivery:IDelivery|undefined = useAppSelector(state =>
         state.deliveries.deliveries.find(delivery => delivery.id === id))
-
+    const orders = useAppSelector(state => {
+        const delivery = state.deliveries.deliveries.find((delivery) => delivery.id === id);
+        return delivery ? delivery.orders.map(order => order.id) : [];
+    })
     useEffect(() => {setVisible(true)}, [])
 
     function deleteDeliveryItem() {
         if (id != null) {
-            dispatch(fetchCancelDelivery(id))
+            for (const orderId of orders) {
+                dispatch(fetchChangeStatusOrder({orderId, newStatus: 'На складе в Японии'}))
+            }
+            dispatch(fetchCancelDelivery({deliveryId: id}))
                 .then(() => dispatch(resetStatus()))
-                // .then(() => navigation('/deliveries'))
         }
     }
     if (!delivery) {

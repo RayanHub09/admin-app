@@ -4,6 +4,7 @@ import {IRole, options} from "../../lists/roleList";
 import {IPossibilitiesManager, possibilitiesManager} from "../../lists/possibilitiesManagerList";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangePossibilitiesManager} from "../../store/slices/managers";
+import {useNavigate} from "react-router-dom";
 
 interface DetailedManagerItemProps {
     manager: IManager
@@ -11,15 +12,20 @@ interface DetailedManagerItemProps {
 
 const DetailedManagerItem:FC<DetailedManagerItemProps> = ({manager}) => {
     const dispatch = useAppDispatch()
+    const isAuth = useAppSelector(state => state.manager.isAuth)
+    const navigation = useNavigate()
     const status = useAppSelector(state => state.managers.status)
     const [isCreate, setIsCreate] = useState(false)
+
+
+
     const [checkboxStates, setCheckboxStates] = useState(
-        Object.keys(possibilitiesManager).reduce((acc, key) => {
-                acc[key] = !!manager[key]
-                return acc
-            }, {} as { [key: string] : boolean}
-        )
+        manager ? Object.keys(possibilitiesManager).reduce((acc, key) => {
+            acc[key] = !!manager[key]
+            return acc
+        }, {} as { [key: string]: boolean }) : {}
     )
+
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setIsCreate(true)
         const { id, checked } = event.target;
@@ -30,32 +36,37 @@ const DetailedManagerItem:FC<DetailedManagerItemProps> = ({manager}) => {
         if (manager.id ) dispatch(fetchChangePossibilitiesManager({managerId: manager.id, checkboxes: checkboxStates}))
     }
     return (
-        <div className={'manager_item_container'}>
-            <h3>{manager.name}</h3>
-            <span>Email: {manager.email}</span>
-            <span>Отдел: {options[manager.role as keyof IRole]}</span>
-            <h3>Разрешения для менеджеров:</h3>
-            <div className={'possibilities_manager_item_container'}>
-                {Object.keys(possibilitiesManager).map((key, index) => (
-                        <div className={'checkbox_input'} key={key}>
-                            <input
-                                type={"checkbox"}
-                                id={key}
-                                onChange={event => handleCheckboxChange(event)}
-                                checked={checkboxStates[key]}/>
-                            <span style={{paddingBottom: '5px' }}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</span>
-                        </div>
-                    )
-                )}
+        manager ? (
+            <div className={'manager_item_container'}>
+                <h3>{manager.name}</h3>
+                <span>Email: {manager.email}</span>
+                <span>Отдел: {options[manager.role as keyof IRole]}</span>
+                <h3>Разрешения для менеджеров:</h3>
+                <div className={'possibilities_manager_item_container'}>
+                    {Object.keys(possibilitiesManager).map((key, index) => (
+                            <div className={'checkbox_input'} key={key}>
+                                <input
+                                    type={"checkbox"}
+                                    id={key}
+                                    onChange={event => handleCheckboxChange(event)}
+                                    checked={checkboxStates[key]}/>
+                                <span style={{paddingBottom: '5px' }}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</span>
+                            </div>
+                        )
+                    )}
+                </div>
+                <button
+                    disabled={!isCreate || status === 'loading'}
+                    onClick={changePossibilitiesManager}
+                    className={'change_possibilities_button'}>
+                    {status === 'loading' ? 'загрузка...' : 'Сохранить'}
+                </button>
             </div>
-            <button
-                disabled={!isCreate || status === 'loading'}
-                onClick={changePossibilitiesManager}
-                className={'change_possibilities_button'}>
-                {status === 'loading' ? 'загрузка...' : 'Сохранить'}
-            </button>
-        </div>
+        ) : (
+            <h3>not found</h3>
+        )
     );
+
 };
 
 export default DetailedManagerItem;

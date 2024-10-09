@@ -24,9 +24,9 @@ const DetailedOrderItem: FC<OrderItemProps> = ({order}) => {
                 <h3 className={'label_order'}>Кол-во товара (шт.)</h3>
                 <span className={'field'}>{order.itemsCnt}</span>
                 <h3 className={'label_order'}>Стоимость</h3>
-                <span className={'field'}><h4>{changeCost(order.priceYen.toString())}¥</h4>{changeCost(order.priceRu.toString())}₽</span>
+                <span className={'field'}><h4>{order.priceYen ? changeCost(order.priceYen.toString()) : 'Не указано'}¥</h4>{order.priceRu ? changeCost(order.priceRu.toString()) : 'Не указано'}₽</span>
                 <h3 className={'label_order'}>Примерный вес</h3>
-                <span className={'field'}>{order.items.reduce((acc, item) => acc = acc+item.part.weight, 0)}</span>
+                <span className={'field'}>{order.items ? order.items.reduce((acc, item) => acc = acc + item.part.weight, 0) : 0}</span>
                 <h3 className={'label_order'}>Дата заказа</h3>
                 <span className={'field'}>{getDate(order.date)[1]}, {getDate(order.date)[0]} </span>
                 {/*<input type={"date"} value={convertToDate(order.date)}/>*/}
@@ -35,7 +35,8 @@ const DetailedOrderItem: FC<OrderItemProps> = ({order}) => {
             </div>
             <ItemsList itemsList={order.items} />
         </div>
-            );
-};
+    );
+
+}
 
 export default DetailedOrderItem;

@@ -33,7 +33,7 @@ const ItemsSlice = createSlice({
                 return (numberOrder === '' || item.numberOrder.includes(numberOrder)) &&
                     (numberDelivery === '' || item.numberDelivery.includes(numberDelivery)) &&
                     (markName === '' || item.part.markName.includes(markName)) &&
-                    (name === '' || item.part.name.includes(name)) &&
+                    (name === '' || item.part.nameEn.includes(name)) &&
                     (startDate === '' || itemDate >= convertStringToDate(startDate).getTime()) &&
                     (endDate === '' || itemDate <= convertStringToDate(endDate ).getTime()) &&
                     (!Object.values(status).includes(true) || status[item.statusOrder]);
