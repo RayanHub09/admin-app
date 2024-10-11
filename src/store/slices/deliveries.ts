@@ -128,10 +128,11 @@ export const fetchChangeStatusOrderDelivery = createAsyncThunk(
             const deliveryData = deliveryDoc.data()
             const orders = deliveryData?.orders || []
             const orderIndex = orders.findIndex((order: IOrder) => order.id === orderId)
-            orders[orderIndex].status.statusName = newStatus;
+            orders[orderIndex]['status.statusName']  = newStatus;
             await updateDoc(deliveryDocRef, {
                 orders: orders
             })
+            console.log(newStatus)
             thunkAPI.dispatch(changeStatusOrderDelivery({orderId, newStatus, deliveryId}))
         } catch (e:any) {
             thunkAPI.rejectWithValue(e.message)
@@ -153,25 +154,14 @@ export const fetchChangeOrderDelivery = createAsyncThunk(
             const deliveryData = deliveryDoc.data()
             const orders = deliveryData?.orders || []
             const orderIndex = orders.findIndex((order: IOrder) => order.id === orderId)
-            orders[orderIndex].status.statusName = newStatus
-            orders[orderIndex].comment = newComment
-            orders[orderIndex].number = newNumber
+            orders[orderIndex]['status.statusName']  = newStatus
+            orders[orderIndex]['comment'] = newComment
+            orders[orderIndex]['number'] = newNumber
             await updateDoc(deliveryDocRef, {
                 orders: orders
             })
-            // const orders = deliveryDoc.data()?.orders || [];
-            // const updatedOrders = orders.map((order: IOrder) => {
-            //     if (order.id === orderId) {
-            //         return {
-            //             ...order,
-            //             ['status.statusName']: newStatus,
-            //             comment: newComment,
-            //             number: newNumber
-            //         };
-            //     }
-            //     return order;
-            // });
-            // await updateDoc(deliveryDocRef, { orders: updatedOrders });
+            console.log(orders)
+            thunkAPI.dispatch(changeOrderDelivery({orderId, newStatus, newComment, newNumber, deliveryId}))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
         }
@@ -245,6 +235,20 @@ const DeliveriesSlice = createSlice({
                     d.id === deliveryId ? updatedDelivery : d
                 );
             }
+        },
+        changeOrderDelivery(state, action) {
+            const { orderId, newStatus, newComment, newNumber, deliveryId } = action.payload
+            const delivery = state.deliveries.filter(delivery => delivery.id === deliveryId)[0]
+
+            if (delivery) {
+                const newOrders = delivery.orders.map(order =>
+                    order.id === orderId ? { ...order, comment: newComment, number: newNumber, status: { ...order.status, statusName: newStatus } } : order
+                )
+                const updatedDelivery = { ...delivery, orders: newOrders }
+                state.deliveries = state.deliveries.map(d =>
+                    d.id === deliveryId ? updatedDelivery : d
+                );
+            }
         }
 
     },
@@ -294,4 +298,4 @@ const DeliveriesSlice = createSlice({
 export const DeliveriesReducer = DeliveriesSlice.reducer
 export const {getAllDeliveries, searchDelivery, clearSearch,
                 changeDelivery, resetStatus, calculateDeliveryCost,
-                cancelDelivery,changeStatusOrderDelivery } = DeliveriesSlice.actions
+                cancelDelivery,changeStatusOrderDelivery, changeOrderDelivery } = DeliveriesSlice.actions

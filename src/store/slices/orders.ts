@@ -60,6 +60,7 @@ export const fetchChangeStatusOrder = createAsyncThunk(
             await updateDoc(orderDocRef, {
                 'status.statusName': newStatus
             })
+            console.log(newStatus)
             thunkAPI.dispatch(changeStatusOrder({orderId, newStatus}))
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
