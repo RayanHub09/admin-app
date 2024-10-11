@@ -1,6 +1,5 @@
 import React, {FC} from 'react';
 import {IDelivery} from "../../interfaces";
-import {getDate} from "../../functions/changeDate";
 import DetailedOrderItem from "../orders/DetailedOrderItem";
 import {changeCost} from "../../functions/changeCost";
 
@@ -9,6 +8,11 @@ interface IDeliveryProps {
 }
 
 const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
+    function getDate(str: string): string[] {
+        const date = str?.split('T')[0]
+        const time = str?.split('T')[1]?.toString()?.slice(0, -5)
+        return [time, date]
+    }
     return (
         <div className={'detailed_delivery_item_container'}>
             <h2>Посылка № {delivery.number}</h2>
