@@ -34,7 +34,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                 className={'change_button'}>
                 {statusFetch === 'loading' ? 'загрузка...' : 'Сохранить'}
             </button>
-            <h2>Заказ № {delivery.number}</h2>
+            <h2>Посылка № {delivery.number}</h2>
             <div className={'detailed_delivery_item'}>
                 <h3 className={'label_order'}>Номер</h3>
                 {changeDeliveryNumber ?

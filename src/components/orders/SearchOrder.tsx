@@ -18,7 +18,6 @@ const initializeStatuses = (): IStatuses => {
 
 
 const SearchOrder = () => {
-
     const dispatch = useAppDispatch()
     const isSearching = useAppSelector(state => state.orders.isSearching)
     const [searchNumber, setSearchNumber] = useState('')
@@ -85,7 +84,6 @@ const SearchOrder = () => {
                     className={'change_button'} >Найти</button>
                 <button
                     onClick={searchClearFields}
-                    disabled={! isSearching}
                     className={'change_button'}>Сбросить</button>
             </div>
         </div>

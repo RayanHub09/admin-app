@@ -16,7 +16,7 @@ const Header = () => {
 
     return (
         <header>
-            <h2>{worker.email}</h2>
+            <h2>{worker?.email}</h2>
             {loading === 'succeeded' && isAuth && <NavBar/>}
             {isAuth && loading === 'succeeded' &&
                <img

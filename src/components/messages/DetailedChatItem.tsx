@@ -38,6 +38,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({block: 'end', behavior: 'auto'})
         }
+        console.log(0)
         dispatch(fetchChangeReadMessage({chat_id: chat?.id, messages_id: unreadMessages}))
     }, [])
 
@@ -59,20 +60,22 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                         {chat.uid === message.uid ? <h4>{user?.name} {user?.surname}</h4> : <h4>{manager.name}</h4>}
                         <p style={{paddingLeft: '10px'}}>{message?.text}</p>
                         {message.attachedFiles.length !== 0 &&
-                            <img src={message.attachedFiles[0].url}/>
+                            <img src={message.attachedFiles[0].uri}/>
                         }
                         {
                             chat.uid !== message.uid &&
                             <span className={'status_message'}>{message.read ? 'Просмотрено' : 'Доставлено'}</span>
                         }
                     </div>)}
-                {statusSendMessage === 'loading' &&
+                {statusSendMessage === 'loading' && temporaryMessage &&
                     <div className={'manager_message message'}>
                         <h4>{manager.name}</h4>
                         <p style={{paddingLeft: '10px'}}>{temporaryMessage}</p>
                         <span className={'status_message'}>Отправка...</span>
                     </div>
+
                 }
+                {/*{(statusSendMessage === 'succeeded' || statusSendMessage === null) && <></>}*/}
                 {statusSendMessage === 'failed' &&
                     <div className={'manager_message message error'}>
                         <span className={'status_message'}>Что-то пошло не так :(</span>

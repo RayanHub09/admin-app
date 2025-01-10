@@ -21,8 +21,11 @@ const ChatItem:FC<ChatItemProps> = ({chat}) => {
     return (
         <Link to={`/messages/${department}/${chat.id}`} className={'link_chat'}>
             <div className={ unreadMessages !== 0 ?  'chat_item_container notifications_chat_item_container' : 'chat_item_container'}>
-                <h4>{user?.name} {user?.surname}</h4>
-                <p style={{paddingLeft: '10px'}}>{messages[messages.length - 1 ]?.uid === user?.id ? <>{user?.name} {user?.surname}</> : <>{manager.name}</>}: <>{messages[messages.length - 1]?.text}</></p>
+                <div>
+                    <h4>{user?.name} {user?.surname}</h4>
+                    <p style={{paddingLeft: '10px'}}>{messages[messages.length - 1 ]?.uid === user?.id ? <>{user?.name} {user?.surname}</> : <>{manager.name}</>}: <>{messages[messages.length - 1]?.text}</></p>
+                </div>
+                {unreadMessages !== 0 && <span className={'unread_messages'}>{unreadMessages}</span>}
             </div>
         </Link>
     );

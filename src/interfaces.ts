@@ -1,3 +1,5 @@
+import {Timestamp} from "firebase/firestore";
+
 export interface IPart {
     discontinued: boolean
     discontinuedTitleEn: string
@@ -149,7 +151,7 @@ export interface IChat {
 }
 export interface IImg {
     name: string
-    url: string
+    uri: string
 }
 export interface IMessage {
     id: string

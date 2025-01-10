@@ -3,7 +3,7 @@ import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {methodsOfDelivery, statusesOfDelivery} from "../../lists/dateOfDelivery";
 
 import {convertStringToDate} from "../../functions/changeDate";
-import {clearSearch, searchDelivery} from "../../store/slices/deliveries";
+import {clearSearchDelivery, searchDelivery} from "../../store/slices/deliveries";
 
 interface IFields {
     [key: string]: boolean
@@ -37,7 +37,7 @@ const SearchDelivery = () => {
     }, [dispatch, searchNumber, startDate, endDate, statuses, methods])
 
     const searchClearFields = useCallback(() => {
-        dispatch(clearSearch())
+        dispatch(clearSearchDelivery())
         setSearchNumber('')
         setStartDate('')
         setEndDate('')
@@ -103,7 +103,6 @@ const SearchDelivery = () => {
                         className={'change_button'} >Найти</button>
                     <button
                         onClick={searchClearFields}
-                        disabled={! isSearching}
                         className={'change_button'}>Сбросить</button>
                 </div>
         </div>

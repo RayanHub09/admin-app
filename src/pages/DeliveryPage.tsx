@@ -48,7 +48,7 @@ const DeliveryPage = () => {
                     <button
                         onClick={() => setChangeMode(!changeMode)}
                         className={'change_button'}>
-                        {changeMode ? 'Вернуться к заказу' : 'Изменить'}
+                        {changeMode ? 'Вернуться к посылке' : 'Изменить'}
                     </button>
                 }
                 {cancelDelivery && !changeMode && delivery.status.statusName !== 'Отменен'  &&

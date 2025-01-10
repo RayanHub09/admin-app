@@ -112,7 +112,6 @@ const SearchItem = () => {
                     className={'change_button'} >Найти</button>
                 <button
                     onClick={searchClearFields}
-                    disabled={!isSearching}
                     className={'change_button'}>Сбросить</button>
             </div>
         </div>

@@ -1,13 +1,16 @@
-import React, {useEffect} from 'react';
+import React, {FC, useEffect} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import DeliveryItem from "./DeliveryItem";
 import './deliveries.sass'
-import {clearSearch, searchDelivery} from "../../store/slices/deliveries";
-import SearchDelivery from "./SearchDelivery";
+import {clearSearchDelivery, searchDelivery} from "../../store/slices/deliveries";
+import {IDelivery} from "../../interfaces";
+import NotFoundText from "../NotFoundText";
 
-const DeliveriesList = () => {
+interface DeliveriesListProps {
+    deliveries: IDelivery[]
+}
+const DeliveriesList:FC<DeliveriesListProps> = ({deliveries}) => {
     const dispatch = useAppDispatch()
-    const deliveries = useAppSelector(state => state.deliveries.deliveries)
     const searchDeliveries = useAppSelector(state => state.deliveries.filteredDeliveries)
     const isSearching = useAppSelector(state => state.deliveries.isSearching)
 
@@ -15,14 +18,13 @@ const DeliveriesList = () => {
         dispatch(searchDelivery(searchTerm))
     }
     useEffect(() => {
-        dispatch(clearSearch())
+        dispatch(clearSearchDelivery())
     }, [])
 
     return (
 
         <div className={'deliveries_list_container'}>
-            <SearchDelivery/>
-            {(searchDeliveries.length === 0 && isSearching)? (<h2 className={'nothing_found'}>Ничего не найдено.<br/><br/>Проверьте данные <br/> и попробуйте еще раз.</h2>) :
+            {(searchDeliveries.length === 0 && isSearching)? (<NotFoundText />) :
                 <div className={'deliveries_list'}>
                     <h3 className={'label_order'}>Номер</h3>
                     <h3 className={'label_order'}>Способ</h3>

@@ -1,15 +1,17 @@
 import React, {useEffect} from 'react';
 import DeliveriesList from "../components/deliveries/DeliveriesList";
-import {useAppDispatch} from "../hooks/redux-hooks";
-import {clearSearch} from "../store/slices/deliveries";
+import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
+import {clearSearchDelivery} from "../store/slices/deliveries";
+import SearchDelivery from "../components/deliveries/SearchDelivery";
 
 const DeliveriesPage = () => {
     const dispatch = useAppDispatch()
-    useEffect(() => {dispatch(clearSearch())}, [])
-
+    const deliveries = useAppSelector(state => state.deliveries.deliveries)
+    useEffect(() => {dispatch(clearSearchDelivery())}, [])
     return (
         <div className={'deliveries_page_container'}>
-            <DeliveriesList />
+            <SearchDelivery/>
+            <DeliveriesList deliveries={deliveries}/>
         </div>
     );
 };

@@ -31,7 +31,8 @@
 
 .managers_list
   @include default_container(column, 0px)
-
+  border-top: 1px rgba(128, 128, 128, 0.5) solid
+  font-size: 20px
 
 .manager_item
   @include default_container(row, 0px)
@@ -73,3 +74,8 @@
 .possibilities_manager_item_container
   display: flex
   flex-direction: column
+
+.manager_list_item_container
+  display: grid
+  grid-template-columns: repeat(2, 1fr)
+  row-gap: 10px

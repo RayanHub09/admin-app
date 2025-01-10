@@ -4,8 +4,10 @@ import {Link, useLocation} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 import {removeManager} from "../store/slices/manager";
 import {collection, getFirestore, onSnapshot} from "firebase/firestore";
-import {IChat, IMessage} from "../interfaces";
+import {IChat, IDelivery, IMessage, IOrder} from "../interfaces";
 import {pushNewMessage} from "../store/slices/messages";
+import {changeOrderSnapshot, deleteOrderSnapshot, pushNewOrderSnapshot} from "../store/slices/orders";
+import {changeDeliverySnapshot, deleteDeliverySnapshot, pushNewDeliverySnapshot} from "../store/slices/deliveries";
 
 
 interface ILinks {
@@ -14,6 +16,7 @@ interface ILinks {
     managers?: string
     messages: string
     deliveries: string
+    users: string
 }
 
 const NavBar = () => {
@@ -34,41 +37,14 @@ const NavBar = () => {
         deliveries: 'Посылки',
         managers: isAdmin ? 'Менеджеры' : '',
         messages: 'Сообщения',
+        users: 'Покупатели',
     }
 
     function showFullMenu() {
         setIsVisible(!isVisible)
     }
 
-    useEffect(() => {
-        const db = getFirestore();
-        const chatRoomsRef = collection(db, 'chat_rooms');
 
-        return onSnapshot(chatRoomsRef, (querySnapshot) => {
-            querySnapshot.forEach((doc) => {
-                const chatRoomId = doc.id;
-                const messagesRefInChatRoom = collection(db, `chat_rooms/${chatRoomId}/messages`);
-
-                return onSnapshot(messagesRefInChatRoom, (querySnapshot1) => {
-                    querySnapshot1.docChanges().forEach((change) => {
-                        if (change.type === 'added') {
-                            dispatch(pushNewMessage({messageData: change.doc.data(), chat_id: change.doc.ref.path.split('/')[1]}))
-
-                        }
-                        // else if (change.type === 'modified') {
-                        //
-                        // } else if (change.type === 'removed') {
-                        //     console.log(`Message removed from chat room ${chatRoomId}:`, change.doc.data());
-                        // }
-                    });
-                }, (error) => {
-                    console.error(`Error reading messages in chat room ${chatRoomId}:`, error);
-                });
-            });
-        }, (error) => {
-            console.error('Error reading chat rooms:', error);
-        });
-    }, []);
     return (
         <nav>
             <div className={'full_navbar'}>
@@ -77,10 +53,11 @@ const NavBar = () => {
                         key={key}>
                         <Link className={
                             location.pathname === `/${key}` ||
-                            location.pathname.slice(0, 9) === '/messages' && key === 'messages' ||
-                            location.pathname.slice(0, 9) === '/managers' && key === 'managers' ||
-                            location.pathname.slice(0, 7) === '/orders' && key === 'orders' ||
-                            location.pathname.slice(0, 11) === '/deliveries' && key === 'deliveries'
+                            location.pathname.split('/')[1] === 'messages' && key === 'messages' ||
+                            location.pathname.split('/')[1] === 'managers' && key === 'managers' ||
+                            location.pathname.split('/')[1] === 'orders' && key === 'orders' ||
+                            location.pathname.split('/')[1] === 'deliveries' && key === 'deliveries' ||
+                            location.pathname.split('/')[1] === 'users' && key === 'users'
                                 ? 'active' : 'link'}
                               to={key !== 'messages' ? `/${key}` : `messages/accounting`}>
                             {links[key as keyof ILinks]}

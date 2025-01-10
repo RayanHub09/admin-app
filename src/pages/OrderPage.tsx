@@ -32,7 +32,7 @@ const OrderPage: React.FC = () => {
     }
 
     if (!order) {
-        return <div>Order not found</div>;
+        return <div className={'no_chats_message'}>Такого заказа не существует.</div>;
     }
     return (
         <div className={'order_page_container'}>

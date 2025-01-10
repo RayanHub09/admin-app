@@ -2,6 +2,7 @@ import React from 'react';
 import SearchItem from "./SearchItem";
 import Item from "./Item";
 import {useAppSelector} from "../../hooks/redux-hooks";
+import NotFoundText from "../NotFoundText";
 
 const ItemsListAll = () => {
     const items = useAppSelector(state => state.items.items)
@@ -9,8 +10,7 @@ const ItemsListAll = () => {
     const isSearching = useAppSelector(state => state.items.isSearching)
     return (
         <div className={'items_list_all_container'}>
-            <SearchItem />
-            {(filteredItems.length == 0 && isSearching) ? (<h2 className={'nothing_found'}>Ничего не найдено.<br/><br/>Проверьте данные<br/> и попробуйте еще раз.</h2>) :
+            {(filteredItems.length == 0 && isSearching) ? (<NotFoundText />) :
                 <div className={'items_list'}>
                     <h4 className={'label_order'}>Наменование</h4>
                     <h4 className={'label_order'}>Производитель</h4>

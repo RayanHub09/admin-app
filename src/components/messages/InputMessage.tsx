@@ -3,8 +3,6 @@ import 'figma-icons';
 
 import {
     fetchPushNewMessage,
-    removeTemporaryMessage,
-    resetStatus,
     setTemporaryMessage
 } from "../../store/slices/messages";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
@@ -26,10 +24,6 @@ const InputMessage:FC<InputMessageProps> = ({uid, chat_id}) => {
                 const file = fileInput.files[0]
                 dispatch(setTemporaryMessage(message))
                 dispatch(fetchPushNewMessage({chat_id, mid, text:message, img: file ? file : null}))
-                    .then(() => dispatch(removeTemporaryMessage()))
-                    .then(() => setTimeout(() => {
-                            dispatch(resetStatus())
-                    }, 1000))
                 setMessage('')
                 setImg('')
 

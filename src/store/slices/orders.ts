@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, deleteDoc, doc, getDocs, query, updateDoc} from "../../firebase";
+import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
 import serializeData from "../../Serializer"
 import {IOrder} from "../../interfaces"
 import {convertStringToDate, getDate} from "../../functions/changeDate";
@@ -60,7 +60,6 @@ export const fetchChangeStatusOrder = createAsyncThunk(
             await updateDoc(orderDocRef, {
                 'status.statusName': newStatus
             })
-            console.log(newStatus)
             thunkAPI.dispatch(changeStatusOrder({orderId, newStatus}))
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
@@ -126,7 +125,6 @@ const OrdersSlice = createSlice({
                     (!Object.values(status).includes(true)   || status[order.status.statusName]);
             })
         },
-
         changeStatusOrder(state, action) {
             const {orderId, newStatus} = action.payload
             state.orders = state.orders.map(order =>
@@ -153,9 +151,6 @@ const OrdersSlice = createSlice({
         },
         cancelOrder(state, action) {
             const {orderId} = action.payload
-            // const newOrder = state.orders.filter(order => order.id === orderId)[0]
-            // newOrder.status.statusName = 'Отменен'
-            // newOrder.items.map(item => item.)
             state.orders = state.orders.map(order => order.id === orderId ? {
                     ...order,
                     status: {statusName: 'Отменен'}
@@ -165,7 +160,22 @@ const OrdersSlice = createSlice({
         },
         resetStatus(state) {
             state.status = null
+        },
+        changeOrderSnapshot(state, action) {
+            state.orders = state.orders.map(order => {
+                if (order.id === action.payload.id) {
+                    return {...action.payload}
+                }
+                return {...order}
+            })
+        },
+        pushNewOrderSnapshot(state, action) {
+            state.orders = [...state.orders, action.payload]
+        },
+        deleteOrderSnapshot(state, action) {
+            state.orders = [...state.orders.filter(order => order.id !== action.payload)]
         }
+
     },
     extraReducers: builder => {
         builder
@@ -216,5 +226,5 @@ const OrdersSlice = createSlice({
 export const OrderReducer = OrdersSlice.reducer
 export const {
     getAllOrders, searchOrder, changeStatusOrder, changeOrder,
-    clearSearch, cancelOrder, resetStatus
+    clearSearch, cancelOrder, resetStatus, changeOrderSnapshot, pushNewOrderSnapshot, deleteOrderSnapshot
 } = OrdersSlice.actions

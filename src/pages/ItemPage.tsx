@@ -5,7 +5,7 @@ const ItemPage = () => {
     const { id } = useParams<{ id: string }>()
     return (
         <div>
-            {id}
+
         </div>
     );
 };

@@ -23,6 +23,8 @@ $background_color: rgb(244, 244, 244)
   padding: 10px 30px
   text-decoration: none
   color: white
+  display: flex
+  column-gap: 5px
   &:hover
     background: rgba(0, 107, 174, 0.6)
 .active_section_messages
@@ -44,8 +46,9 @@ $background_color: rgb(244, 244, 244)
   //width: 70%
 
 .chat_item_container
-  @include default_container(column, 0px, 0px)
+  @include default_container(row, 0px, 0px)
   background: $background_color
+  justify-content: space-between
   padding: 10px 15px
   cursor: pointer
   border-bottom: rgba(106, 106, 106, 0.25) 2px solid
@@ -63,7 +66,7 @@ $background_color: rgb(244, 244, 244)
 
 
 .notifications_chat_item_container
-  background: rgb(230, 230, 230)
+  background: rgba(230, 230, 230, 0.54)
 .chat_list_container
   @include default_container(column, 0px, 0px)
   width: 70%
@@ -215,3 +218,23 @@ $background_color: rgb(244, 244, 244)
   align-self: flex-end
   font-size: 13px
   color: #949494
+
+.unread_messages
+  align-self: center
+  color: rgba(255, 255, 255)
+  background: rgba(0, 107, 174, 0.71)
+  padding: 1px 7px
+  border-radius: 20px
+
+.unread_messages_count
+  background: rgba(255, 255, 255, 0.87)
+  color: black
+  font-size: 14px
+  z-index: 2
+  padding: 0 6px 1px
+  border-radius: 15px
+
+.no_chats_message
+  font-size: 25px
+  text-align: center
+  padding-top: 20px

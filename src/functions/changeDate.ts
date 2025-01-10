@@ -3,7 +3,6 @@ export function getDate(date: string | undefined): [string, string] {
     return [day, month];
 }
 
-
 export function convertStringToDate(dateString: string): Date {
     let parts = dateString.split('.');
     if (parts.length === 3) {

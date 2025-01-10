@@ -1,0 +1,72 @@
+@mixin default_container($flex-direction: row, $row_gap, $column_gap: 0px)
+  flex-direction: $flex-direction
+  row-gap: $row_gap
+  column-gap: $column_gap
+  display: flex
+
+@media (max-width: 950px)
+  .users_list, .user_information
+    overflow: scroll
+.users_list_container
+  @include default_container(column, 20px)
+
+.users_list
+  display: grid
+  font-size: 18px
+  grid-template-columns: repeat(5, 1fr)
+  padding-bottom: 20px
+
+.field_link
+  border-bottom: 1px rgba(128, 128, 128, 0.5) solid
+  border-right: 1px rgba(128, 128, 128, 0.4) solid
+  padding: 10px
+  text-decoration: none
+  color: black
+
+.field_link_chosen
+  border-bottom: 1px rgba(128, 128, 128, 0.5) solid
+  border-right: 1px rgba(128, 128, 128, 0.4) solid
+  padding: 10px
+  text-decoration: none
+  color: black
+  background: rgba(148, 148, 148, 0.09)
+.label_user
+  font-weight: bold
+  border-bottom: 1px rgba(128, 128, 128, 0.5) solid
+  border-right: 1px rgba(128, 128, 128, 0.4) solid
+  border-top: 1px rgba(128, 128, 128, 0.5) solid
+  padding: 10px
+
+.search_users_container
+  @include default_container(column, 20px, 0px)
+  align-items: center
+
+.no-users-message
+  font-size: 25px
+  text-align: center
+
+.user_information
+  display: grid
+  font-size: 20px
+  grid-template-columns: 200px 1fr
+  gap: 10px
+  //border: 2px solid rgba(0, 0, 0, 0.2)
+  padding: 10px
+.order_grid_container
+  display: grid
+  grid-template-columns: repeat(4, 1fr)
+  padding-bottom: 20px
+  font-size: 18px
+.title
+  text-decoration: underline
+  text-align: center
+  font-size: 25px
+.detailed_user_item_container
+  @include default_container(column, 20px)
+.container_list_del_user
+  @include default_container(column, 10px)
+.fields_search
+  @include default_container(row, 10px, 10px)
+  justify-content: space-between
+
+

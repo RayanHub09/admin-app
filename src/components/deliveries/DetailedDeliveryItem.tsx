@@ -9,6 +9,9 @@ interface IDeliveryProps {
 
 const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
     function getDate(str: string): string[] {
+        if (typeof str !== 'string') {
+            return ['', '']
+        }
         const date = str?.split('T')[0]
         const time = str?.split('T')[1]?.toString()?.slice(0, -5)
         return [time, date]
@@ -28,7 +31,7 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                     </>
                 }
                 <h3 className={'label_order'}>Статус</h3>
-                <span className={'field'}>{delivery.status.statusName}</span>
+                <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}>{delivery.status.statusName}</span>
                 <h3 className={'label_order'}>Кол-во товара</h3>
                 <span className={'field'}>{delivery.orders.reduce((acc, item) =>
                     acc += item.itemsCnt, 0)}</span>
@@ -42,7 +45,7 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                 </span>}
                 {!delivery.deliveryCost && !delivery.deliveryCostYen && <span className={'field'}></span>}
                 <h3 className={'label_order'}>Стоимость товара</h3>
-                <span className={delivery.status.statusName !== 'Отменен' ? 'field' : 'field cancel_field'}><h4>{changeCost(delivery.partsCostYen.toString())}¥</h4>{changeCost(delivery.partsCostRu.toString())}₽</span>
+                <span className={'field'}><h4>{changeCost(delivery.partsCostYen.toString())}¥</h4>{changeCost(delivery.partsCostRu.toString())}₽</span>
                 <h3 className={'label_order'}>Декларируемая стоимость</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Время создания</h3>

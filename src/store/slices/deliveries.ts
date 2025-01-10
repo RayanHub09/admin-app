@@ -93,13 +93,6 @@ export const fetchCancelDelivery = createAsyncThunk(
     'deliveries/fetchDeleteDelivery',
     async ({deliveryId}:{deliveryId: string}, thunkAPI) => {
        try {
-           // for (const orderId of ordersId) {
-           //     const orderDocRef = doc(db, 'orders', orderId)
-           //     await updateDoc(orderDocRef, {
-           //         ['status.statusName'] : 'На складе в Японии'
-           //     })
-           //
-           // }
            const deliveryDocRef = doc(db, 'deliveries', deliveryId)
            const deliveryDoc = await getDoc(deliveryDocRef)
            const deliveryData = deliveryDoc.data()
@@ -190,7 +183,7 @@ const DeliveriesSlice = createSlice({
                     (!Object.values(methods).includes(true)   || methods[delivery.deliveryMethod])
             })
         },
-        clearSearch(state) {
+        clearSearchDelivery(state) {
             state.isSearching = false
             state.filteredDeliveries = []
         },
@@ -249,6 +242,20 @@ const DeliveriesSlice = createSlice({
                     d.id === deliveryId ? updatedDelivery : d
                 );
             }
+        },
+        changeDeliverySnapshot(state, action) {
+            state.deliveries = state.deliveries.map(delivery => {
+                if (delivery.id === action.payload.id) {
+                    return {... action.payload}
+                }
+                return {...delivery}
+            })
+        },
+        pushNewDeliverySnapshot(state, action) {
+            state.deliveries = [...state.deliveries, action.payload]
+        },
+        deleteDeliverySnapshot(state, action) {
+            state.deliveries = [...state.deliveries.filter(delivery => delivery.id !== action.payload)]
         }
 
     },
@@ -296,6 +303,8 @@ const DeliveriesSlice = createSlice({
 })
 
 export const DeliveriesReducer = DeliveriesSlice.reducer
-export const {getAllDeliveries, searchDelivery, clearSearch,
-                changeDelivery, resetStatus, calculateDeliveryCost,
-                cancelDelivery,changeStatusOrderDelivery, changeOrderDelivery } = DeliveriesSlice.actions
+export const {getAllDeliveries, searchDelivery, clearSearchDelivery,
+    changeDelivery, resetStatus, calculateDeliveryCost,
+    cancelDelivery,changeStatusOrderDelivery, changeOrderDelivery,
+    changeDeliverySnapshot, pushNewDeliverySnapshot, deleteDeliverySnapshot
+} = DeliveriesSlice.actions
