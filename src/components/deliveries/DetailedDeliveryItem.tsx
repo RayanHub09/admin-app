@@ -2,6 +2,7 @@ import React, {FC} from 'react';
 import {IDelivery} from "../../interfaces";
 import DetailedOrderItem from "../orders/DetailedOrderItem";
 import {changeCost} from "../../functions/changeCost";
+import {Link} from "react-router-dom";
 
 interface IDeliveryProps {
     delivery: IDelivery
@@ -61,6 +62,13 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Комментарий</h3>
                 <span className={'field'}>{delivery.comment}</span>
+                <h3 className={'label_order'}>Покупатель</h3>
+                <Link
+                    className={'field'}
+                    style={{borderLeft: '1px rgba(128, 128, 128, 0.5) solid'}}
+                    to={`/users/${delivery.uid}`}>
+                    <span>{delivery.uid}</span>
+                </Link>
             </div>
             <div>
                 {delivery.orders.map((item, index) => <DetailedOrderItem key={index} order={item} />)}

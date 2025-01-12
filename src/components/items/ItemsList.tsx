@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useEffect} from 'react';
 import {IItem, IReItem} from "../../interfaces";
 import Item from "./Item";
 import './items.sass'
@@ -7,6 +7,7 @@ interface ItemsListProps {
     itemsList: IItem[]
 }
 const ItemsList:FC<ItemsListProps> = ({itemsList}) => {
+    useEffect(() => {}, [itemsList.length])
     return (
         <div className={'items_list_container'}>
             <h3>Список товаров</h3>
@@ -19,8 +20,8 @@ const ItemsList:FC<ItemsListProps> = ({itemsList}) => {
                 <h4 className={'label_order'}>Номер заказа</h4>
                 <h4 className={'label_order'}>Номер посылки</h4>
                 <h4 className={'label_order'}>Комментарий</h4>
-                {itemsList?.map(item => (
-                    <Item item={item as IReItem} key={item.id}/>
+                {itemsList.map((item, index) => (
+                    <Item item={item as IReItem} key={index}/>
                 ))}
             </div>
         </div>

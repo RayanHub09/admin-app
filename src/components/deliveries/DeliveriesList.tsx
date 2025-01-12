@@ -13,10 +13,6 @@ const DeliveriesList:FC<DeliveriesListProps> = ({deliveries}) => {
     const dispatch = useAppDispatch()
     const searchDeliveries = useAppSelector(state => state.deliveries.filteredDeliveries)
     const isSearching = useAppSelector(state => state.deliveries.isSearching)
-
-    function search(searchTerm:string) {
-        dispatch(searchDelivery(searchTerm))
-    }
     useEffect(() => {
         dispatch(clearSearchDelivery())
     }, [])

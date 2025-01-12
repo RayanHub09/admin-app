@@ -33,7 +33,7 @@ const SearchDelivery = () => {
     const [methods, setMethods] = useState<IFields>(initializeMethods)
 
     const searchDeliveryItem = useCallback(() => {
-        dispatch(searchDelivery([searchNumber, startDate, endDate, statuses, methods]))
+        dispatch(searchDelivery([searchNumber, startDate, endDate, statuses, methods, '']))
     }, [dispatch, searchNumber, startDate, endDate, statuses, methods])
 
     const searchClearFields = useCallback(() => {

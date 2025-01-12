@@ -25,7 +25,9 @@ const ChatItem:FC<ChatItemProps> = ({chat}) => {
                     <h4>{user?.name} {user?.surname}</h4>
                     <p style={{paddingLeft: '10px'}}>{messages[messages.length - 1 ]?.uid === user?.id ? <>{user?.name} {user?.surname}</> : <>{manager.name}</>}: <>{messages[messages.length - 1]?.text}</></p>
                 </div>
-                {unreadMessages !== 0 && <span className={'unread_messages'}>{unreadMessages}</span>}
+                {/*{unreadMessages !== 0 && <span className={'unread_messages'}>{unreadMessages}</span>}*/}
+                {(messages[messages.length - 1]?.uid !== manager.id && unreadMessages !== 0) &&  <span className={ 'unread_messages' }>Непрочитанное сообщение</span> }
+                {(messages[messages.length - 1]?.uid !== manager.id && unreadMessages === 0) && <span className={ 'unread_messages_yellow' }>Нет ответа</span>}
             </div>
         </Link>
     );

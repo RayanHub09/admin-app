@@ -30,8 +30,11 @@ export interface IItem {
 export interface IReItem {
     id: string
     dateOrder: string
+    uid: string
+    idOrder: string
     numberOrder: string
     numberDelivery: string
+    idDelivery: string
     statusOrder: string
     amount: number
     comment: string
@@ -60,6 +63,7 @@ export interface IOrder {
 export interface IReOrder {
     id: string
     numberDelivery: string
+    idDelivery: string
     comment: string
     date: string
     items: IItem[]

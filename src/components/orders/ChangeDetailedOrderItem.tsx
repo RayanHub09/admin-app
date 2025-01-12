@@ -52,7 +52,7 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
                 {!isDisabled ? 'Сохранить' : 'загрузка...'}</button>
             <h2>Заказ № {order.number}</h2>
             <div className={'detailed_order_item'}>
-                <h3 className={'label_order'}>Номер</h3>
+                <h3 className={'label_order'} style={{borderTop: '1px rgba(128, 128, 128, 0.5) solid'}}>Номер</h3>
                 {changeOrderNumber ?
                     <input
                         className={'input_field'}

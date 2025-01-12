@@ -23,6 +23,8 @@ const NavBar = () => {
     const isAdmin = useAppSelector(state => state.manager.manager.role) === 'admin'
     const location = useLocation()
     const manager = useAppSelector(state => state.manager.manager)
+    const count_unanswered_messages = useAppSelector(state => state.messages.chats).filter(chat =>
+        chat.messages[chat.messages.length -1 ].uid !== manager.id).length
     const dispatch = useAppDispatch()
     const unreadMessages = useAppSelector(state => state.messages.chats.reduce((sum: number, chat: IChat | undefined) => {
         if (!chat) return sum
@@ -64,9 +66,14 @@ const NavBar = () => {
                         </Link>
                         {unreadMessages !== 0 && key === 'messages' &&
                             <span
-                                className={'notifications'}>
+                                className={'notifications red_notifications'}>
                         {unreadMessages}
                     </span>}
+                        {key === 'messages' && count_unanswered_messages - unreadMessages > 0 && <span
+                            className={'notifications yellow_notifications'}>
+                        {count_unanswered_messages - unreadMessages}
+                    </span>}
+
                     </div>
                 )}
 
@@ -89,8 +96,20 @@ const NavBar = () => {
                               key={key}
                               onClick={() => setIsVisible(false)}
                               to={key !== 'messages' ? `/${key}` : `messages/accounting`}>
-                            {links[key as keyof ILinks]}</Link>
+                            {links[key as keyof ILinks]}
+                            {unreadMessages !== 0 && key === 'messages' &&
+                                <span
+                                    className={'notifications red_notifications'}>
+                        {unreadMessages}
+                    </span>}
+                            {key === 'messages' && count_unanswered_messages - unreadMessages > 0 && <span
+                                className={'notifications yellow_notifications'}>
+                        {count_unanswered_messages - unreadMessages}
+                    </span>}
+                        </Link>
+
                     )}
+
                     <a
                         className={'button_out_ link'}
                         onClick={() => dispatch(removeManager())}

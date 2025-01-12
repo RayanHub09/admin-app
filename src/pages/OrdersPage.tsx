@@ -7,7 +7,8 @@ import Loading from "../components/Loading";
 
 
 const OrdersPage = () => {
-    const status = useAppSelector(state => state.orders.statusGet)
+    const status_orders = useAppSelector(state => state.orders.statusGet)
+    const status_deliveries = useAppSelector(state => state.deliveries.statusGet)
     const dispatch = useAppDispatch()
 
     useEffect(() => {
@@ -16,12 +17,13 @@ const OrdersPage = () => {
 
     return (
         <div className={'orders_page_container'}>
-            {status === 'loading' &&
+            {(status_orders === 'loading' || status_deliveries === 'loading') &&
                 <div className={'container'}>
-                    {status === 'loading' && <Loading />}
+                    {<Loading />}
                 </div>
             }
-            {(status === 'succeeded' || status === null) &&
+            {(status_orders === 'succeeded' || status_orders === null) &&
+                (status_deliveries === 'succeeded' || status_deliveries === null) &&
                 <>
                     <SearchOrder/>
                     <OrdersList />

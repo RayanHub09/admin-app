@@ -15,8 +15,22 @@ const Item:FC<IItemProps> = ({item}) => {
            <span className={'field'}><h4>{changeCost(item.part.priceYen.toString())}¥</h4>{changeCost(item.part.priceRub.toString())}₽</span>
            <span className={'field'}>{item.part.weight}</span>
            <span className={'field'}>{item.amount}</span>
-           <span className={'field'}>{item.numberOrder}</span>
-           <span className={'field'}>{item.numberDelivery}</span>
+           {item.idOrder ?
+               <Link
+                   className={'field'}
+                   to={`/orders/${item.idOrder}`}>
+                   <span>{item.numberOrder}</span>
+               </Link> :
+               <span className={'field'}></span>
+           }
+           {item.idDelivery ?
+               <Link
+                   className={'field'}
+                   to={`/deliveries/${item.idDelivery}`}>
+                   <span>{item.numberDelivery}</span>
+               </Link> :
+               <span className={'field'}></span>
+           }
            <span className={'field'}>{item.comment}</span>
        </>
     );

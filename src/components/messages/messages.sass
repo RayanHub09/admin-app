@@ -103,7 +103,7 @@ $background_color: rgb(244, 244, 244)
   max-width: 50%
   padding: 10px
   background-color: white
-  @include default_container(column, 0px, 0px)
+  @include default_container(column, 3px, 0px)
 
 .manager_message
   border-radius:  10px 10px 0px 10px
@@ -222,7 +222,13 @@ $background_color: rgb(244, 244, 244)
 .unread_messages
   align-self: center
   color: rgba(255, 255, 255)
-  background: rgba(0, 107, 174, 0.71)
+  background: rgba(174, 0, 0, 0.44)
+  padding: 1px 7px
+  border-radius: 20px
+.unread_messages_yellow
+  align-self: center
+  color: black
+  background: rgba(255, 255, 0, 0.41)
   padding: 1px 7px
   border-radius: 20px
 
@@ -238,3 +244,31 @@ $background_color: rgb(244, 244, 244)
   font-size: 25px
   text-align: center
   padding-top: 20px
+.default_button_delete
+  align-self: flex-end
+  background: none
+  font-size: 12px
+  padding: 3px
+  border-radius: 8px
+  border: 1px rgba(255, 0, 0, 0.3) solid
+  color: rgba(255, 0, 0, 0.79)
+
+  &:hover
+    opacity: 0.5
+  &:disabled
+    opacity: 0.5
+.user_efault_button_delete
+  align-self: flex-start
+.yellow
+  background: rgba(255, 255, 0, 0.25)
+  border: 1px yellow solid
+  font-size: 11px
+  padding: 3px
+  border-radius: 8px
+.message_change_container
+  @include default_container(row, 0px, 10px)
+.notifications_container
+  @include default_container(row, 2px, 2px)
+@media (max-width: 700px)
+  .notifications_container
+    flex-wrap: wrap

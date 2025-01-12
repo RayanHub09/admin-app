@@ -111,7 +111,7 @@ const OrdersSlice = createSlice({
             state.orders = [...action.payload]
         },
         searchOrder(state, action) {
-            const [number, startDate, endDate, status] = action.payload;
+            const [number, startDate, endDate, status, uid] = action.payload;
             if (number === '' && startDate === '' && endDate === '' && !Object.values(status).includes(true)) {
                 state.isSearching = false
                 return
@@ -119,10 +119,18 @@ const OrdersSlice = createSlice({
             state.isSearching = true
             state.filteredOrders = state.orders.filter(order => {
                 const orderDate = convertStringToDate(getDate(order.date)[1]).getTime()
-                return (number === '' || order.number.includes(number)) &&
+                if (uid.length === 0) {
+                    return (number === '' || order.number.includes(number)) &&
+                        (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
+                        (endDate === '' || orderDate <= convertStringToDate(endDate ).getTime()) &&
+                        (!Object.values(status).includes(true)   || status[order.status.statusName]);
+                }
+                return order.uid === uid &&
+                    (number === '' || order.number.includes(number)) &&
                     (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
                     (endDate === '' || orderDate <= convertStringToDate(endDate ).getTime()) &&
                     (!Object.values(status).includes(true)   || status[order.status.statusName]);
+
             })
         },
         changeStatusOrder(state, action) {

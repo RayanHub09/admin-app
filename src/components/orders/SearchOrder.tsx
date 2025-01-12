@@ -26,7 +26,7 @@ const SearchOrder = () => {
     const [statuses, setStatuses] = useState<IStatuses>(initializeStatuses)
 
     const searchOrderItem = useCallback(() => {
-        dispatch(searchOrder([searchNumber, startDate, endDate, statuses]))
+        dispatch(searchOrder([searchNumber, startDate, endDate, statuses, '']))
 
     }, [dispatch, searchNumber, startDate, endDate, statuses])
 

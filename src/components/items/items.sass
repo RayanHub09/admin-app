@@ -6,11 +6,12 @@
 
 .items_list_container
   @include default_container(column, 5px, 0px)
+  padding-bottom: 20px
 
 .items_list
   display: grid
   grid-template-columns: repeat(8, 1fr)
-  border: 1px rgba(128, 128, 128, 0.4) solid
+  //border: 1px rgba(128, 128, 128, 0.4) solid
 @media (max-width: 950px)
     .items_list
       overflow: scroll
@@ -20,5 +21,6 @@
   align-items: center
 .items_list_all_container
   @include default_container(column, 20px, 0px)
+  padding-bottom: 20px
 
 

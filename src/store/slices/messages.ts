@@ -1,9 +1,9 @@
-import { IChat, IManager, IMessage } from "../../interfaces"
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { collection, db, doc, getDoc, getDocs, query } from "../../firebase"
+import {IChat, IMessage} from "../../interfaces"
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit"
+import {collection, db, deleteDoc, doc, getDoc, getDocs, query} from "../../firebase"
 import serializeData from "../../Serializer"
-import { serverTimestamp, setDoc, updateDoc } from "firebase/firestore"
-import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage"
+import {serverTimestamp, setDoc, updateDoc} from "firebase/firestore"
+import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage"
 
 function generate() {
     return `${Math.random().toString(36).substr(2, 9)}${Math.random().toString(36).substr(2, 9)}`
@@ -96,9 +96,11 @@ export const fetchChangeReadMessage = createAsyncThunk(
     'chats/fetchChangeReadMessage',
     async ({ chat_id, messages_id }: { chat_id: string; messages_id: string[] }, thunkAPI) => {
         thunkAPI.dispatch(changeReadMessage({ chat_id, messages_id }))
+
         for (const message_id of messages_id) {
             const messageDocRef = doc(db, `chat_rooms/${chat_id}/messages/${message_id}`)
             try {
+                console.log(messages_id)
                 await updateDoc(messageDocRef, { read: true })
             } catch (e: any) {
                 return thunkAPI.rejectWithValue(e.message)
@@ -106,7 +108,19 @@ export const fetchChangeReadMessage = createAsyncThunk(
         }
     }
 )
+export const fetchDeleteMessage = createAsyncThunk(
+    'chats/fetchDeleteMessage',
+    async ({chat_id, message_id}: {chat_id: string, message_id: string}, thunkAPI) => {
+        try {
+            const messageRef = doc(db, `chat_rooms/${chat_id}/messages`, message_id);
+            await deleteDoc(messageRef)
+            await thunkAPI.dispatch(deleteMessage([chat_id, message_id]))
+            console.log(123344568)
+        } catch (e) {
 
+        }
+    }
+)
 const ChatsSlice = createSlice({
     name: 'chats',
     initialState,
@@ -148,7 +162,16 @@ const ChatsSlice = createSlice({
                 })
                 state.chats[chatIndex] = chat
             }
+        },
+        deleteMessage(state, action) {
+            const [chat_id, message_id] = action.payload
+            const chatIndex = state.chats.findIndex(chat => chat.id === chat_id)
+
+            if (chatIndex !== -1) {
+                state.chats[chatIndex].messages = state.chats[chatIndex].messages.filter(message => message.id !== message_id)
+            }
         }
+
     },
     extraReducers: (builder) => {
         builder
@@ -175,21 +198,21 @@ const ChatsSlice = createSlice({
                 }
             )
             .addMatcher(
-                (action) => ([fetchChangeReadMessage.rejected.type].includes(action.type)),
+                (action) => ([fetchChangeReadMessage.rejected.type, fetchDeleteMessage.rejected.type].includes(action.type)),
                 (state, action: PayloadAction<string>) => {
                     state.statusChange = 'failed'
                     state.error = action.payload as string
                 }
             )
             .addMatcher(
-                (action) => ([fetchChangeReadMessage.fulfilled.type].includes(action.type)),
+                (action) => ([fetchChangeReadMessage.fulfilled.type, fetchDeleteMessage.fulfilled.type].includes(action.type)),
                 (state) => {
                     state.statusChange = 'succeeded'
                     state.error = null
                 }
             )
             .addMatcher(
-                (action) => ([fetchChangeReadMessage.pending.type].includes(action.type)),
+                (action) => ([fetchChangeReadMessage.pending.type, fetchDeleteMessage.pending.type].includes(action.type)),
                 (state) => {
                     state.statusChange = 'loading'
                 }
@@ -219,6 +242,7 @@ const ChatsSlice = createSlice({
 
 export const ChatReducer = ChatsSlice.reducer
 export const {
-    getAllMessages, pushNewMessage, setTemporaryMessage, resetStatus, changeReadMessage
+    getAllMessages, pushNewMessage, setTemporaryMessage, resetStatus, changeReadMessage,
+    deleteMessage
 } = ChatsSlice.actions
 

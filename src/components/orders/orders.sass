@@ -21,8 +21,7 @@
 
 
 .field,  .label_order
-  border-bottom: 1px rgba(128, 128, 128, 0.5) solid
-  border-right: 1px rgba(128, 128, 128, 0.4) solid
+  border: 1px rgba(128, 128, 128, 0.5) solid
   padding: 10px
 
 .input_field
@@ -53,6 +52,7 @@
   align-self: center
   text-align: center
   font-size: 20px
+  padding: 20px
 .promote_button
   @extend %button
   background: #006bae
@@ -87,7 +87,7 @@
 .detailed_order_item
   display: grid
   grid-template-columns: repeat(2, 1fr)
-  border: 1px rgba(128, 128, 128, 0.5) solid
+
 
 .detailed_order_item_container
   @include default_container(column, 20px)
@@ -111,10 +111,14 @@
 .field_search
   @include default_container(column, 5px)
 .statuses_container
-  @include default_container(row, 10px, 10px)
-  justify-content: center
-  flex-wrap: wrap
-  max-width: 900px
+  display: grid
+  grid-template-columns: repeat(2, 1fr)
+  column-gap: 10px
+
+@media (max-width: 520px)
+  .statuses_container
+    grid-template-columns: 1fr
+
 .status_container
   @include default_container(row, 0px, 5px)
 .container
@@ -123,3 +127,6 @@
   height: 100%
   align-items: center
   justify-content: center
+@media (max-width: 950px)
+  .detailed_order_item_container ,.detailed_order_item
+    overflow: scroll

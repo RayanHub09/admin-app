@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { IOrder } from "../../interfaces";
 import ItemsList from "../items/ItemsList";
 import { changeCost } from "../../functions/changeCost";
+import {useAppSelector} from "../../hooks/redux-hooks";
 
 interface OrderItemProps {
     order: IOrder
 }
 
 const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
+    const items = useAppSelector(state => state.items.items).filter(item => item.idOrder === order.id)
 
     function getDate(str: string | undefined): string[] {
         if (typeof str !== 'string') {
@@ -26,8 +28,8 @@ const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
                 <h2>Заказ № {order.number}</h2>
             </Link>
             <div className={'detailed_order_item'}>
-                <h3 className={'label_order'}>Номер</h3>
-                <span className={'field'}>{order.number}</span>
+                <h3 className={'label_order'} style={{borderTop: '1px rgba(128, 128, 128, 0.5) solid'}}>Номер</h3>
+                <span className={'field'} style={{borderTop: '1px rgba(128, 128, 128, 0.5) solid'}}>{order.number}</span>
                 <h3 className={'label_order'}>Статус</h3>
                 <span className={'field'}>{order.status.statusName}</span>
                 <h3 className={'label_order'}>Кол-во товара (шт.)</h3>
@@ -48,8 +50,15 @@ const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
                 </span>
                 <h3 className={'label_order'}>Комментарий</h3>
                 <span className={'field'}>{order.comment}</span>
+                <h3 className={'label_order'}>Покупатель</h3>
+                <Link
+                    className={'field'}
+                    style={{borderLeft: '1px rgba(128, 128, 128, 0.5) solid'}}
+                    to={`/users/${order.uid}`}>
+                    <span>{order.uid}</span>
+                </Link>
             </div>
-            <ItemsList itemsList={order.items} />
+            <ItemsList itemsList={items} />
         </div>
     );
 }

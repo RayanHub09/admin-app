@@ -9,7 +9,9 @@ const NavigationSections = () => {
     return (
             <div className={'sections_list_container'}>
                 {Object.keys(options).map((key) =>
-                    <NavigationSection option={key as string}/>
+                    <NavigationSection
+                        key={key}
+                        option={key as string}/>
                 )}
         </div>
     );

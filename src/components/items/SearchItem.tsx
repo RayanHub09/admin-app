@@ -1,8 +1,8 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 
 import {searchItem} from "../../store/slices/items";
-import {clearSearch} from "../../store/slices/items";
+import {clearSearchItem} from "../../store/slices/items";
 import {statusItem} from "../../lists/statusItem";
 
 interface IStatuses {
@@ -28,14 +28,25 @@ const SearchItem = () => {
     const [markName, setMarkName] = useState('')
     const [name, setName] = useState('')
 
+    useEffect(() => {
+        dispatch(clearSearchItem())
+        setName('')
+        setMarkName('')
+        setStartDate('')
+        setEndDate('')
+        setSearchNumberDelivery('')
+        setSearchNumberOrder('')
+        setStatuses(initializeStatuses())
+    }, [])
+
     const searchItemF = useCallback(() => {
-        dispatch(searchItem([searchNumberOrder, searchNumberDelivery, markName, name, startDate, endDate, statuses]))
+        dispatch(searchItem([searchNumberOrder, searchNumberDelivery, markName, name, startDate, endDate, statuses, '']))
 
     }, [dispatch, searchNumberOrder, searchNumberDelivery, markName, name, startDate, endDate, statuses])
 
 
     const searchClearFields = useCallback(() => {
-        dispatch(clearSearch())
+        dispatch(clearSearchItem())
         setName('')
         setMarkName('')
         setStartDate('')

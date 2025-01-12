@@ -7,6 +7,7 @@ import ChangeDetailedDeliveryItem from "../components/deliveries/ChangeDetailedD
 import CalculateDeliveryCost from "../components/deliveries/CalculateDeliveryCost";
 import {fetchCancelDelivery, fetchChangeStatusOrderDelivery, resetStatus} from "../store/slices/deliveries";
 import {fetchChangeStatusOrder} from "../store/slices/orders";
+import NotFoundPage from "./NotFoundPage";
 
 
 const DeliveryPage = () => {
@@ -18,7 +19,6 @@ const DeliveryPage = () => {
     const [changeMode, setChangeMode] = useState(false)
     const [visible, setVisible] = useState(false)
     const dispatch = useAppDispatch()
-    const navigation = useNavigate()
     const status = useAppSelector(state => state.deliveries.status)
     const { id } = useParams<{ id: string }>()
     const delivery:IDelivery|undefined = useAppSelector(state =>
@@ -28,6 +28,10 @@ const DeliveryPage = () => {
         return delivery ? delivery.orders.map(order => order.id) : [];
     })
     useEffect(() => {setVisible(true)}, [])
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [])
 
     function deleteDeliveryItem() {
         if (id != null) {
@@ -39,7 +43,7 @@ const DeliveryPage = () => {
         }
     }
     if (!delivery) {
-        return <div>Order not found</div>;
+        return <NotFoundPage />
     }
     return (
         <div className={'delivery_page_container'}>

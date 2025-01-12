@@ -12,7 +12,7 @@ import {
     pushNewDeliverySnapshot
 } from "./store/slices/deliveries";
 import {getAllItems} from "./store/slices/items";
-import {IDelivery, IItem, IOrder, IReItem, IReOrder} from "./interfaces";
+import {IDelivery, IOrder, IReItem, IReOrder} from "./interfaces";
 import {fetchAutoSignIn} from "./store/slices/manager";
 import {useNavigate} from "react-router-dom";
 import {fetchGetAllChats, pushNewMessage} from "./store/slices/messages";
@@ -84,41 +84,65 @@ function App() {
 
     useEffect(() => {
         if (manager.isAuth) {
-            dispatch(fetchGetAllManagers())
-            dispatch(fetchGetAllChats())
-            dispatch(fetchGetAllUsers())
-            dispatch(fetchGetAllOrders())
+            dispatch(fetchGetAllManagers());
+            dispatch(fetchGetAllChats());
+            dispatch(fetchGetAllUsers());
+
             dispatch(fetchGetAllDeliveries())
                 .then((data) => {
-                    const deliveries = data.payload as IDelivery[]
-                    console.log(deliveries)
-                    return deliveries
-                })
-                .then((deliveries) => {
-                    if (Array.isArray(deliveries) && deliveries.length > 0) {
-                        const orders = deliveries.reduce((acc, delivery) => {
-                            return [...acc, ...(delivery.orders ? delivery.orders.map((order) => ({
-                                ...order,
-                                numberDelivery: delivery.number
-                            } as IReOrder)) : [])];
-                        }, [] as IReOrder[]);
+                    const deliveries = data.payload as IDelivery[];
 
-                        const items = orders.reduce((acc, order) => {
-                            return [...acc, ...(order.items ? order.items.map((item) => ({
+                    if (Array.isArray(deliveries) && deliveries.length > 0) {
+                        return deliveries.reduce((acc, delivery) => {
+                            return [
+                                ...acc,
+                                ...(delivery.orders ? delivery.orders.map((order) => ({
+                                    ...order,
+                                    numberDelivery: delivery.number,
+                                    idDelivery: delivery.id
+                                } as IReOrder)) : [])
+                            ];
+                        }, [] as IReOrder[]);
+                    }
+                    return [];
+                })
+                .then((ordersWithDeliveryInfo) => {
+                    return dispatch(fetchGetAllOrders()).then((data) => {
+                        return { orders: data.payload as IOrder[], ordersWithDeliveryInfo };
+                    });
+                })
+                .then(({ orders, ordersWithDeliveryInfo }) => {
+                    const combinedOrders = [...orders, ...ordersWithDeliveryInfo];
+
+                    const uniqueOrders = combinedOrders.filter((order, index, self) =>
+                        index === self.findIndex((o) => o.id === order.id)
+                    )
+
+                    const items = uniqueOrders.reduce((acc, order) => {
+                        const deliveryInfo = ordersWithDeliveryInfo.find(o => o.id === order.id)
+                        const numberDelivery = deliveryInfo ? deliveryInfo.numberDelivery : ''
+                        const idDelivery = deliveryInfo ? deliveryInfo.idDelivery : ''
+
+                        return [
+                            ...acc,
+                            ...(order.items ? order.items.map((item) => ({
                                 ...item,
                                 dateOrder: order.date,
                                 numberOrder: order.number,
-                                numberDelivery: order.numberDelivery,
-                                statusOrder: order.status.statusName
-                            } as IReItem)) : [])];
-                        }, [] as IReItem[]);
+                                idOrder: order.id,
+                                numberDelivery: numberDelivery,
+                                idDelivery: idDelivery,
+                                statusOrder: order.status.statusName,
+                                uid: order.uid
+                            } as IReItem)) : [])
+                        ];
+                    }, [] as IReItem[]);
 
-
-                        dispatch(getAllItems(items));
-                    }
+                    dispatch(getAllItems(items));
                 });
         }
     }, [manager.isAuth]);
+
     useEffect(() => {
         if (manager.token) {
             navigation('/orders')

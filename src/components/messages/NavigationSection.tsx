@@ -21,7 +21,13 @@ const NavigationSection: FC<NavigationSectionProps> = ({option}) => {
             return count + unreadInChat;
         }
         return count;
-    }, 0);
+    }, 0)
+    const count_unanswered_messages = useAppSelector(state =>
+        state.messages.chats).filter(chat =>
+            chat.messages[chat.messages.length -1 ].uid !== manager.id
+            && chat.department === options[option as keyof IRole]
+
+        ).length
 
     function showSection(key: string): void {
         setSection(key)
@@ -37,9 +43,12 @@ const NavigationSection: FC<NavigationSectionProps> = ({option}) => {
             className={location.pathname.split('/')[2] === option ? 'active_section_messages' : 'section_messages'}
             key={option}
             to={`/messages/${option}`} >
-            {options[option as keyof IRole]}
-            {unreadMessagesCount !== 0 && <span style={{alignSelf: 'flex-start'}} className={'unread_messages_count'}>{unreadMessagesCount}</span>}
-        </Link>
+            <div className={'notifications_container'}>
+                {options[option as keyof IRole]}
+                {unreadMessagesCount !== 0 && <span style={{alignSelf: 'flex-start'}} className={'red_notifications'}>{unreadMessagesCount}</span>}
+                {count_unanswered_messages - unreadMessagesCount > 0 && <span  className={'yellow_notifications'}>{count_unanswered_messages - unreadMessagesCount}</span>}
+
+            </div></Link>
 
     );
 };
