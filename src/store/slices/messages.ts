@@ -86,6 +86,7 @@ export const fetchPushNewMessage = createAsyncThunk(
                 uid: mid
             }
             await setDoc(newMessageRef, messageData)
+            await thunkAPI.dispatch(pushNewMessage({chat_id, messageData}))
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message)
         }

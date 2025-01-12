@@ -20,7 +20,7 @@ interface ILinks {
 }
 
 const NavBar = () => {
-    const isAdmin = useAppSelector(state => state.manager.manager.role) === 'admin'
+    const isAdmin = useAppSelector(state => state.manager.manager?.role) === 'admin'
     const location = useLocation()
     const manager = useAppSelector(state => state.manager.manager)
     const count_unanswered_messages = useAppSelector(state => state.messages.chats).filter(chat =>

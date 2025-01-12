@@ -19,7 +19,7 @@ import UserPage from "../../pages/UserPage";
 
 
 const Router = () => {
-    const isAdmin = useAppSelector(state => state.manager.manager.role) === 'admin'
+    const isAdmin = useAppSelector(state => state.manager.manager?.role) === 'admin'
     return (
         <Routes>
             <Route path="/" element={<SignInPage />} />
