@@ -41,12 +41,6 @@ const SearchOrder = () => {
         setStatuses(initializeStatuses())
     }, [dispatch])
 
-    useEffect(() => {
-        setAscending(isSorting)
-        if (isSorting) setSortValue('asc')
-        else setSortValue('desc')
-
-    }, [])
 
     const changeButton = () => {
         setSortValue('')

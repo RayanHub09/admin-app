@@ -15,7 +15,7 @@
   padding: 20px
 
 .orders_page_container, .deliveries_page_container, .items_page_container,
-.messages_page_container, .chat_page_container, .users_page_container, .user_page_container
+.messages_page_container, .chat_page_container, .users_page_container, .user_page_container, .container_error
   @include default_container(column, 10px)
   padding: 20px
   height: 100%
@@ -27,3 +27,11 @@
   padding: 20px
   align-items: center
   @include default_container(column, 10px)
+
+.container_error
+  align-items: center
+  font-size: 18px
+.navbar_error
+  background: #006bae
+  height: 100px
+  width: 100%
