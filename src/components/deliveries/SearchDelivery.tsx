@@ -2,8 +2,8 @@ import React, {useCallback, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {methodsOfDelivery, statusesOfDelivery} from "../../lists/dateOfDelivery";
 
-import {convertStringToDate} from "../../functions/changeDate";
-import {clearSearchDelivery, searchDelivery} from "../../store/slices/deliveries";
+import {clearSearchDelivery, searchDelivery, resetSort, sortDeliveries} from "../../store/slices/deliveries";
+
 
 interface IFields {
     [key: string]: boolean
@@ -31,11 +31,31 @@ const SearchDelivery = () => {
     const [endDate, setEndDate] = useState('')
     const [statuses, setStatuses] = useState<IFields>(initializeStatuses)
     const [methods, setMethods] = useState<IFields>(initializeMethods)
+    const [sortValue, setSortValue] = useState('');
+    const [ascending, setAscending] = useState<boolean | null>(null);
 
     const searchDeliveryItem = useCallback(() => {
-        dispatch(searchDelivery([searchNumber, startDate, endDate, statuses, methods, '']))
+        const startDateInSeconds = startDate ? Math.floor(new Date(startDate).getTime() / 1000).toString() : ''
+        const endDateInSeconds = endDate ? Math.floor(new Date(endDate).getTime() / 1000).toString() : ''
+        dispatch(searchDelivery([searchNumber, startDateInSeconds, endDateInSeconds, statuses, methods, '']))
     }, [dispatch, searchNumber, startDate, endDate, statuses, methods])
-
+    const changeButton = () => {
+        setSortValue('')
+    };
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = event.target.value
+        setSortValue(value)
+        if (value === "asc") {
+            setAscending(true)
+            dispatch(sortDeliveries(!ascending))
+        } else if (value === "desc") {
+            setAscending(false)
+            dispatch(sortDeliveries(!ascending))
+        } else {
+            setAscending(null)
+            dispatch(resetSort())
+        }
+    };
     const searchClearFields = useCallback(() => {
         dispatch(clearSearchDelivery())
         setSearchNumber('')
@@ -105,6 +125,19 @@ const SearchDelivery = () => {
                         onClick={searchClearFields}
                         className={'change_button'}>Сбросить</button>
                 </div>
+            <div className={'sort_container'}>
+                <select className={'fields_sort'} onChange={handleSortChange} value={sortValue}>
+                    <option value="" disabled>Выбрать сортировку</option>
+                    <option value="asc">Сначала старые</option>
+                    <option value="desc">Сначала новые</option>
+                </select>
+                <button
+                    onClick={changeButton}
+                    className={'default_button'}
+                    disabled={sortValue === ''}>
+                    Сбросить
+                </button>
+            </div>
         </div>
     );
 };

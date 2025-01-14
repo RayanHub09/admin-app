@@ -10,7 +10,7 @@ interface IItemProps {
 const Item:FC<IItemProps> = ({item}) => {
     return (
        <>
-           <span className={'field'}>{item.part.nameRu}</span>
+           <span className={'field'}>{item.id}</span>
            <span className={'field'}>{item.part.markName}</span>
            <span className={'field'}><h4>{changeCost(item.part.priceYen.toString())}¥</h4>{changeCost(item.part.priceRub.toString())}₽</span>
            <span className={'field'}>{item.part.weight}</span>

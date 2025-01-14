@@ -4,6 +4,7 @@ import { IOrder } from "../../interfaces";
 import ItemsList from "../items/ItemsList";
 import { changeCost } from "../../functions/changeCost";
 import {useAppSelector} from "../../hooks/redux-hooks";
+import {getDate} from "../../functions/changeDate";
 
 interface OrderItemProps {
     order: IOrder
@@ -12,15 +13,6 @@ interface OrderItemProps {
 const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
     const items = useAppSelector(state => state.items.items).filter(item => item.idOrder === order.id)
 
-    function getDate(str: string | undefined): string[] {
-        if (typeof str !== 'string') {
-            return ['', '']
-        }
-
-        const date = str.split('T')[0];
-        const time = str.split('T')[1]?.toString()?.slice(0, -5);
-        return [time, date];
-    }
 
     return (
         <div className={'detailed_order_item_container'}>
@@ -45,8 +37,7 @@ const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
                 </span>
                 <h3 className={'label_order'}>Дата заказа</h3>
                 <span className={'field'}>
-                    {/*{getDate(order.date)[1]}, {getDate(order.date)[0]}*/}
-
+                    {getDate(order.date)[1]}, {getDate(order.date)[0]}
                 </span>
                 <h3 className={'label_order'}>Комментарий</h3>
                 <span className={'field'}>{order.comment}</span>

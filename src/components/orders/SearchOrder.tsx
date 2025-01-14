@@ -1,8 +1,7 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {statusOrder} from "../../lists/statusOrder";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
-import {clearSearch, searchOrder} from "../../store/slices/orders";
-import {convertStringToDate, getDate} from "../../functions/changeDate";
+import {clearSearch, searchOrder, sortOrders, resetSort} from "../../store/slices/orders";
 
 interface IStatuses {
     [key: string]: boolean
@@ -19,14 +18,18 @@ const initializeStatuses = (): IStatuses => {
 
 const SearchOrder = () => {
     const dispatch = useAppDispatch()
-    const isSearching = useAppSelector(state => state.orders.isSearching)
+    const isSorting = useAppSelector(state => state.orders.paramSort)
     const [searchNumber, setSearchNumber] = useState('')
     const [startDate, setStartDate] = useState<string>('')
     const [endDate, setEndDate] = useState('')
+    const [ascending, setAscending] = useState<boolean | null>(null);
+    const [sortValue, setSortValue] = useState('');
     const [statuses, setStatuses] = useState<IStatuses>(initializeStatuses)
 
     const searchOrderItem = useCallback(() => {
-        dispatch(searchOrder([searchNumber, startDate, endDate, statuses, '']))
+        const startDateInSeconds = startDate ? Math.floor(new Date(startDate).getTime() / 1000).toString() : ''
+        const endDateInSeconds = endDate ? Math.floor(new Date(endDate).getTime() / 1000).toString() : ''
+        dispatch(searchOrder([searchNumber, startDateInSeconds, endDateInSeconds, statuses, '']))
 
     }, [dispatch, searchNumber, startDate, endDate, statuses])
 
@@ -38,6 +41,30 @@ const SearchOrder = () => {
         setStatuses(initializeStatuses())
     }, [dispatch])
 
+    useEffect(() => {
+        setAscending(isSorting)
+        if (isSorting) setSortValue('asc')
+        else setSortValue('desc')
+
+    }, [])
+
+    const changeButton = () => {
+        setSortValue('')
+    };
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = event.target.value
+        setSortValue(value)
+        if (value === "asc") {
+            setAscending(true)
+            dispatch(sortOrders(!ascending))
+        } else if (value === "desc") {
+            setAscending(false)
+            dispatch(sortOrders(!ascending))
+        } else {
+            setAscending(null)
+            dispatch(resetSort())
+        }
+    };
 
     return (
         <div className={'search_orders_container'}>
@@ -85,6 +112,19 @@ const SearchOrder = () => {
                 <button
                     onClick={searchClearFields}
                     className={'change_button'}>Сбросить</button>
+            </div>
+            <div className={'sort_container'}>
+                <select className={'fields_sort'} onChange={handleSortChange} value={sortValue}>
+                    <option value="" disabled>Выбрать сортировку</option>
+                    <option value="asc">Сначала старые</option>
+                    <option value="desc">Сначала новые</option>
+                </select>
+                <button
+                    onClick={changeButton}
+                    className={'default_button'}
+                    disabled={sortValue === ''}>
+                    Сбросить
+                </button>
             </div>
         </div>
     );

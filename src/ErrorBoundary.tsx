@@ -1,19 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import {BrowserRouter} from "react-router-dom";
-import {Provider} from "react-redux";
-import {store} from "./store";
-import './firebase'
-// import ErrorBoundary from "./ErrorBoundary";
-import ErrorFallback from "./pages/ErrorFallback";
-import NetworkStatus from "./pages/NetworkStatus";
-import { useState, useEffect, createContext, useContext } from 'react';
-
-const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
-);
+import React, { useState, useEffect, createContext, useContext } from 'react';
 
 interface ErrorBoundaryContextType {
     hasError: boolean;
@@ -66,24 +51,3 @@ const ErrorBoundary: React.FC<Props> = ({ children, FallbackComponent }) => {
 
     return <>{children}</>;
 };
-
-root.render(
-    <React.StrictMode>
-        <BrowserRouter>
-            <Provider store={store}>
-                <ErrorBoundaryProvider>
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                        <NetworkStatus />
-                        <App/>
-                    </ErrorBoundary>
-                </ErrorBoundaryProvider>
-
-            </Provider>
-        </BrowserRouter>
-    </React.StrictMode>
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-

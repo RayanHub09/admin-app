@@ -1,14 +1,19 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
-import serializeData from "../../Serializer"
 import {IOrder} from "../../interfaces"
 import {convertStringToDate, getDate} from "../../functions/changeDate";
+import {serverTimestamp, Timestamp} from "firebase/firestore";
+import firebase from "firebase/compat";
 
 
 interface IState {
     orders: IOrder[]
     filteredOrders: IOrder[]
+    sortedOrders: IOrder[]
+    filteredSortedOrders: IOrder[]
+    paramSort: boolean | null
     isSearching: boolean
+    isSorting: boolean
     error: string | null
     status: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
@@ -17,7 +22,11 @@ interface IState {
 const initialState: IState = {
     orders: [],
     filteredOrders: [],
+    filteredSortedOrders: [],
+    sortedOrders: [],
     isSearching: false,
+    isSorting: false,
+    paramSort: null,
     error: null,
     status: null,
     statusGet: null
@@ -27,25 +36,32 @@ export const fetchGetAllOrders = createAsyncThunk(
     'orders/fetchGetAllOrders',
     async (arg, thunkAPI) => {
         try {
-            const q = query(collection(db, "orders"))
-            const querySnapshot = await getDocs(q)
+            const q = query(collection(db, "orders"));
+            const querySnapshot = await getDocs(q);
             const orders: IOrder[] = querySnapshot.docs.map(doc => {
-                const data = doc.data()
-                const serializedData = serializeData(
-                    {
-                        id: doc.id,
-                        date: data.date.seconds,
-                        ...doc.data(),
-                        status: {
-                            date: data.status.date.seconds,
-                            ...doc.data().status,
-                        }
+                const data = doc.data();
+                const serializedData: IOrder = {
+                    id: doc.id,
+                    comment: data.comment,
+                    date: data.date.seconds,
+                    items: data.items,
+                    itemsCnt: data.itemsCnt,
+                    number: data.number,
+                    priceRu: data.priceRu,
+                    priceYen: data.priceYen,
+                    uid: data.uid,
+                    status: {
+                        archived: data.status.archived || false,
+                        date: data.status.date.seconds,
+                        readyToPackage: data.status.readyToPackage,
+                        statusName: data.status.statusName
                     }
-                )
-                return serializedData as IOrder
-            })
-            thunkAPI.dispatch(getAllOrders(orders))
-            return orders
+                }
+                return serializedData;
+            });
+
+            thunkAPI.dispatch(getAllOrders(orders));
+            return orders;
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }
@@ -58,7 +74,8 @@ export const fetchChangeStatusOrder = createAsyncThunk(
         const orderDocRef = doc(db, 'orders', orderId)
         try {
             await updateDoc(orderDocRef, {
-                'status.statusName': newStatus
+                'status.statusName': newStatus,
+                'status.date': serverTimestamp()
             })
             thunkAPI.dispatch(changeStatusOrder({orderId, newStatus}))
         } catch (error: any) {
@@ -77,8 +94,11 @@ export const fetchChangeOrder = createAsyncThunk(
            }: { orderId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
         try {
             const orderDocRef = doc(db, 'orders', orderId);
-            const updateData: { [key: string]: string } = {};
-            if (newStatus !== undefined) updateData['status.statusName'] = newStatus;
+            const updateData: { [key: string]: string|any } = {};
+            if (newStatus !== undefined) {
+                updateData['status.statusName'] = newStatus
+                updateData['status.date'] = serverTimestamp()
+            }
             if (newComment !== undefined) updateData['comment'] = newComment;
             if (newNumber !== undefined) updateData['number'] = newNumber;
             await updateDoc(orderDocRef, updateData)
@@ -95,8 +115,7 @@ export const fetchCancelOrder = createAsyncThunk(
     async (orderId: string, thunkAPI) => {
         try {
             const orderDocRef = doc(db, 'orders', orderId)
-            await updateDoc(orderDocRef, {['status.statusName']: 'Отменен'})
-            // await updateDoc(orderDocRef, {['items'] : })
+            await updateDoc(orderDocRef, {['status.statusName']: 'Отменен', ['status.date']: serverTimestamp()})
             thunkAPI.dispatch(cancelOrder({orderId}))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
@@ -118,36 +137,38 @@ const OrdersSlice = createSlice({
             }
             state.isSearching = true
             state.filteredOrders = state.orders.filter(order => {
-                const orderDate = convertStringToDate(getDate(order.date)[1]).getTime()
-                if (uid.length === 0) {
-                    return (number === '' || order.number.includes(number)) &&
-                        (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
-                        (endDate === '' || orderDate <= convertStringToDate(endDate ).getTime()) &&
-                        (!Object.values(status).includes(true)   || status[order.status.statusName]);
-                }
-                return order.uid === uid &&
+                const orderDate = order.date
+                return (order.uid === uid || uid === '') &&
                     (number === '' || order.number.includes(number)) &&
-                    (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
-                    (endDate === '' || orderDate <= convertStringToDate(endDate ).getTime()) &&
+                    (startDate === '' || orderDate >= startDate) &&
+                    (endDate === '' || orderDate <= endDate) &&
                     (!Object.values(status).includes(true)   || status[order.status.statusName]);
-
             })
+            if (state.isSorting) {
+                state.filteredSortedOrders = [...state.filteredOrders].sort((a, b) => {
+                    const dateA = +a.date
+                    const dateB = +b.date
+                    return state.paramSort ? dateA - dateB : dateB - dateA
+                })
+            }
         },
         changeStatusOrder(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {orderId, newStatus} = action.payload
             state.orders = state.orders.map(order =>
-                order.id === orderId ? {...order, status: {statusName: newStatus}} : order
+                order.id === orderId ? {...order, status: {statusName: newStatus, date: currentTimeInSeconds}} : order
             ) as IOrder[]
             state.filteredOrders = state.filteredOrders.map(order =>
-                order.id === orderId ? {...order, status: {statusName: newStatus}} : order
+                order.id === orderId ? {...order, status: {statusName: newStatus, date: currentTimeInSeconds}} : order
             ) as IOrder[]
         },
         changeOrder(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {orderId, newStatus, newComment, newNumber} = action.payload
             state.orders = state.orders.map(order =>
                 order.id === orderId ? {
                     ...order,
-                    status: {statusName: newStatus},
+                    status: {statusName: newStatus, date: currentTimeInSeconds},
                     comment: newComment,
                     number: newNumber
                 } : order
@@ -158,10 +179,12 @@ const OrdersSlice = createSlice({
             state.filteredOrders = []
         },
         cancelOrder(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {orderId} = action.payload
             state.orders = state.orders.map(order => order.id === orderId ? {
                     ...order,
-                    status: {statusName: 'Отменен'}
+                    status: {statusName: 'Отменен'},
+                    date: currentTimeInSeconds
                 } : order
             ) as IOrder[]
 
@@ -182,6 +205,26 @@ const OrdersSlice = createSlice({
         },
         deleteOrderSnapshot(state, action) {
             state.orders = [...state.orders.filter(order => order.id !== action.payload)]
+        },
+        sortOrders(state, action) {
+            state.isSorting = true
+            state.sortedOrders = [...state.orders]
+            state.paramSort = action.payload
+            state.sortedOrders.sort((a, b) => {
+                const dateA = +a.date
+                const dateB = +b.date
+                return action.payload ? dateA - dateB : dateB - dateA
+            })
+            state.filteredSortedOrders = [...state.filteredOrders]
+            state.filteredSortedOrders.sort((a, b) => {
+                const dateA = +a.date
+                const dateB = +b.date
+                return action.payload ? dateA - dateB : dateB - dateA
+            })
+        },
+        resetSort(state) {
+            state.isSorting = false
+            state.paramSort = null
         }
 
     },
@@ -233,6 +276,6 @@ const OrdersSlice = createSlice({
 
 export const OrderReducer = OrdersSlice.reducer
 export const {
-    getAllOrders, searchOrder, changeStatusOrder, changeOrder,
+    getAllOrders, searchOrder, changeStatusOrder, changeOrder, resetSort, sortOrders,
     clearSearch, cancelOrder, resetStatus, changeOrderSnapshot, pushNewOrderSnapshot, deleteOrderSnapshot
 } = OrdersSlice.actions

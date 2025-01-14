@@ -20,16 +20,25 @@ interface ILinks {
 }
 
 const NavBar = () => {
+    const dispatch = useAppDispatch()
     const isAdmin = useAppSelector(state => state.manager.manager?.role) === 'admin'
     const location = useLocation()
     const manager = useAppSelector(state => state.manager.manager)
-    const count_unanswered_messages = useAppSelector(state => state.messages.chats).filter(chat =>
-        chat.messages[chat.messages.length -1 ].uid !== manager.id).length
-    const dispatch = useAppDispatch()
-    const unreadMessages = useAppSelector(state => state.messages.chats.reduce((sum: number, chat: IChat | undefined) => {
-        if (!chat) return sum
-        return sum + chat.messages.filter((message: IMessage) => !message?.read && message?.uid !== manager.id).length;
-    }, 0));
+    const count_unanswered_messages = useAppSelector(state => {
+        const chats = state.messages.chats || [];
+        return chats.filter(chat =>
+            chat.messages && chat.messages[chat.messages.length - 1]?.uid !== manager.id
+        ).length;
+    });
+
+    const unreadMessages = useAppSelector(state => {
+        const chats = state.messages.chats || [];
+        return chats.reduce((sum: number, chat: IChat | undefined) => {
+            if (!chat || !chat.messages) return sum;
+            return sum + chat.messages.filter((message: IMessage) => !message?.read && message?.uid !== manager.id).length;
+        }, 0);
+    });
+
 
 
     const [isVisible, setIsVisible] = useState(false)

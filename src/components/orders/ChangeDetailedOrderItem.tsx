@@ -20,6 +20,8 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
     const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
     const changeOrderNumber = useAppSelector(state => state.manager.manager.changeOrderNumber)
     const deliveries = useAppSelector(state => state.deliveries.deliveries)
+    const [error, setError] = useState('')
+    const numbersOrders = useAppSelector(state => state.orders.orders).map(order => order.number)
     const getDeliveryIdByOrderId = (): string | null => {
         const delivery = deliveries.find(delivery =>
             delivery.orders && delivery.orders.some(item => item.id === order.id)
@@ -29,28 +31,41 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
 
     function changeOrder() {
-        setIsDisabled(true)
-        dispatch(fetchChangeOrder({
-            orderId: order.id, newStatus: status,
-            newComment: comment, newNumber: number,
-        })).then(() => setIsDisabled(false))
-        const deliveryId = getDeliveryIdByOrderId()
-        if (deliveryId)
-            dispatch(fetchChangeOrderDelivery({
-                deliveryId, orderId: order.id, newStatus: status,
+        if (numbersOrders.includes(number)) {
+            setError('Данный номер уже занят. Попробуйте другой.')
+            setTimeout(() => setError(''), 4000)
+        } else {
+            setError('')
+            setIsDisabled(true)
+            dispatch(fetchChangeOrder({
+                orderId: order.id, newStatus: status,
                 newComment: comment, newNumber: number,
-            }))
+            })).then(() => setIsDisabled(false))
+            const deliveryId = getDeliveryIdByOrderId()
+            if (deliveryId)
+                dispatch(fetchChangeOrderDelivery({
+                    deliveryId, orderId: order.id, newStatus: status,
+                    newComment: comment, newNumber: number,
+                }))
+        }
 
     }
 
     return (
         <div className={'detailed_order_item_container'}>
-            <button
-                onClick={changeOrder}
-                className={'change_button'}
-                disabled={isDisabled}>
-                {!isDisabled ? 'Сохранить' : 'загрузка...'}</button>
+            <div className={'container'}>
+                <button
+                    onClick={changeOrder}
+                    className={'change_button'}
+                    disabled={isDisabled}>
+                    {!isDisabled ? 'Сохранить' : 'загрузка...'}</button>
+                {error &&
+                    <div className={'error'}>
+                        {error}
+                    </div>}
+            </div>
             <h2>Заказ № {order.number}</h2>
+
             <div className={'detailed_order_item'}>
                 <h3 className={'label_order'} style={{borderTop: '1px rgba(128, 128, 128, 0.5) solid'}}>Номер</h3>
                 {changeOrderNumber ?

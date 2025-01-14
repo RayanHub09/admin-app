@@ -10,8 +10,11 @@ const OrderGrid:FC<OrderGridProps> = ({orders}) => {
 
     return (
         <div className={'order_grid_container'}>
-            <span style={{borderLeft: '1px rgba(128, 128, 128, 0.5) solid'}} className={'label_user'}>ID</span>
             <span className={'label_user'}>Номер</span>
+            <span className={'label_user'}>Дата заказа</span>
+            <span style={{borderLeft: '1px rgba(128, 128, 128, 0.5) solid'}} className={'label_user'}>ID</span>
+            <span className={'label_user'}>Стоимость товара</span>
+            <span className={'label_user'}>Кол-во</span>
             <span className={'label_user'}>Статус</span>
             <span className={'label_user'}>Комментарий</span>
             {orders.map(order => <>

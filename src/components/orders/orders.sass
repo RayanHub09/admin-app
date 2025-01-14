@@ -18,6 +18,7 @@
 .orders_list_container
   @include default_container(column, 10px)
   height: 100%
+  padding-bottom: 20px
 
 
 .field,  .label_order
@@ -33,6 +34,16 @@
   column-gap: 10px
   justify-content: space-between
   border: #a5a5a5 2px solid
+  padding: 20px
+  align-items: center
+
+.grey_order_item_container
+  @include default_container(row, 10px)
+  font-size: 20px
+  column-gap: 10px
+  justify-content: space-between
+  border: #a5a5a5 2px solid
+  background: rgba(148, 148, 148, 0.35)
   padding: 20px
   align-items: center
 @media (max-width: 920px)

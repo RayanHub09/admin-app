@@ -11,13 +11,13 @@ import {
     fetchGetAllDeliveries,
     pushNewDeliverySnapshot
 } from "./store/slices/deliveries";
-import {getAllItems} from "./store/slices/items";
-import {IDelivery, IOrder, IReItem, IReOrder} from "./interfaces";
+import {getAllItems, pushNewItems} from "./store/slices/items";
+import {IChat, IDelivery, IOrder, IReItem, IReOrder} from "./interfaces";
 import {fetchAutoSignIn} from "./store/slices/manager";
 import {useNavigate} from "react-router-dom";
-import {fetchGetAllChats, pushNewMessage} from "./store/slices/messages";
+import {changeMessage, fetchGetAllChats, pushNewChat, pushNewMessage} from "./store/slices/messages";
 import {fetchGetAllUsers} from "./store/slices/users";
-import {collection, getFirestore, onSnapshot} from "firebase/firestore";
+import {collection, getFirestore, onSnapshot, serverTimestamp} from "firebase/firestore";
 
 
 function App() {
@@ -34,12 +34,13 @@ function App() {
                     dispatch(changeOrderSnapshot(change.doc.data() as IOrder))
                 } else if (change.type === 'added') {
                     dispatch(pushNewOrderSnapshot(change.doc.data() as IOrder))
+                    dispatch(pushNewItems([change.doc.data().items, change.doc.data().id, change.doc.data().number]))
                 } else if (change.type === 'removed') {
-                    dispatch(deleteOrderSnapshot(change.doc.id)) // Используйте change.doc.id вместо change.doc.data().id
+                    dispatch(deleteOrderSnapshot(change.doc.id))
                 }
             });
-        });
-        return () => unsubscribe(); // Очистка обработчика
+        })
+        return () => unsubscribe()
     }, []);
 
     useEffect(() => {
@@ -54,9 +55,20 @@ function App() {
                 return onSnapshot(messagesRefInChatRoom, (querySnapshot1) => {
                     querySnapshot1.docChanges().forEach((change) => {
                         if (change.type === 'added') {
+
                             dispatch(pushNewMessage({
-                                messageData: change.doc.data(),
+                                messageData: {
+                                    ...change.doc.data(),
+                                    id: change.doc.id
+                                },
                                 chat_id: change.doc.ref.path.split('/')[1]
+                            }));
+                        } else if (change.type === 'modified') {
+                            dispatch(changeMessage({
+                                chat_id: change.doc.ref.path.split('/')[1],
+                                messageData: {
+                                    ...change.doc.data(),
+                                    id: change.doc.id}
                             }))
                         }
                     })
@@ -77,6 +89,20 @@ function App() {
                     dispatch(pushNewDeliverySnapshot(change.doc.data() as IDelivery))
                 } else if (change.type === 'removed') {
                     dispatch(deleteDeliverySnapshot(change.doc.data().id))
+                }
+            })
+        })
+    }, [])
+
+    useEffect(() => {
+        const db = getFirestore()
+        const ChatsRef = collection(db, 'chat_rooms')
+        return onSnapshot(ChatsRef, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'added') {
+                    dispatch(pushNewChat(change.doc.data() as IChat))
+                } else if (change.type === 'removed') {
+                    console.log()
                 }
             })
         })

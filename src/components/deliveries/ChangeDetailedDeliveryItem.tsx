@@ -11,6 +11,7 @@ interface IDeliveryProps {
 
 const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
     const dispatch = useAppDispatch()
+    const numbersDeliveries = useAppSelector(state => state.deliveries.deliveries).map(delivery => delivery.number)
     const statusFetch = useAppSelector(state => state.deliveries.status)
     const writeCommentsDelivery = useAppSelector(state => state.manager.manager.writeCommentsDelivery)
     const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
@@ -18,22 +19,34 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
     const [number, setNumber] = useState(delivery.number)
     const [status, setStatus] = useState(delivery.status.statusName)
     const [comment, setComment] = useState(delivery.comment)
+    const [error, setError] = useState('')
 
     function changeDelivery() {
-        dispatch(fetchChangeDelivery({deliveryId: delivery.id, newStatus: status,
-            newComment: comment, newNumber: number}))
-            .then(() => dispatch(resetStatus()))
+        if (numbersDeliveries.includes(number)) {
+             setError('Данный номер уже занят. Попробуйте другой.')
+            setTimeout(() => setError(''), 4000)
+        } else {
+            dispatch(fetchChangeDelivery({deliveryId: delivery.id, newStatus: status,
+                newComment: comment, newNumber: number}))
+                .then(() => dispatch(resetStatus()))
+        }
 
     }
 
     return (
         <div className={'detailed_delivery_item_container'}>
-            <button
-                onClick={changeDelivery}
-                disabled={statusFetch === 'loading'}
-                className={'change_button'}>
-                {statusFetch === 'loading' ? 'загрузка...' : 'Сохранить'}
-            </button>
+            <div className={'container'}>
+                <button
+                    onClick={changeDelivery}
+                    disabled={statusFetch === 'loading'}
+                    className={'change_button'}>
+                    {statusFetch === 'loading' ? 'загрузка...' : 'Сохранить'}
+                </button>
+                {error &&
+                    <div className={'error'}>
+                        {error}
+                    </div>}
+            </div>
             <h2>Посылка № {delivery.number}</h2>
             <div className={'detailed_delivery_item'}>
                 <h3 className={'label_order'}>Номер</h3>
@@ -86,7 +99,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Декларируемая стоимость</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Время создания</h3>
-                <span className={'field'}>{getDate(delivery.creationDate)[1]}, {getDate(delivery.creationDate)[0]}</span>
+                <span className={'field'}>{getDate(delivery.creationDate.toString())[1]}, {getDate(delivery.creationDate.toString())[0]}</span>
                 <h3 className={'label_order'}>ФИО</h3>
                 <span className={'field'}>{delivery.customer.name} {delivery.customer.surname}</span>
                 <h3 className={'label_order'}>Адрес</h3>

@@ -16,6 +16,7 @@ import ItemPage from "../../pages/ItemPage";
 import ChatPage from "../../pages/ChatPage";
 import UsersPage from "../../pages/UsersPage";
 import UserPage from "../../pages/UserPage";
+import OfflinePage from "../../pages/OfflinePage";
 
 
 const Router = () => {
@@ -31,6 +32,7 @@ const Router = () => {
             <Route path={'/users/:id'} element={<PrivateRouter element={<UserPage />} /> } />
             <Route path={'/deliveries'} element={<PrivateRouter element={<DeliveriesPage />} /> } />
             <Route path={'/items'} element={<PrivateRouter element={<ItemsPage />} /> } />
+            <Route path={'/offline'} element={<PrivateRouter element={<OfflinePage />} /> } />
             <Route path={'/items/:id'} element={<PrivateRouter element={<ItemPage />} /> } />
             <Route path={'/deliveries/:id'} element={<PrivateRouter element={<DeliveryPage />} /> } />
             <Route path={'/managers/:id'} element={<PrivateRouter element={<ManagerPage />} /> } />

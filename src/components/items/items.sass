@@ -3,7 +3,12 @@
   row-gap: $row_gap
   column-gap: $column_gap
   display: flex
-
+%button
+  border-radius: 5px
+  font-size: 16px
+  border: 1px black solid
+  transition: all 1s
+  cursor: pointer
 .items_list_container
   @include default_container(column, 5px, 0px)
   padding-bottom: 20px
@@ -22,5 +27,12 @@
 .items_list_all_container
   @include default_container(column, 20px, 0px)
   padding-bottom: 20px
+
+.fields_sort
+  @extend %button
+
+.sort_container
+  @include default_container(row, 10px, 10px)
+  align-self: flex-end
 
 

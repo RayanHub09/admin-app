@@ -11,8 +11,12 @@ interface DeliveriesListProps {
 }
 const DeliveriesList:FC<DeliveriesListProps> = ({deliveries}) => {
     const dispatch = useAppDispatch()
-    const searchDeliveries = useAppSelector(state => state.deliveries.filteredDeliveries)
+    const sortedDeliveries = useAppSelector(state => state.deliveries.sortedDeliveries)
+    const filteredSortedDeliveries = useAppSelector(state => state.deliveries.filteredSortedDeliveries)
+    const filteredDeliveries = useAppSelector(state => state.deliveries.filteredDeliveries)
     const isSearching = useAppSelector(state => state.deliveries.isSearching)
+    const isSorting = useAppSelector(state => state.deliveries.isSorting)
+
     useEffect(() => {
         dispatch(clearSearchDelivery())
     }, [])
@@ -20,22 +24,24 @@ const DeliveriesList:FC<DeliveriesListProps> = ({deliveries}) => {
     return (
 
         <div className={'deliveries_list_container'}>
-            {(searchDeliveries.length === 0 && isSearching)? (<NotFoundText />) :
+            {(filteredDeliveries.length === 0 && isSearching) ? (<NotFoundText />) :
                 <div className={'deliveries_list'}>
                     <h3 className={'label_order'}>Номер</h3>
-                    <h3 className={'label_order'}>Способ</h3>
-                    <h3 className={'label_order'}>Статус</h3>
                     <h3 className={'label_order'}>Время создания</h3>
-                    <h3 className={'label_order'}>Стоимость доставки</h3>
+                    <h3 className={'label_order'}>Способ доставки</h3>
                     <h3 className={'label_order'}>Стоимость товара</h3>
                     <h3 className={'label_order'}>Кол-во</h3>
+                    <h3 className={'label_order'}>Стоимость доставки</h3>
+                    <h3 className={'label_order'}>Статус</h3>
+                    <h3 className={'label_order'}>Комментарий</h3>
                     {isSearching
-                        ?
-                        searchDeliveries.map(delivery =>
-                            <DeliveryItem delivery={delivery} key={delivery.id} />)
+                        ? (isSorting ? filteredSortedDeliveries.map(delivery =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} />) : filteredDeliveries.map(delivery =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} />))
                         :
-                        deliveries.map(delivery =>
-                            <DeliveryItem delivery={delivery} key={delivery.id} />)
+                        (isSorting ? sortedDeliveries.map(delivery =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} />) : deliveries.map(delivery =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} />))
                     }
                 </div>
             }

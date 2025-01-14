@@ -4,13 +4,17 @@ import {collection, db, doc, getDoc, getDocs, query, updateDoc} from "../../fire
 import serializeData from "../../Serializer";
 import {convertStringToDate, getDate} from "../../functions/changeDate";
 import {RootState} from "../index";
-import {arrayUnion} from "firebase/firestore";
+import {arrayUnion, serverTimestamp, Timestamp} from "firebase/firestore";
 
 
 interface IState {
     deliveries: IDelivery[]
+    sortedDeliveries: IDelivery[]
+    filteredSortedDeliveries: IDelivery[]
     error: string | null
+    paramSort: boolean | null
     isSearching: boolean
+    isSorting: boolean
     filteredDeliveries: IDelivery[]
     status: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
@@ -18,8 +22,12 @@ interface IState {
 
 const initialState: IState = {
     deliveries: [],
+    sortedDeliveries: [],
+    filteredSortedDeliveries: [],
     error: null,
     isSearching: false,
+    isSorting: false,
+    paramSort: null,
     filteredDeliveries: [],
     status: null,
     statusGet: null
@@ -29,25 +37,53 @@ export const fetchGetAllDeliveries = createAsyncThunk(
     'deliveries/fetchGetAllDeliveries',
     async (arg, thunkAPI) => {
         try {
-            const q = query(collection(db, "deliveries"))
-            const querySnapshot = await getDocs(q)
+            const q = query(collection(db, "deliveries"));
+            const querySnapshot = await getDocs(q);
             const deliveries: IDelivery[] = querySnapshot.docs.map(doc => {
-                const data = doc.data()
-                const serializedData = serializeData(
-                    {
-                        id: doc.id,
-                        creationDate: data.creationDate.seconds,
-                        ...data,
-                        status: {
-                            date: data.status.date.seconds,
-                            ...data.status,
-                        }
-                    }
-                )
-                return serializedData as IDelivery
-            })
-            thunkAPI.dispatch(getAllDeliveries(deliveries))
-            return deliveries
+                const data = doc.data();
+                const serializedOrders: IOrder[] = data.orders.map((order: any) => ({
+                    id: order.id,
+                    comment: order.comment,
+                    date: order.date.seconds,
+                    items: order.items,
+                    itemsCnt: order.itemsCnt,
+                    number: order.number,
+                    priceRu: order.priceRu,
+                    priceYen: order.priceYen,
+                    status: {
+                        archived: data.status.archived || false,
+                        date: data.status.date.seconds,
+                        readyToPackage: data.status.readyToPackage,
+                        statusName: data.status.statusName
+                    },
+                    uid: order.uid
+                }));
+
+                const serializedData: IDelivery = {
+                    id: doc.id,
+                    comment: data.comment,
+                    country: data.country,
+                    creationDate: data.creationDate.seconds,
+                    customer: data.customer,
+                    deliveryCost: data.deliveryCost,
+                    deliveryCostYen: data.deliveryCostYen,
+                    deliveryMethod: data.deliveryMethod,
+                    number: data.number,
+                    orders: serializedOrders,
+                    partsCostRu: data.partsCostRu,
+                    partsCostYen: data.partsCostYen,
+                    ruDelivery: data.ruDelivery,
+                    status: {
+                        date: data.status.date.seconds,
+                        readyToBuy: data.status.readyToBuy,
+                        statusName: data.status.statusName
+                    },
+                    uid: data.uid
+                };
+                return serializedData;
+            });
+            thunkAPI.dispatch(getAllDeliveries(deliveries));
+            return deliveries;
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }
@@ -64,8 +100,11 @@ export const fetchChangeDelivery = createAsyncThunk(
            }: { deliveryId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
         const deliveryDocRef = doc(db, 'deliveries', deliveryId)
         try {
-            const updateData: { [key: string]: string } = {};
-            if (newStatus !== undefined) updateData['status.statusName'] = newStatus;
+            const updateData: { [key: string]: string|any } = {};
+            if (newStatus !== undefined) {
+                updateData['status.statusName'] = newStatus
+                updateData['status.date'] = serverTimestamp()
+            };
             if (newComment !== undefined) updateData['comment'] = newComment;
             if (newNumber !== undefined) updateData['number'] = newNumber;
             await updateDoc(deliveryDocRef, updateData)
@@ -107,7 +146,8 @@ export const fetchCancelDelivery = createAsyncThunk(
             const deliveryData = deliveryDoc.data()
             const updatedOrders = deliveryData?.orders.map((order: IOrder) => ({
                 ...order,
-                ['status.statusName']: 'На складе в Японии'
+                ['status.statusName']: 'На складе в Японии',
+                ['status.date']: serverTimestamp()
             }))
             await updateDoc(deliveryDocRef, {
                 ['status.statusName']: 'Отменен',
@@ -131,6 +171,7 @@ export const fetchChangeStatusOrderDelivery = createAsyncThunk(
             const orders = deliveryData?.orders || []
             const orderIndex = orders.findIndex((order: IOrder) => order.id === orderId)
             orders[orderIndex]['status.statusName'] = newStatus;
+            orders[orderIndex]['status.date'] = serverTimestamp()
             await updateDoc(deliveryDocRef, {
                 orders: orders
             })
@@ -184,32 +225,33 @@ const DeliveriesSlice = createSlice({
             }
             state.isSearching = true
             state.filteredDeliveries = state.deliveries.filter(delivery => {
-                const orderDate = convertStringToDate(getDate(delivery.creationDate)[1]).getTime()
-                if (uid.length === 0) {
-                    return (number === '' || delivery.number.includes(number)) &&
-                        (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
-                        (endDate === '' || orderDate <= convertStringToDate(endDate).getTime()) &&
-                        (!Object.values(status).includes(true) || status[delivery.status.statusName]) &&
-                        (!Object.values(methods).includes(true) || methods[delivery.deliveryMethod])
-                }
-                return delivery.uid === uid &&
+                const orderDate = delivery.creationDate
+                return (uid === '' || delivery.uid === uid ) &&
                     (number === '' || delivery.number.includes(number)) &&
-                    (startDate === '' || orderDate >= convertStringToDate(startDate).getTime()) &&
-                    (endDate === '' || orderDate <= convertStringToDate(endDate).getTime()) &&
+                    (startDate === '' || orderDate >= startDate) &&
+                    (endDate === '' || orderDate <= endDate) &&
                     (!Object.values(status).includes(true) || status[delivery.status.statusName]) &&
                     (!Object.values(methods).includes(true) || methods[delivery.deliveryMethod])
             })
+            if (state.isSorting) {
+                state.filteredSortedDeliveries = [...state.filteredDeliveries].sort((a, b) => {
+                    const dateA = +a.creationDate
+                    const dateB = +b.creationDate
+                    return state.paramSort ? dateA - dateB : dateB - dateA
+                })
+            }
         },
         clearSearchDelivery(state) {
             state.isSearching = false
             state.filteredDeliveries = []
         },
         changeDelivery(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {deliveryId, newStatus, newComment, newNumber} = action.payload
             state.deliveries = state.deliveries.map(delivery =>
                 delivery.id === deliveryId ? {
                     ...delivery,
-                    status: {statusName: newStatus},
+                    status: {statusName: newStatus, date: currentTimeInSeconds},
                     comment: newComment,
                     number: newNumber
                 } : delivery
@@ -232,22 +274,27 @@ const DeliveriesSlice = createSlice({
             console.log(state.deliveries)
         },
         cancelDelivery(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {deliveryId} = action.payload
             const newDelivery = {...state.deliveries.filter(order => order.id === deliveryId)[0]}
             newDelivery.status.statusName = 'Отменен'
-            newDelivery.orders.map(order => order.status.statusName = 'На складе в Японии')
+            newDelivery.status.date = currentTimeInSeconds
+            newDelivery.orders.map(order => {
+                order.status.statusName = 'На складе в Японии'
+                order.status.date = currentTimeInSeconds
+            })
             state.deliveries = state.deliveries.map(delivery => delivery.id === deliveryId
                 ? newDelivery
                 : delivery
             ) as IDelivery[]
         },
         changeStatusOrderDelivery(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {orderId, newStatus, deliveryId} = action.payload
             const delivery = state.deliveries.filter(delivery => delivery.id === deliveryId)[0]
-
             if (delivery) {
                 const newOrders = delivery.orders.map(order =>
-                    order.id === orderId ? {...order, status: {...order.status, statusName: newStatus}} : order
+                    order.id === orderId ? {...order, status: {...order.status, statusName: newStatus, date: currentTimeInSeconds}} : order
                 )
                 const updatedDelivery = {...delivery, orders: newOrders}
                 state.deliveries = state.deliveries.map(d =>
@@ -256,6 +303,7 @@ const DeliveriesSlice = createSlice({
             }
         },
         changeOrderDelivery(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
             const {orderId, newStatus, newComment, newNumber, deliveryId} = action.payload
             const delivery = state.deliveries.filter(delivery => delivery.id === deliveryId)[0]
 
@@ -265,7 +313,7 @@ const DeliveriesSlice = createSlice({
                         ...order,
                         comment: newComment,
                         number: newNumber,
-                        status: {...order.status, statusName: newStatus}
+                        status: {...order.status, statusName: newStatus, date: currentTimeInSeconds}
                     } : order
                 )
                 const updatedDelivery = {...delivery, orders: newOrders}
@@ -287,6 +335,26 @@ const DeliveriesSlice = createSlice({
         },
         deleteDeliverySnapshot(state, action) {
             state.deliveries = [...state.deliveries.filter(delivery => delivery.id !== action.payload)]
+        },
+        sortDeliveries(state, action) {
+            state.isSorting = true
+            state.sortedDeliveries = [...state.deliveries]
+            state.paramSort = action.payload
+            state.sortedDeliveries.sort((a, b) => {
+                const dateA = +a.creationDate
+                const dateB = +b.creationDate
+                return action.payload ? dateA - dateB : dateB - dateA
+            })
+            state.filteredSortedDeliveries = [...state.filteredDeliveries]
+            state.filteredSortedDeliveries.sort((a, b) => {
+                const dateA = +a.creationDate
+                const dateB = +b.creationDate
+                return action.payload ? dateA - dateB : dateB - dateA
+            })
+        },
+        resetSort(state) {
+            state.isSorting = false
+            state.paramSort = null
         }
 
     },
@@ -338,5 +406,6 @@ export const {
     getAllDeliveries, searchDelivery, clearSearchDelivery,
     changeDelivery, resetStatus, calculateDeliveryCost,
     cancelDelivery, changeStatusOrderDelivery, changeOrderDelivery,
-    changeDeliverySnapshot, pushNewDeliverySnapshot, deleteDeliverySnapshot
+    changeDeliverySnapshot, pushNewDeliverySnapshot, deleteDeliverySnapshot,
+    sortDeliveries, resetSort
 } = DeliveriesSlice.actions

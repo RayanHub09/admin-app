@@ -1,16 +1,22 @@
-import {IChat, IMessage} from "../../interfaces"
+import {IChat, IMessage, IReItem} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit"
-import {collection, db, deleteDoc, doc, getDoc, getDocs, query} from "../../firebase"
-import serializeData from "../../Serializer"
-import {serverTimestamp, setDoc, updateDoc} from "firebase/firestore"
+import {collection, db, deleteDoc, doc, getDocs, query} from "../../firebase"
+import {serverTimestamp, setDoc, Timestamp, updateDoc} from "firebase/firestore"
 import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage"
+import {IRole, options} from "../../lists/roleList";
 
-function generate() {
-    return `${Math.random().toString(36).substr(2, 9)}${Math.random().toString(36).substr(2, 9)}`
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 interface IState {
     chats: IChat[]
+    paramSort: boolean | null
+    isSorting: boolean
     error: string | null
     statusSend: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
@@ -21,6 +27,8 @@ interface IState {
 
 const initialState: IState = {
     chats: [],
+    paramSort: null,
+    isSorting: false,
     error: null,
     statusChange: null,
     statusSend: null,
@@ -33,33 +41,41 @@ export const fetchGetAllChats = createAsyncThunk(
     'chats/fetchGetAllChats',
     async (arg, thunkAPI) => {
         try {
-            const q = query(collection(db, "chat_rooms"))
-            const querySnapshot = await getDocs(q)
+            const q = query(collection(db, "chat_rooms"));
+            const querySnapshot = await getDocs(q);
             const chats: IChat[] = querySnapshot.docs.map(doc => {
-                const serializedData = serializeData({
+                const data = doc.data();
+                const serializedData = {
                     id: doc.id,
-                    ...doc.data()
-                })
-                return serializedData as IChat
-            })
+                    department: data.department,
+                    theme: data.theme,
+                    uid: data.uid,
+                    creationDate: data.creationDate.seconds,
+                    messages: []
+                };
+                return serializedData as IChat;
+            });
 
             for (const chat of chats) {
-                const q_1 = query(collection(db, `chat_rooms/${chat.id}/messages`))
-                const querySnapshot_1 = await getDocs(q_1)
-                const messages: IMessage[] = querySnapshot_1.docs.map(doc => {
-                    const serializedData = serializeData({
+                const q_1 = query(collection(db, `chat_rooms/${chat.id}/messages`));
+                const querySnapshot_1 = await getDocs(q_1);
+                chat.messages = querySnapshot_1.docs.map(doc => {
+                    const data = doc.data();
+                    const serializedMessage: IMessage = {
                         id: doc.id,
-                        ...doc.data()
-                    })
-                    return serializedData as IMessage
+                        text: data.text,
+                        read: data.read,
+                        attachedFiles: data.attachedFiles,
+                        creationTime: data.creationTime.seconds,
+                        uid: data.uid
+                    }
+                    return serializedMessage;
                 })
-                const docRef = doc(db, 'users', chat.uid)
-                const data = await getDoc(docRef)
-                chat.messages = [...messages]
             }
-            thunkAPI.dispatch(getAllMessages(chats))
-        } catch (e:any) {
-            return thunkAPI.rejectWithValue(e.message)
+            console.log(chats)
+            thunkAPI.dispatch(getAllMessages(chats));
+        } catch (e: any) {
+            return thunkAPI.rejectWithValue(e.message);
         }
     }
 )
@@ -68,8 +84,9 @@ export const fetchPushNewMessage = createAsyncThunk(
     'messages/fetchPushNewMessage',
     async ({ text, mid, chat_id, img }: { text: string; mid: string; chat_id: string; img: File | null }, thunkAPI) => {
         try {
-            const id = generate()
+            const id = generateUUID()
             const storage = getStorage()
+            const time = serverTimestamp()
             const storageRef = ref(storage, `files/${img?.name}`)
             const snapshot = await uploadBytes(storageRef, img as File)
             const downloadURL = await getDownloadURL(storageRef)
@@ -82,11 +99,11 @@ export const fetchPushNewMessage = createAsyncThunk(
                 text: text ? text : '',
                 read: false,
                 attachedFiles: img !== null ? [file] : [],
-                creationTime: serverTimestamp(),
+                creationTime: time,
                 uid: mid
             }
             await setDoc(newMessageRef, messageData)
-            await thunkAPI.dispatch(pushNewMessage({chat_id, messageData}))
+            // await thunkAPI.dispatch(pushNewMessage({chat_id, messageData}))
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message)
         }
@@ -116,7 +133,6 @@ export const fetchDeleteMessage = createAsyncThunk(
             const messageRef = doc(db, `chat_rooms/${chat_id}/messages`, message_id);
             await deleteDoc(messageRef)
             await thunkAPI.dispatch(deleteMessage([chat_id, message_id]))
-            console.log(123344568)
         } catch (e) {
 
         }
@@ -141,10 +157,13 @@ const ChatsSlice = createSlice({
             state.statusSend = null
         },
         pushNewMessage(state, action) {
+            console.log(action.payload.messageData)
             state.temporaryMessage = null
             const chatIndex = state.chats.findIndex(chat => chat.id === action.payload.chat_id)
-            if (chatIndex !== -1) {
-                state.chats[chatIndex].messages.push(action.payload.messageData)
+            const time = action.payload.messageData.creationTime?.seconds
+            const new_message = {...action.payload.messageData, creationTime : time}
+            if (state.chats[chatIndex].messages) {
+                state.chats[chatIndex].messages = [...state.chats[chatIndex].messages, new_message]
             }
         },
         setTemporaryMessage(state, action) {
@@ -171,7 +190,39 @@ const ChatsSlice = createSlice({
             if (chatIndex !== -1) {
                 state.chats[chatIndex].messages = state.chats[chatIndex].messages.filter(message => message.id !== message_id)
             }
+        },
+        pushNewChat(state, action) {
+            state.chats = [...state.chats, action.payload]
+        },
+        changeMessage(state, action) {
+            const { chat_id, messageData } = action.payload;
+            const find_chat = state.chats.find(chat => chat.id === chat_id);
+
+            if (!find_chat) {
+                return state;
+            }
+
+            const updatedMessages = find_chat.messages.filter(message => message.id !== messageData?.id);
+            const new_chat = {
+                ...find_chat,
+                messages: [...updatedMessages, messageData]
+            };
+
+            return {
+                ...state,
+                chats: state.chats.map(chat => chat.id === chat_id ? new_chat : chat)
+            };
+        },
+        setParam(state, action) {
+            state.isSorting = true
+            state.paramSort = action.payload
+            console.log(state.paramSort)
+        },
+        resetSort(state) {
+            state.isSorting = false
         }
+
+
 
     },
     extraReducers: (builder) => {
@@ -244,6 +295,7 @@ const ChatsSlice = createSlice({
 export const ChatReducer = ChatsSlice.reducer
 export const {
     getAllMessages, pushNewMessage, setTemporaryMessage, resetStatus, changeReadMessage,
-    deleteMessage
+    deleteMessage, pushNewChat, changeMessage, setParam, resetSort
+
 } = ChatsSlice.actions
 

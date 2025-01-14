@@ -8,10 +8,11 @@ import {getNewStatus, statusOrder} from "../../lists/statusOrder";
 import {fetchChangeStatusOrderDelivery} from "../../store/slices/deliveries";
 
 interface OrderItemProps {
-    order: IOrder
+    order: IOrder,
+    index: number
 }
 
-const OrderItem: FC<OrderItemProps> = ({order}) => {
+const OrderItem: FC<OrderItemProps> = ({order, index}) => {
 
     const [isDisabled, setIsDisabled] = useState(false)
     const changingStatusOrder = useAppSelector(state => state.manager.manager.changeStatusOrders)
@@ -37,7 +38,7 @@ const OrderItem: FC<OrderItemProps> = ({order}) => {
             .finally(() => setIsDisabled(false));
     }
     return (
-        <div className={'order_item_container'}>
+        <div className={index % 2 === 0 ? 'order_item_container' : 'grey_order_item_container'}>
             <div className={order.status.statusName !== 'Отменен' ? 'order_item' : 'order_item cancel_field'}>
                 <h4>{order.number}</h4>
             </div>

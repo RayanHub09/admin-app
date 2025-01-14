@@ -14,6 +14,7 @@ const ChatPage = () => {
     }
     return (
         <div className={'chat_page_container'}>
+
             <DetailedChatItem
                 key={chat.id}
                 chat={chat as IChat} />
