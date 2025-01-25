@@ -25,34 +25,27 @@ const initializeMethods = (): IFields => {
 
 const SearchDelivery = () => {
     const dispatch = useAppDispatch()
-    const isSearching = useAppSelector(state => state.deliveries.isSearching)
     const [searchNumber, setSearchNumber] = useState('')
     const [startDate, setStartDate] = useState<string>('')
     const [endDate, setEndDate] = useState('')
     const [statuses, setStatuses] = useState<IFields>(initializeStatuses)
     const [methods, setMethods] = useState<IFields>(initializeMethods)
     const [sortValue, setSortValue] = useState('');
-    const [ascending, setAscending] = useState<boolean | null>(null);
 
     const searchDeliveryItem = useCallback(() => {
         const startDateInSeconds = startDate ? Math.floor(new Date(startDate).getTime() / 1000).toString() : ''
         const endDateInSeconds = endDate ? Math.floor(new Date(endDate).getTime() / 1000).toString() : ''
         dispatch(searchDelivery([searchNumber, startDateInSeconds, endDateInSeconds, statuses, methods, '']))
     }, [dispatch, searchNumber, startDate, endDate, statuses, methods])
-    const changeButton = () => {
-        setSortValue('')
-    };
+
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const value = event.target.value
         setSortValue(value)
         if (value === "asc") {
-            setAscending(true)
-            dispatch(sortDeliveries(!ascending))
+            dispatch(sortDeliveries(true))
         } else if (value === "desc") {
-            setAscending(false)
-            dispatch(sortDeliveries(!ascending))
+            dispatch(sortDeliveries(false))
         } else {
-            setAscending(null)
             dispatch(resetSort())
         }
     };
@@ -131,12 +124,6 @@ const SearchDelivery = () => {
                     <option value="asc">Сначала старые</option>
                     <option value="desc">Сначала новые</option>
                 </select>
-                <button
-                    onClick={changeButton}
-                    className={'default_button'}
-                    disabled={sortValue === ''}>
-                    Сбросить
-                </button>
             </div>
         </div>
     );

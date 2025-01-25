@@ -3,20 +3,15 @@ import {IDelivery} from "../../interfaces";
 import DetailedOrderItem from "../orders/DetailedOrderItem";
 import {changeCost} from "../../functions/changeCost";
 import {Link} from "react-router-dom";
+import {useAppSelector} from "../../hooks/redux-hooks";
+import {getDate} from "../../functions/changeDate";
 
 interface IDeliveryProps {
     delivery: IDelivery
 }
 
 const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
-    function getDate(str: string): string[] {
-        if (typeof str !== 'string') {
-            return ['', '']
-        }
-        const date = str?.split('T')[0]
-        const time = str?.split('T')[1]?.toString()?.slice(0, -5)
-        return [time, date]
-    }
+    const user = useAppSelector(state => state.users.users).find(user => user.id === delivery.uid)
     return (
         <div className={'detailed_delivery_item_container'}>
             <h2>Посылка № {delivery.number}</h2>
@@ -39,12 +34,11 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Вес</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Стоимость доставки</h3>
-                {delivery.deliveryCost && delivery.deliveryCostYen && <span
+                {(delivery.deliveryCost && delivery.deliveryCostYen) ? <span
                     style={{fontWeight: '500'}}
                     className={'field'}>
                         {delivery.deliveryCostYen}¥ ({delivery.deliveryCost}₽)
-                </span>}
-                {!delivery.deliveryCost && !delivery.deliveryCostYen && <span className={'field'}></span>}
+                </span> : <span className={'field'}></span>}
                 <h3 className={'label_order'}>Стоимость товара</h3>
                 <span className={'field'}><h4>{changeCost(delivery.partsCostYen.toString())}¥</h4>{changeCost(delivery.partsCostRu.toString())}₽</span>
                 <h3 className={'label_order'}>Декларируемая стоимость</h3>
@@ -67,7 +61,7 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                     className={'field'}
                     style={{borderLeft: '1px rgba(128, 128, 128, 0.5) solid'}}
                     to={`/users/${delivery.uid}`}>
-                    <span>{delivery.uid}</span>
+                    <span>{user?.name} {user?.surname} {user?.patronymic}</span>
                 </Link>
             </div>
             <div>

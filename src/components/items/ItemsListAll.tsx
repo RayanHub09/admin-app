@@ -11,6 +11,9 @@ const ItemsListAll = () => {
     const isSearching = useAppSelector(state => state.items.isSearching);
     const isSorting = useAppSelector(state => state.items.isSorting);
 
+    if (items.length === 0) {
+        return <div className={'container'} style={{fontSize: '30px'}}>Пока нет товаров</div>
+    }
     return (
         <div className={'items_list_all_container'}>
             {(isSearching && filteredItems.length === 0) ? (
@@ -24,6 +27,7 @@ const ItemsListAll = () => {
                     <h4 className={'label_order'}>Кол-во</h4>
                     <h4 className={'label_order'}>Номер заказа</h4>
                     <h4 className={'label_order'}>Номер посылки</h4>
+                    <h4 className={'label_order'}>Покупатель</h4>
                     <h4 className={'label_order'}>Комментарий</h4>
                     {isSearching
                         ? (isSorting ? filteredSortedItems.map((item, index) => (

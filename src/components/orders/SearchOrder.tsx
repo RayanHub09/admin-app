@@ -22,7 +22,6 @@ const SearchOrder = () => {
     const [searchNumber, setSearchNumber] = useState('')
     const [startDate, setStartDate] = useState<string>('')
     const [endDate, setEndDate] = useState('')
-    const [ascending, setAscending] = useState<boolean | null>(null);
     const [sortValue, setSortValue] = useState('');
     const [statuses, setStatuses] = useState<IStatuses>(initializeStatuses)
 
@@ -41,21 +40,14 @@ const SearchOrder = () => {
         setStatuses(initializeStatuses())
     }, [dispatch])
 
-
-    const changeButton = () => {
-        setSortValue('')
-    };
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const value = event.target.value
         setSortValue(value)
         if (value === "asc") {
-            setAscending(true)
-            dispatch(sortOrders(!ascending))
+            dispatch(sortOrders(true))
         } else if (value === "desc") {
-            setAscending(false)
-            dispatch(sortOrders(!ascending))
+            dispatch(sortOrders(false))
         } else {
-            setAscending(null)
             dispatch(resetSort())
         }
     };
@@ -113,12 +105,6 @@ const SearchOrder = () => {
                     <option value="asc">Сначала старые</option>
                     <option value="desc">Сначала новые</option>
                 </select>
-                <button
-                    onClick={changeButton}
-                    className={'default_button'}
-                    disabled={sortValue === ''}>
-                    Сбросить
-                </button>
             </div>
         </div>
     );

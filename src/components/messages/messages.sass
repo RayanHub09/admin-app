@@ -78,7 +78,7 @@ $background_color: rgb(244, 244, 244)
   color: black
   font-size: 16px
 .detailed_chat_item
-  @include default_container(column, 00px, 0px)
+  @include default_container(column, 10px, 0px)
   width: 70%
   height: 100%
 @media (max-width: 920px)
@@ -95,7 +95,6 @@ $background_color: rgb(244, 244, 244)
   height: 200px
   overflow: auto
   background: $background_color
-  margin-bottom: 10px
   border-radius: 0px 0px 10px 10px
 
 .message
@@ -272,3 +271,5 @@ $background_color: rgb(244, 244, 244)
 @media (max-width: 700px)
   .notifications_container
     flex-wrap: wrap
+.no_messages
+  color: #006bae

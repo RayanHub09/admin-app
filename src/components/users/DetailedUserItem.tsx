@@ -184,6 +184,7 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                             <h4 className={'label_order'}>Кол-во</h4>
                             <h4 className={'label_order'}>Номер заказа</h4>
                             <h4 className={'label_order'}>Номер посылки</h4>
+                            <h4 className={'label_order'}>Покупатель</h4>
                             <h4 className={'label_order'}>Комментарий</h4>
                             {isSearchingItems
                                 ?

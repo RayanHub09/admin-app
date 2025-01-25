@@ -133,6 +133,7 @@ export interface IDelivery {
     ruDelivery: IRuDelivery | null
     status: IDeliveryStatus
     uid: string
+    weight: number
 }
 
 export interface IUser {

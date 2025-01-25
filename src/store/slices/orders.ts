@@ -1,9 +1,9 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, doc, getDocs, query, updateDoc} from "../../firebase";
+import {collection, db, deleteDoc, doc, getDocs, query, updateDoc} from "../../firebase";
 import {IOrder} from "../../interfaces"
-import {convertStringToDate, getDate} from "../../functions/changeDate";
-import {serverTimestamp, Timestamp} from "firebase/firestore";
-import firebase from "firebase/compat";
+import {serverTimestamp} from "firebase/firestore";
+import {statusOrder} from "../../lists/statusOrder";
+
 
 
 interface IState {
@@ -17,6 +17,7 @@ interface IState {
     error: string | null
     status: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
+    statusDelete: 'loading' | 'succeeded' | 'failed' | null
 }
 
 const initialState: IState = {
@@ -29,7 +30,8 @@ const initialState: IState = {
     paramSort: null,
     error: null,
     status: null,
-    statusGet: null
+    statusGet: null,
+    statusDelete: null
 }
 
 export const fetchGetAllOrders = createAsyncThunk(
@@ -73,10 +75,21 @@ export const fetchChangeStatusOrder = createAsyncThunk(
     async ({orderId, newStatus}: { orderId: string, newStatus: string,}, thunkAPI) => {
         const orderDocRef = doc(db, 'orders', orderId)
         try {
-            await updateDoc(orderDocRef, {
-                'status.statusName': newStatus,
-                'status.date': serverTimestamp()
-            })
+            if (statusOrder.slice(3).includes(newStatus)) {
+                await updateDoc(orderDocRef, {
+                    'status.statusName': newStatus,
+                    'status.date': serverTimestamp(),
+                    'status.readyToPackage': true
+                })
+            } else {
+                await updateDoc(orderDocRef, {
+                    'status.statusName': newStatus,
+                    'status.date': serverTimestamp(),
+                    'status.readyToPackage': false
+                })
+            }
+
+
             thunkAPI.dispatch(changeStatusOrder({orderId, newStatus}))
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
@@ -94,10 +107,17 @@ export const fetchChangeOrder = createAsyncThunk(
            }: { orderId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
         try {
             const orderDocRef = doc(db, 'orders', orderId);
-            const updateData: { [key: string]: string|any } = {};
+            const updateData: { [key: string]: string|any } = {}
             if (newStatus !== undefined) {
-                updateData['status.statusName'] = newStatus
-                updateData['status.date'] = serverTimestamp()
+                if (statusOrder.slice(3).includes(newStatus)) {
+                    updateData['status.statusName'] = newStatus
+                    updateData['status.date'] = serverTimestamp()
+                    updateData['status.readyToPackage'] = true
+                } else {
+                    updateData['status.statusName'] = newStatus
+                    updateData['status.date'] = serverTimestamp()
+                    updateData['status.readyToPackage'] = false
+                }
             }
             if (newComment !== undefined) updateData['comment'] = newComment;
             if (newNumber !== undefined) updateData['number'] = newNumber;
@@ -115,13 +135,27 @@ export const fetchCancelOrder = createAsyncThunk(
     async (orderId: string, thunkAPI) => {
         try {
             const orderDocRef = doc(db, 'orders', orderId)
-            await updateDoc(orderDocRef, {['status.statusName']: 'Отменен', ['status.date']: serverTimestamp()})
+            await updateDoc(orderDocRef, {['status.statusName']: 'Отменен', ['status.date']: serverTimestamp(), ['status.readyToPackage']: false}, )
             thunkAPI.dispatch(cancelOrder({orderId}))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
         }
     }
 )
+
+export const fetchDeleteOrder = createAsyncThunk(
+    'chats/fetchDeleteMessage',
+    async ({order_id}: {order_id: string}, thunkAPI) => {
+        try {
+            const messageRef = doc(db, `orders`, order_id);
+            await deleteDoc(messageRef)
+            await thunkAPI.dispatch(deleteOrder(order_id))
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
+
 const OrdersSlice = createSlice({
     name: 'orders',
     initialState,
@@ -225,6 +259,9 @@ const OrdersSlice = createSlice({
         resetSort(state) {
             state.isSorting = false
             state.paramSort = null
+        },
+        deleteOrder(state, action) {
+            state.orders = state.orders.filter(order => order.id !== action.payload)
         }
 
     },
@@ -239,6 +276,17 @@ const OrdersSlice = createSlice({
             })
             .addCase(fetchGetAllOrders.fulfilled, (state, action) => {
                 state.statusGet = 'succeeded'
+                state.error = null
+            })
+            .addCase(fetchDeleteOrder.pending, (state, action) => {
+                state.statusDelete = 'loading'
+            })
+            .addCase(fetchDeleteOrder.rejected, (state, action) => {
+                state.statusDelete = 'failed'
+                state.error = action.payload as string
+            })
+            .addCase(fetchDeleteOrder.fulfilled, (state, action) => {
+                state.statusDelete = 'succeeded'
                 state.error = null
             })
             .addMatcher(
@@ -277,5 +325,6 @@ const OrdersSlice = createSlice({
 export const OrderReducer = OrdersSlice.reducer
 export const {
     getAllOrders, searchOrder, changeStatusOrder, changeOrder, resetSort, sortOrders,
-    clearSearch, cancelOrder, resetStatus, changeOrderSnapshot, pushNewOrderSnapshot, deleteOrderSnapshot
+    clearSearch, cancelOrder, resetStatus, changeOrderSnapshot, pushNewOrderSnapshot,
+    deleteOrderSnapshot, deleteOrder
 } = OrdersSlice.actions

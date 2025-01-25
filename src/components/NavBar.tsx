@@ -3,12 +3,7 @@ import './components.sass'
 import {Link, useLocation} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
 import {removeManager} from "../store/slices/manager";
-import {collection, getFirestore, onSnapshot} from "firebase/firestore";
 import {IChat, IDelivery, IMessage, IOrder} from "../interfaces";
-import {pushNewMessage} from "../store/slices/messages";
-import {changeOrderSnapshot, deleteOrderSnapshot, pushNewOrderSnapshot} from "../store/slices/orders";
-import {changeDeliverySnapshot, deleteDeliverySnapshot, pushNewDeliverySnapshot} from "../store/slices/deliveries";
-
 
 interface ILinks {
     items: string
@@ -27,7 +22,7 @@ const NavBar = () => {
     const count_unanswered_messages = useAppSelector(state => {
         const chats = state.messages.chats || [];
         return chats.filter(chat =>
-            chat.messages && chat.messages[chat.messages.length - 1]?.uid !== manager.id
+            chat.messages && chat.messages[chat.messages.length - 1]?.uid === chat.uid && chat.messages.length !== 0
         ).length;
     });
 
@@ -35,7 +30,7 @@ const NavBar = () => {
         const chats = state.messages.chats || [];
         return chats.reduce((sum: number, chat: IChat | undefined) => {
             if (!chat || !chat.messages) return sum;
-            return sum + chat.messages.filter((message: IMessage) => !message?.read && message?.uid !== manager.id).length;
+            return sum + chat.messages.filter((message: IMessage) => !message?.read && message?.uid === chat.uid).length;
         }, 0);
     });
 
@@ -62,6 +57,7 @@ const NavBar = () => {
                 {Object.keys(links).map((key) =>
                     <div
                         key={key}>
+
                         <Link className={
                             location.pathname === `/${key}` ||
                             location.pathname.split('/')[1] === 'messages' && key === 'messages' ||

@@ -18,7 +18,7 @@ const NavigationSection: FC<NavigationSectionProps> = ({ option }) => {
     const unreadMessagesCount = chats.reduce((count, chat) => {
         if (chat.department === options[option as keyof IRole]) {
             const unreadInChat = chat.messages?.filter((message: IMessage) => {
-                return message?.uid !== manager.id && !message?.read;
+                return message?.uid === chat.uid && !message?.read;
             }).length || 0;
             return count + unreadInChat;
         }
@@ -27,7 +27,7 @@ const NavigationSection: FC<NavigationSectionProps> = ({ option }) => {
 
     const count_unanswered_messages = chats.filter(chat => {
         if (!chat.messages || chat.messages.length === 0) return false;
-        return chat.messages[chat.messages.length - 1].uid !== manager.id && chat.department === options[option as keyof IRole];
+        return chat.messages[chat.messages.length - 1].uid === chat.uid && chat.department === options[option as keyof IRole];
     }).length;
 
     function showSection(key: string): void {

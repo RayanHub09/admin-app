@@ -9,6 +9,7 @@ export interface IPossibilitiesManager {
     changeStatusOrders: string
     calculateDeliveryCost: string
     changeWeight: string
+    chatManagement: string
 }
 
 export const possibilitiesManager:IPossibilitiesManager = {
@@ -21,5 +22,7 @@ export const possibilitiesManager:IPossibilitiesManager = {
     changeStatusDelivery: 'изменение статуса доставки',
     changeStatusOrders: 'изменение статуса заказа',
     calculateDeliveryCost: 'расчет стоимости доставки',
-    changeWeight: 'изменение веса'
+    changeWeight: 'изменение веса',
+    chatManagement: 'управление чатами'
+
 }

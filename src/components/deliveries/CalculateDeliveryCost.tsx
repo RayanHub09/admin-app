@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchCalculateDeliveryCost, resetStatus} from "../../store/slices/deliveries";
 
@@ -14,15 +14,20 @@ const CalculateDeliveryCost:FC<CalculateDeliveryCostProps> = ({visible, id}) => 
     const dispatch = useAppDispatch()
     const [deliveryCostRu, setDeliveryCostRu] = useState('')
     const [deliveryCostYen, setDeliveryCostYen] = useState('')
-    const [errorEnter, setErrorEnter]  = useState(false)
-    const [errorField, setErrorField]  = useState(false)
     const [error, setError] = useState<Error>(null)
     const status = useAppSelector(state => state.deliveries.status)
     function calculateDelivery() {
-        if (deliveryCostYen.length === 0 || deliveryCostRu.length == 0)
+        if (deliveryCostYen.length === 0 || deliveryCostRu.length === 0) {
             setError('errorField')
-        if (isNaN(+deliveryCostRu) || isNaN(+deliveryCostYen))
+            setTimeout(() => {
+                setError(null)
+            }, 2000)
+        }
+        else if (isNaN(+deliveryCostRu) || isNaN(+deliveryCostYen)) {
             setError('errorEnter')
+            setTimeout(() => {setError(null)}, 2000)
+        }
+
         else {
             setError(null)
             dispatch(fetchCalculateDeliveryCost({deliveryId:id, deliveryCostRu: +deliveryCostRu, deliveryCostYen: +deliveryCostYen}))
@@ -33,6 +38,11 @@ const CalculateDeliveryCost:FC<CalculateDeliveryCostProps> = ({visible, id}) => 
                 .then(() => dispatch(resetStatus()))
         }
     }
+    useEffect(() => {
+        setError(null)
+        setDeliveryCostRu('')
+        setDeliveryCostYen('')
+    }, [visible])
     return (
         <div
             className={'calculate_delivery_container'}
@@ -60,7 +70,7 @@ const CalculateDeliveryCost:FC<CalculateDeliveryCostProps> = ({visible, id}) => 
                 style={{alignSelf: "center"}}
                 disabled={status === 'loading'}
                 className={'change_button'}>
-                {status === 'loading' ? 'загрузка...' : 'Сохранить'}
+                {status === 'loading' ? 'Сохранение...' : 'Сохранить'}
             </button>
         </div>
     );

@@ -16,11 +16,13 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
     const [number, setNumber] = useState(order.number)
     const [comment, setComment] = useState(order.comment)
     const [status, setStatus] = useState(order.status.statusName)
+    const manager = useAppSelector(state => state.manager.manager)
     const writeCommentsOrder = useAppSelector(state => state.manager.manager.writeCommentsOrder)
     const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
     const changeOrderNumber = useAppSelector(state => state.manager.manager.changeOrderNumber)
     const deliveries = useAppSelector(state => state.deliveries.deliveries)
     const [error, setError] = useState('')
+
     const numbersOrders = useAppSelector(state => state.orders.orders).map(order => order.number)
     const getDeliveryIdByOrderId = (): string | null => {
         const delivery = deliveries.find(delivery =>
@@ -31,7 +33,8 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
 
     function changeOrder() {
-        if (numbersOrders.includes(number)) {
+        if (numbersOrders.includes(number) && order.number !== number) {
+            console.log()
             setError('Данный номер уже занят. Попробуйте другой.')
             setTimeout(() => setError(''), 4000)
         } else {
@@ -68,7 +71,7 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
             <div className={'detailed_order_item'}>
                 <h3 className={'label_order'} style={{borderTop: '1px rgba(128, 128, 128, 0.5) solid'}}>Номер</h3>
-                {changeOrderNumber ?
+                {(changeOrderNumber || manager.role === 'admin') ?
                     <input
                         className={'input_field'}
                         value={number}
@@ -77,7 +80,7 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
                     <span className={'field'}>{order.number}</span>
                 }
                 <h3 className={'label_order'}>Статус</h3>
-                {changeStatusDelivery ?
+                {(changeStatusDelivery || manager.role === 'admin') ?
                     <select
                         value={status}
                         onChange={event => setStatus(event.target.value)}
@@ -104,7 +107,7 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
                 <h3 className={'label_order'}>Дата заказа</h3>
                 <span className={'field'}>{getDate(order.date)[1]}, {getDate(order.date)[0]}</span>
                 <h3 className={'label_order'}>Комментарий</h3>
-                {writeCommentsOrder ?
+                {(writeCommentsOrder || manager.role === 'admin') ?
                     <input
                         className={'input_field'}
                         onChange={event => setComment(event.target.value)}

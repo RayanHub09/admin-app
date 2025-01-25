@@ -3,11 +3,14 @@ import {IItem, IReItem} from "../../interfaces";
 import './items.sass'
 import {changeCost} from "../../functions/changeCost";
 import {Link} from "react-router-dom";
+import {useAppSelector} from "../../hooks/redux-hooks";
 
 interface IItemProps {
     item: IReItem & IItem
 }
 const Item:FC<IItemProps> = ({item}) => {
+    const uid = useAppSelector(state => state.orders.orders).find(order => order.number === item.numberOrder)?.uid
+    const user = useAppSelector(state => state.users.users).find(user => user.id === uid)
     return (
        <>
            <span className={'field'}>{item.id}</span>
@@ -31,6 +34,11 @@ const Item:FC<IItemProps> = ({item}) => {
                </Link> :
                <span className={'field'}></span>
            }
+           <Link
+               className={'field'}
+               to={`/users/${user?.id}`}>
+               <span>{user?.name} {user?.surname} {user?.patronymic}</span>
+           </Link>
            <span className={'field'}>{item.comment}</span>
        </>
     );

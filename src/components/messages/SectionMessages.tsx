@@ -25,9 +25,14 @@ const SectionMessages = () => {
         setSortedChats(prevChats => {
             const sorted = [...prevChats];
             return sorted.sort((a, b) => {
-                const dateA = +new Date(a.messages[a.messages.length - 1]?.creationTime);
-                const dateB = +new Date(b.messages[b.messages.length - 1]?.creationTime);
-                return value !== "asc" ? dateA - dateB : dateB - dateA;
+                if (a.messages.length > 0 && b.messages.length > 0) {
+                    const dateA = +new Date(a.messages[a.messages.length - 1]?.creationTime);
+                    const dateB = +new Date(b.messages[b.messages.length - 1]?.creationTime);
+                    return value === "desc" ? dateA - dateB : dateB - dateA;
+                }
+                if (a.messages.length === 0) return 1;
+                if (b.messages.length === 0) return -1;
+                return 0;
             });
         });
     };

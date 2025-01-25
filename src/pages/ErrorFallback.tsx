@@ -8,8 +8,8 @@ const ErrorFallback: React.FC = () => {
             <span className={'navbar_error'}></span>
             <div className={'container_error'}>
                 <h1>Произошла ошибка</h1>
-                <p>Пожалуйста, попробуйте позже или вернитесь на главную страницу.</p>
-                <p>Перейти на <Link to={'/orders'}>главную страницу</Link>.</p>
+                <p>Пожалуйста, перезагрузите страницу и попробуйте снова.</p>
+                {/*<p>Перейти на <Link to={'/orders'}>главную страницу</Link>.</p>*/}
             </div>
         </div>
     );

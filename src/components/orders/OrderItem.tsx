@@ -15,7 +15,7 @@ interface OrderItemProps {
 const OrderItem: FC<OrderItemProps> = ({order, index}) => {
 
     const [isDisabled, setIsDisabled] = useState(false)
-    const changingStatusOrder = useAppSelector(state => state.manager.manager.changeStatusOrders)
+    const manager = useAppSelector(state => state.manager.manager)
     const dispatch = useAppDispatch()
     const deliveries = useAppSelector(state => state.deliveries.deliveries)
     const getDeliveryIdByOrderId = (): string|null => {
@@ -45,7 +45,7 @@ const OrderItem: FC<OrderItemProps> = ({order, index}) => {
             <span className={order.status.statusName !== 'Отменен' ? 'status' : 'cancel_field'}>Статус: {order.status.statusName}</span>
             <div className={'fast_actions'}>
                 <Link to={`/orders/${order.id}`} className={'link_item_button'}>Перейти в заказ</Link>
-                {changingStatusOrder &&
+                {(manager.changeStatusOrders || manager.role === 'admin') &&
                     <button
                         onClick={changeStatusOrder}
                         disabled={isDisabled || order.status.statusName === 'Отменен'}

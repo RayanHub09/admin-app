@@ -20,6 +20,7 @@ interface IState {
     error: string | null
     statusSend: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
+    statusDelete: 'loading' | 'succeeded' | 'failed' | null
     temporaryMessage: string | null
     statusChange: 'loading' | 'succeeded' | 'failed' | null
     unreadMessages: number
@@ -30,6 +31,7 @@ const initialState: IState = {
     paramSort: null,
     isSorting: false,
     error: null,
+    statusDelete: null,
     statusChange: null,
     statusSend: null,
     statusGet: null,
@@ -103,7 +105,6 @@ export const fetchPushNewMessage = createAsyncThunk(
                 uid: mid
             }
             await setDoc(newMessageRef, messageData)
-            // await thunkAPI.dispatch(pushNewMessage({chat_id, messageData}))
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message)
         }
@@ -133,8 +134,21 @@ export const fetchDeleteMessage = createAsyncThunk(
             const messageRef = doc(db, `chat_rooms/${chat_id}/messages`, message_id);
             await deleteDoc(messageRef)
             await thunkAPI.dispatch(deleteMessage([chat_id, message_id]))
-        } catch (e) {
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
 
+export const fetchDeleteChat = createAsyncThunk(
+    'chats/fetchDeleteMessage',
+    async ({chat_id}: {chat_id: string}, thunkAPI) => {
+        try {
+            const messageRef = doc(db, `chat_rooms`, chat_id);
+            await deleteDoc(messageRef)
+            await thunkAPI.dispatch(deleteChat(chat_id))
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
         }
     }
 )
@@ -162,7 +176,7 @@ const ChatsSlice = createSlice({
             const chatIndex = state.chats.findIndex(chat => chat.id === action.payload.chat_id)
             const time = action.payload.messageData.creationTime?.seconds
             const new_message = {...action.payload.messageData, creationTime : time}
-            if (state.chats[chatIndex].messages) {
+            if (state.chats[chatIndex]?.messages) {
                 state.chats[chatIndex].messages = [...state.chats[chatIndex].messages, new_message]
             }
         },
@@ -220,6 +234,9 @@ const ChatsSlice = createSlice({
         },
         resetSort(state) {
             state.isSorting = false
+        },
+        deleteChat(state, action) {
+            state.chats = state.chats.filter(chat => chat.id !== action.payload)
         }
 
 
@@ -227,6 +244,27 @@ const ChatsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addMatcher(
+                (action) => ([fetchDeleteChat.rejected.type].includes(action.type)),
+                (state, action: PayloadAction<string>) => {
+                    state.statusDelete = 'failed'
+                    state.error = action.payload as string
+                }
+            )
+            .addMatcher(
+                (action) => ([fetchDeleteChat.fulfilled.type].includes(action.type)),
+                (state) => {
+                    state.statusDelete = null
+                    state.error = null
+
+                }
+            )
+            .addMatcher(
+                (action) => ([fetchDeleteChat.pending.type].includes(action.type)),
+                (state) => {
+                    state.statusDelete = 'loading'
+                }
+            )
             .addMatcher(
                 (action) => ([fetchPushNewMessage.rejected.type].includes(action.type)),
                 (state, action: PayloadAction<string>) => {
@@ -295,7 +333,7 @@ const ChatsSlice = createSlice({
 export const ChatReducer = ChatsSlice.reducer
 export const {
     getAllMessages, pushNewMessage, setTemporaryMessage, resetStatus, changeReadMessage,
-    deleteMessage, pushNewChat, changeMessage, setParam, resetSort
+    deleteMessage, pushNewChat, changeMessage, setParam, resetSort, deleteChat
 
 } = ChatsSlice.actions
 

@@ -84,6 +84,9 @@
             resetSort(state) {
                 state.isSorting = false
                 state.paramSort = null
+            },
+            deleteItems(state, action) {
+                state.items = state.items.filter(item => !action.payload.includes(item.id))
             }
 
         }
@@ -92,5 +95,5 @@
     export const ItemsReducer = ItemsSlice.reducer
 
     export const {getAllItems, searchItem, clearSearchItem, pushNewItems,
-        sortItems, resetSort
+        sortItems, resetSort, deleteItems
     } = ItemsSlice.actions

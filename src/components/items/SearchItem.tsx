@@ -16,7 +16,6 @@ const initializeStatuses = (): IStatuses => {
 
 const SearchItem = () => {
     const dispatch = useAppDispatch();
-    const isSearching = useAppSelector(state => state.items.isSearching);
     const [searchNumberOrder, setSearchNumberOrder] = useState('');
     const [searchNumberDelivery, setSearchNumberDelivery] = useState('');
     const [startDate, setStartDate] = useState<string>('');
@@ -24,7 +23,6 @@ const SearchItem = () => {
     const [statuses, setStatuses] = useState<IStatuses>(initializeStatuses());
     const [markName, setMarkName] = useState('');
     const [name, setName] = useState('');
-    const [ascending, setAscending] = useState<boolean | null>(null);
     const [sortValue, setSortValue] = useState('');
 
     useEffect(() => {
@@ -39,21 +37,15 @@ const SearchItem = () => {
         setSortValue('');
     }, [dispatch]);
 
-    const changeButton = () => {
-        setSortValue('')
-    };
 
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const value = event.target.value
         setSortValue(value)
         if (value === "asc") {
-            setAscending(true)
-            dispatch(sortItems(!ascending))
+            dispatch(sortItems(true))
         } else if (value === "desc") {
-            setAscending(false)
-            dispatch(sortItems(!ascending))
+            dispatch(sortItems(false))
         } else {
-            setAscending(null)
             dispatch(resetSort())
         }
     };
@@ -149,12 +141,7 @@ const SearchItem = () => {
                     <option value="asc">Сначала старые</option>
                     <option value="desc">Сначала новые</option>
                 </select>
-                <button
-                    onClick={changeButton}
-                    className={'default_button'}
-                    disabled={sortValue === ''}>
-                    Сбросить
-                </button>
+
             </div>
         </div>
     );

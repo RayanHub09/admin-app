@@ -17,7 +17,7 @@ const ChatItem: FC<ChatItemProps> = ({chat}) => {
     const department = Object.keys(options).find(key => options[key as keyof IRole] === chat.department)
     const messages = chat.messages
     const unreadMessages = chat.messages.filter((message: IMessage) => {
-        return message?.uid !== manager.id && !message?.read
+        return message?.uid === chat.uid && !message?.read
     }).length
 
     return (
@@ -27,22 +27,30 @@ const ChatItem: FC<ChatItemProps> = ({chat}) => {
                 <div>
                     <h4>{user?.name} {user?.surname}</h4>
                     <div style={{display: 'flex', gap: '10px'}}>
-                        <p style={{paddingLeft: '10px'}}>{messages[messages.length - 1]?.uid === user?.id ? <>{user?.name} {user?.surname}</> : <>{manager.name}</>}: <>{messages[messages.length - 1]?.text}</>
-                        </p>
-                        <p
-                            style={{alignSelf: "center"}}
-                            className={'status_message'}>
-                            {getDate(messages[messages.length - 1]?.creationTime)[1].split(':')[0]}:
-                            {getDate(messages[messages.length - 1]?.creationTime)[1].split(':')[1]} <span> </span>
-                            {getDate(messages[messages.length - 1]?.creationTime)[0].split('.')[0]}.
-                            {getDate(messages[messages.length - 1]?.creationTime)[0].split('.')[1]}
-                        </p>
+                        {chat.messages.length !== 0 ?
+                            <>
+                                <p style={{paddingLeft: '10px'}}>
+                                    {messages[messages.length - 1]?.uid === user?.id ? <>{user?.name} {user?.surname}</> : <>Менеджер</>}: <>{messages[messages.length - 1]?.text}</>
+                                </p>
+                                <p
+                                    style={{alignSelf: "center"}}
+                                    className={'status_message'}>
+                                    {getDate(messages[messages.length - 1]?.creationTime)[1].split(':')[0]}:
+                                    {getDate(messages[messages.length - 1]?.creationTime)[1].split(':')[1]} <span> </span>
+                                    {getDate(messages[messages.length - 1]?.creationTime)[0].split('.')[0]}.
+                                    {getDate(messages[messages.length - 1]?.creationTime)[0].split('.')[1]}
+                                </p>
+                            </> :
+                            <p className={'no_messages'}>Нет сообщений</p>
+                        }
+
                     </div>
                 </div>
-                {(messages[messages.length - 1]?.uid !== manager.id && unreadMessages !== 0) &&
+                {(chat.messages.length !== 0 && messages[messages.length - 1]?.uid === chat.uid && unreadMessages !== 0) &&
                     <span className={'unread_messages'}>Непрочитанное сообщение</span>}
-                {(messages[messages.length - 1]?.uid !== manager.id && unreadMessages === 0) &&
+                {(chat.messages.length !== 0 && messages[messages.length - 1]?.uid === chat.uid && unreadMessages === 0) &&
                     <span className={'unread_messages_yellow'}>Нет ответа</span>}
+
             </div>
         </Link>
     );

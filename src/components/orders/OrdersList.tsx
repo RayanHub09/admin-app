@@ -13,6 +13,9 @@ const OrdersList = () => {
     const isSorting = useAppSelector(state => state.orders.isSorting)
     const filteredSortedOrders = useAppSelector(state => state.orders.filteredSortedOrders)
 
+    if (orders.length === 0) {
+        return <div className={'container'} style={{fontSize: '30px'}}>Пока нет заказов</div>
+    }
 
     return (
         <div className={'orders_list_container'}>

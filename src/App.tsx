@@ -25,23 +25,6 @@ function App() {
     const manager = useAppSelector(state => state.manager)
     const uid = useAppSelector(state => state.manager?.manager?.id)
     const navigation = useNavigate()
-    useEffect(() => {
-        const db = getFirestore();
-        const ordersRef = collection(db, 'orders');
-        const unsubscribe = onSnapshot(ordersRef, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'modified') {
-                    dispatch(changeOrderSnapshot(change.doc.data() as IOrder))
-                } else if (change.type === 'added') {
-                    dispatch(pushNewOrderSnapshot(change.doc.data() as IOrder))
-                    dispatch(pushNewItems([change.doc.data().items, change.doc.data().id, change.doc.data().number]))
-                } else if (change.type === 'removed') {
-                    dispatch(deleteOrderSnapshot(change.doc.id))
-                }
-            });
-        })
-        return () => unsubscribe()
-    }, []);
 
     useEffect(() => {
         const db = getFirestore();
@@ -73,23 +56,6 @@ function App() {
                         }
                     })
                 })
-            })
-        })
-    }, [])
-
-
-    useEffect(() => {
-        const db = getFirestore()
-        const DeliveriesRef = collection(db, 'deliveries')
-        return onSnapshot(DeliveriesRef, (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === 'modified') {
-                    dispatch(changeDeliverySnapshot(change.doc.data() as IDelivery))
-                } else if (change.type === 'added') {
-                    dispatch(pushNewDeliverySnapshot(change.doc.data() as IDelivery))
-                } else if (change.type === 'removed') {
-                    dispatch(deleteDeliverySnapshot(change.doc.data().id))
-                }
             })
         })
     }, [])

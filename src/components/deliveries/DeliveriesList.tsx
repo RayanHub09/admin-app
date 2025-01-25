@@ -21,8 +21,11 @@ const DeliveriesList:FC<DeliveriesListProps> = ({deliveries}) => {
         dispatch(clearSearchDelivery())
     }, [])
 
-    return (
+    if (deliveries.length === 0) {
+        return <div className={'container'} style={{fontSize: '30px'}}>Пока нет доставок</div>
+    }
 
+    return (
         <div className={'deliveries_list_container'}>
             {(filteredDeliveries.length === 0 && isSearching) ? (<NotFoundText />) :
                 <div className={'deliveries_list'}>

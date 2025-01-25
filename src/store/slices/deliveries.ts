@@ -1,10 +1,12 @@
 import {IDelivery, IOrder} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, doc, getDoc, getDocs, query, updateDoc} from "../../firebase";
+import {collection, db, deleteDoc, doc, getDoc, getDocs, query, updateDoc} from "../../firebase";
 import serializeData from "../../Serializer";
 import {convertStringToDate, getDate} from "../../functions/changeDate";
 import {RootState} from "../index";
 import {arrayUnion, serverTimestamp, Timestamp} from "firebase/firestore";
+import {deleteChat} from "./messages";
+import {useAppSelector} from "../../hooks/redux-hooks";
 
 
 interface IState {
@@ -18,6 +20,7 @@ interface IState {
     filteredDeliveries: IDelivery[]
     status: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
+    statusDelete: 'loading' | 'succeeded' | 'failed' | null
 }
 
 const initialState: IState = {
@@ -30,7 +33,8 @@ const initialState: IState = {
     paramSort: null,
     filteredDeliveries: [],
     status: null,
-    statusGet: null
+    statusGet: null,
+    statusDelete: null
 }
 
 export const fetchGetAllDeliveries = createAsyncThunk(
@@ -78,7 +82,8 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                         readyToBuy: data.status.readyToBuy,
                         statusName: data.status.statusName
                     },
-                    uid: data.uid
+                    uid: data.uid,
+                    weight: data.weight
                 };
                 return serializedData;
             });
@@ -209,6 +214,35 @@ export const fetchChangeOrderDelivery = createAsyncThunk(
             thunkAPI.rejectWithValue(e.message)
         }
     }
+)
+
+export const fetchDeleteDelivery = createAsyncThunk(
+    'chats/fetchDeleteMessage',
+    async ({delivery_id}: {delivery_id: string}, thunkAPI) => {
+        try {
+            const messageRef = doc(db, `deliveries`, delivery_id);
+            await deleteDoc(messageRef)
+            await thunkAPI.dispatch(deleteDelivery(delivery_id))
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
+
+export const fetchChangeWeightDelivery = createAsyncThunk(
+    'chats/fetchChangeWeightDelivery',
+    async ({deliveryId, weight} : {deliveryId : string, weight : number}, thunkAPI) => {
+        try {
+            const deliveryDocRef = doc(db, 'deliveries', deliveryId)
+            const newData = {
+                weight: weight
+            }
+            await updateDoc(deliveryDocRef, newData)
+            await thunkAPI.dispatch(changeWeight([deliveryId, weight]))
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+}
 )
 const DeliveriesSlice = createSlice({
     name: 'deliveries',
@@ -355,6 +389,26 @@ const DeliveriesSlice = createSlice({
         resetSort(state) {
             state.isSorting = false
             state.paramSort = null
+        },
+        deleteDelivery(state, action) {
+            state.deliveries = state.deliveries.filter(delivery => delivery.id !== action.payload)
+        },
+        changeWeight(state, action) {
+            const [deliveryId, weight] = action.payload;
+            const deliveryIndex = state.deliveries.findIndex(delivery => delivery.id === deliveryId);
+            if (deliveryIndex !== -1) {
+                const updatedDelivery = {
+                    ...state.deliveries[deliveryIndex],
+                    weight: weight
+                }
+                state.deliveries = [
+                    ...state.deliveries.slice(0, deliveryIndex),
+                    updatedDelivery,
+                    ...state.deliveries.slice(deliveryIndex + 1)
+                ];
+            } else {
+                console.warn(`Delivery with ID ${deliveryId} not found.`);
+            }
         }
 
     },
@@ -372,10 +426,21 @@ const DeliveriesSlice = createSlice({
             .addCase(fetchGetAllDeliveries.pending, (state, action) => {
                 state.statusGet = 'loading';
             })
+            .addCase(fetchDeleteDelivery.fulfilled, (state, action) => {
+                state.statusDelete = 'succeeded';
+                state.error = null;
+            })
+            .addCase(fetchDeleteDelivery.rejected, (state, action) => {
+                state.statusDelete = 'failed';
+                state.error = action.payload as string;
+            })
+            .addCase(fetchDeleteDelivery.pending, (state, action) => {
+                state.statusDelete = 'loading';
+            })
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.pending.type, fetchCalculateDeliveryCost.pending.type, fetchChangeOrderDelivery.pending.type,
-                        fetchCancelDelivery.pending.type, fetchChangeStatusOrderDelivery.pending.type].includes(action.type),
+                        fetchCancelDelivery.pending.type, fetchChangeStatusOrderDelivery.pending.type, fetchChangeWeightDelivery.pending.type].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'loading'
                 }
@@ -383,7 +448,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.fulfilled.type, fetchCalculateDeliveryCost.fulfilled.type, fetchChangeOrderDelivery.fulfilled.type,
-                        fetchCancelDelivery.fulfilled.type, fetchChangeStatusOrderDelivery.fulfilled.type].includes(action.type),
+                        fetchCancelDelivery.fulfilled.type, fetchChangeStatusOrderDelivery.fulfilled.type, fetchChangeWeightDelivery.fulfilled.type].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'succeeded'
                     state.error = null
@@ -392,7 +457,7 @@ const DeliveriesSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeDelivery.rejected.type, fetchCalculateDeliveryCost.rejected.type, fetchChangeOrderDelivery.rejected.type,
-                        fetchCancelDelivery.rejected.type, fetchChangeStatusOrderDelivery.rejected.type].includes(action.type),
+                        fetchCancelDelivery.rejected.type, fetchChangeStatusOrderDelivery.rejected.type, fetchChangeWeightDelivery.rejected.type].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'failed'
                     state.error = action.payload as string
@@ -407,5 +472,5 @@ export const {
     changeDelivery, resetStatus, calculateDeliveryCost,
     cancelDelivery, changeStatusOrderDelivery, changeOrderDelivery,
     changeDeliverySnapshot, pushNewDeliverySnapshot, deleteDeliverySnapshot,
-    sortDeliveries, resetSort
+    sortDeliveries, resetSort, deleteDelivery, changeWeight
 } = DeliveriesSlice.actions

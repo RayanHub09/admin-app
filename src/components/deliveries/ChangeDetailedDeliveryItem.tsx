@@ -20,6 +20,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
     const [status, setStatus] = useState(delivery.status.statusName)
     const [comment, setComment] = useState(delivery.comment)
     const [error, setError] = useState('')
+    const manager = useAppSelector(state => state.manager.manager);
 
     function changeDelivery() {
         if (numbersDeliveries.includes(number)) {
@@ -50,7 +51,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
             <h2>Посылка № {delivery.number}</h2>
             <div className={'detailed_delivery_item'}>
                 <h3 className={'label_order'}>Номер</h3>
-                {changeDeliveryNumber ?
+                {(manager.role === 'admin' || changeDeliveryNumber) ?
                     <input
                         value={number}
                         onChange={(event) => setNumber(event.target.value)}
@@ -66,7 +67,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                     </>
                 }
                 <h3 className={'label_order'}>Статус</h3>
-                {changeStatusDelivery ?
+                {(manager.role === 'admin' || changeStatusDelivery) ?
                     <select
                         value={status}
                         onChange={event => setStatus(event.target.value)}
@@ -86,12 +87,11 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Вес</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Стоимость доставки</h3>
-                {delivery.deliveryCost && delivery.deliveryCostYen &&  <span
+                {(delivery.deliveryCost && delivery.deliveryCostYen) ?  <span
                     style={{fontWeight: '500'}}
                     className={'field'}>
                         {delivery.deliveryCostYen}¥ ({delivery.deliveryCost}₽)
-                </span>}
-                {!delivery.deliveryCost && !delivery.deliveryCostYen &&  <span className={'field'}></span>}
+                </span> : <span className={'field'}></span>}
                 <h3 className={'label_order'}>Стоимость товара</h3>
                 <span className={'field'}
                       style={{fontWeight: '500'}}>
@@ -99,7 +99,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Декларируемая стоимость</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Время создания</h3>
-                <span className={'field'}>{getDate(delivery.creationDate.toString())[1]}, {getDate(delivery.creationDate.toString())[0]}</span>
+                <span className={'field'}>{getDate(delivery.creationDate)[1]}, {getDate(delivery.creationDate)[0]}</span>
                 <h3 className={'label_order'}>ФИО</h3>
                 <span className={'field'}>{delivery.customer.name} {delivery.customer.surname}</span>
                 <h3 className={'label_order'}>Адрес</h3>
@@ -109,7 +109,7 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Номера накладных</h3>
                 <span className={'field'}>{}</span>
                 <h3 className={'label_order'}>Комментарий</h3>
-                {writeCommentsDelivery ?
+                {(manager.role === 'admin' || writeCommentsDelivery) ?
                     <input
                         value={comment}
                         onChange={(event) => setComment(event.target.value)}
