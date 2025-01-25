@@ -134,6 +134,13 @@ export interface IDelivery {
     status: IDeliveryStatus
     uid: string
     weight: number
+    sizeSm: ISize
+}
+
+export interface ISize {
+    width: number,
+    height: number,
+    length: number
 }
 
 export interface IUser {

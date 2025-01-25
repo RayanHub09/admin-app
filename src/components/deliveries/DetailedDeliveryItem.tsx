@@ -31,8 +31,10 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Кол-во товара</h3>
                 <span className={'field'}>{delivery.orders.reduce((acc, item) =>
                     acc += item.itemsCnt, 0)}</span>
-                <h3 className={'label_order'}>Вес</h3>
-                <span className={'field'}>{}</span>
+                <h3 className={'label_order'}>Габариты(см)</h3>
+                <span className={'field'}>{delivery.sizeSm?.width}x{delivery.sizeSm?.height}x{delivery.sizeSm?.length}</span>
+                <h3 className={'label_order'}>Вес(кг)</h3>
+                <span className={'field'}>{delivery.weight}</span>
                 <h3 className={'label_order'}>Стоимость доставки</h3>
                 {(delivery.deliveryCost && delivery.deliveryCostYen) ? <span
                     style={{fontWeight: '500'}}

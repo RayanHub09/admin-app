@@ -83,7 +83,8 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                         statusName: data.status.statusName
                     },
                     uid: data.uid,
-                    weight: data.weight
+                    weight: data.weight,
+                    sizeSm: data.sizeSm
                 };
                 return serializedData;
             });
@@ -105,11 +106,12 @@ export const fetchChangeDelivery = createAsyncThunk(
            }: { deliveryId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
         const deliveryDocRef = doc(db, 'deliveries', deliveryId)
         try {
-            const updateData: { [key: string]: string|any } = {};
+            const updateData: { [key: string]: string | any } = {};
             if (newStatus !== undefined) {
                 updateData['status.statusName'] = newStatus
                 updateData['status.date'] = serverTimestamp()
-            };
+            }
+            ;
             if (newComment !== undefined) updateData['comment'] = newComment;
             if (newNumber !== undefined) updateData['number'] = newNumber;
             await updateDoc(deliveryDocRef, updateData)
@@ -208,7 +210,6 @@ export const fetchChangeOrderDelivery = createAsyncThunk(
             await updateDoc(deliveryDocRef, {
                 orders: orders
             })
-            console.log(orders)
             thunkAPI.dispatch(changeOrderDelivery({orderId, newStatus, newComment, newNumber, deliveryId}))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
@@ -218,12 +219,12 @@ export const fetchChangeOrderDelivery = createAsyncThunk(
 
 export const fetchDeleteDelivery = createAsyncThunk(
     'chats/fetchDeleteMessage',
-    async ({delivery_id}: {delivery_id: string}, thunkAPI) => {
+    async ({delivery_id}: { delivery_id: string }, thunkAPI) => {
         try {
             const messageRef = doc(db, `deliveries`, delivery_id);
             await deleteDoc(messageRef)
             await thunkAPI.dispatch(deleteDelivery(delivery_id))
-        } catch (e:any) {
+        } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message)
         }
     }
@@ -231,18 +232,22 @@ export const fetchDeleteDelivery = createAsyncThunk(
 
 export const fetchChangeWeightDelivery = createAsyncThunk(
     'chats/fetchChangeWeightDelivery',
-    async ({deliveryId, weight} : {deliveryId : string, weight : number}, thunkAPI) => {
+    async ({deliveryId, weight, width, height, length}:
+               { deliveryId: string, weight: number, width: string, height: string, length: string }, thunkAPI) => {
         try {
             const deliveryDocRef = doc(db, 'deliveries', deliveryId)
             const newData = {
-                weight: weight
+                weight: weight,
+                'sizeSm.width': +width,
+                'sizeSm.height': +height,
+                'sizeSm.length': +length
             }
             await updateDoc(deliveryDocRef, newData)
             await thunkAPI.dispatch(changeWeight([deliveryId, weight]))
-        } catch (e:any) {
+        } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message)
         }
-}
+    }
 )
 const DeliveriesSlice = createSlice({
     name: 'deliveries',
@@ -260,7 +265,7 @@ const DeliveriesSlice = createSlice({
             state.isSearching = true
             state.filteredDeliveries = state.deliveries.filter(delivery => {
                 const orderDate = delivery.creationDate
-                return (uid === '' || delivery.uid === uid ) &&
+                return (uid === '' || delivery.uid === uid) &&
                     (number === '' || delivery.number.includes(number)) &&
                     (startDate === '' || orderDate >= startDate) &&
                     (endDate === '' || orderDate <= endDate) &&
@@ -328,7 +333,10 @@ const DeliveriesSlice = createSlice({
             const delivery = state.deliveries.filter(delivery => delivery.id === deliveryId)[0]
             if (delivery) {
                 const newOrders = delivery.orders.map(order =>
-                    order.id === orderId ? {...order, status: {...order.status, statusName: newStatus, date: currentTimeInSeconds}} : order
+                    order.id === orderId ? {
+                        ...order,
+                        status: {...order.status, statusName: newStatus, date: currentTimeInSeconds}
+                    } : order
                 )
                 const updatedDelivery = {...delivery, orders: newOrders}
                 state.deliveries = state.deliveries.map(d =>

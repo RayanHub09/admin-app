@@ -20,7 +20,8 @@ interface IState {
     error: string | null
     statusSend: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
-    statusDelete: 'loading' | 'succeeded' | 'failed' | null
+    statusDeleteMessage: 'loading' | 'succeeded' | 'failed' | null
+    statusDeleteChat: 'loading' | 'succeeded' | 'failed' | null
     temporaryMessage: string | null
     statusChange: 'loading' | 'succeeded' | 'failed' | null
     unreadMessages: number
@@ -31,7 +32,8 @@ const initialState: IState = {
     paramSort: null,
     isSorting: false,
     error: null,
-    statusDelete: null,
+    statusDeleteMessage: null,
+    statusDeleteChat: null,
     statusChange: null,
     statusSend: null,
     statusGet: null,
@@ -244,17 +246,18 @@ const ChatsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+
             .addMatcher(
                 (action) => ([fetchDeleteChat.rejected.type].includes(action.type)),
                 (state, action: PayloadAction<string>) => {
-                    state.statusDelete = 'failed'
+                    state.statusDeleteChat = 'failed'
                     state.error = action.payload as string
                 }
             )
             .addMatcher(
                 (action) => ([fetchDeleteChat.fulfilled.type].includes(action.type)),
                 (state) => {
-                    state.statusDelete = null
+                    state.statusDeleteChat = null
                     state.error = null
 
                 }
@@ -262,7 +265,7 @@ const ChatsSlice = createSlice({
             .addMatcher(
                 (action) => ([fetchDeleteChat.pending.type].includes(action.type)),
                 (state) => {
-                    state.statusDelete = 'loading'
+                    state.statusDeleteChat = 'loading'
                 }
             )
             .addMatcher(

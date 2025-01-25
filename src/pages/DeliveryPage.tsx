@@ -100,7 +100,7 @@ const DeliveryPage = () => {
                     <button
                         onClick={() => setVisibleFieldsWeight(!visibleFieldsWeight)}
                         className={'change_button'}>{
-                        visibleFieldsWeight ? 'Закрыть' : 'Вес'
+                        visibleFieldsWeight ? 'Закрыть' : 'Вес и габариты'
                     }</button>}
             </div>
             {manager.role === 'admin' || (!changeMode && !delivery?.deliveryCost) ?

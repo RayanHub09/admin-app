@@ -26,7 +26,8 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
         state.users.users.find(user => user.id === chat.uid))
     const [loadingDelete, setLoadingDelete] = useState<{ [key: string]: boolean }>({});
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
-    const statusDeleteChat = useAppSelector(state => state.messages.statusDelete)
+    const statusDeleteChat = useAppSelector(state => state.messages.statusDeleteChat)
+    const statusDeleteMessage = useAppSelector(state => state.messages.statusChange)
 
     function deleteMessage(messageId: string) {
         setLoadingDelete(prev => ({...prev, [messageId]: true}));
@@ -56,11 +57,12 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
     if (!chat?.messages) {
         <NotFoundPage/>
     }
+
     function deleteChat() {
-        dispatch(fetchDeleteChat({chat_id : chat.id})).then(() =>
+        dispatch(fetchDeleteChat({chat_id: chat.id})).then(() =>
             navigation('/' + location.pathname.split('/')[1].toString() + '/' + location.pathname.split('/')[2])
         )
-           }
+    }
 
     return (
         <div className={'detailed_chat_item'}>
@@ -77,7 +79,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                             {chat.uid === message.uid ? <h4>{user?.name} {user?.surname}</h4> : <h4>Менеджер</h4>}
                             <p
                                 style={{paddingLeft: '10px'}}>{message?.text}</p>
-                            { message.creationTime && <span
+                            {message.creationTime && <span
                                 style={{paddingRight: '10px'}}
                                 className={'status_message'}>
                                     {getDate(message.creationTime)[1].split(':')[0]}:{getDate(message.creationTime)[1].split(':')[1]}<span>  </span>
@@ -97,7 +99,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                                         disabled={loadingDelete[message.id]}
                                         className={chat.uid === message.uid ? ('user_efault_button_delete default_button_delete') : 'default_button_delete '}
                                     >
-                                        {loadingDelete[message.id] ? 'Загрузка...' : 'Удалить'}
+                                        {loadingDelete[message.id] ? 'Удаление...' : 'Удалить'}
                                     </button>
 
                                 }
@@ -129,12 +131,15 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                 : <div className={'chat_messages_container'}>
                     <h3 style={{alignSelf: 'center'}}>Сообщений пока нет</h3>
                 </div>
+            }
+            {(manager.role === 'admin' || manager.chatManagement) &&
+                <button
+                    onClick={deleteChat}
+                    className={'default_button_delete'}>{
+                    statusDeleteChat === 'loading' ? 'Удаление...' : 'Удалить'
                 }
-            <button
-                onClick={deleteChat}
-                className={'default_button_delete'}>{
-                statusDeleteChat === 'loading' ? 'Удаление...' : 'Удалить'
-            }</button>
+                    </button>
+            }
             <InputMessage chat_id={chat?.id} uid={chat?.uid}/>
         </div>
     );
