@@ -1,47 +1,43 @@
-import React, {useEffect, useState} from 'react';
-import {useAppSelector} from "../../hooks/redux-hooks";
-import {IRole, options} from "../../lists/roleList";
+import React, { useEffect, useState } from 'react';
+import { useAppSelector } from "../../hooks/redux-hooks";
+import { IRole, options } from "../../lists/roleList";
 import ChatItem from "./ChatItem";
-import {useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import './messages.sass';
-import {IChat} from "../../interfaces";
+import { IChat } from "../../interfaces";
 
 const SectionMessages = () => {
     const chats = useAppSelector(state => state.messages.chats);
-    const section = useLocation().pathname.split('/')[2]; // Извлекаем секцию из URL
-    const [sortValue, setSortValue] = useState('');
+    const section = useLocation().pathname.split('/')[2];
+    const [sortValue, setSortValue] = useState('asc');
     const [sortedChats, setSortedChats] = useState<IChat[]>([]);
 
     useEffect(() => {
         const filteredChats = chats.filter(chat => options[section as keyof IRole] === chat.department);
         setSortedChats(filteredChats);
-        setSortValue('')
     }, [chats, section]);
+
+    useEffect(() => {
+        handleSortChange(sortValue);
+    }, [sortValue]);
 
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement> | string) => {
         if (typeof event === 'string') {
             setSortValue(event)
-        }
-        else {
+        } else {
             const value = event.target.value;
             setSortValue(value);
         }
         setSortedChats(prevChats => {
             const sorted = [...prevChats];
             return sorted.sort((a, b) => {
-                if (a.messages.length > 0 && b.messages.length > 0) {
-                    const dateA = +new Date(a.messages[a.messages.length - 1]?.creationTime);
-                    const dateB = +new Date(b.messages[b.messages.length - 1]?.creationTime);
-                    return sortValue !== "desc" ? dateA - dateB : dateB - dateA;
-                }
-                if (a.messages.length === 0) return 1;
-                if (b.messages.length === 0) return -1;
-                return 0;
+                const dateA = a.messages.length > 0 ? +new Date(a.messages[a.messages.length - 1]?.creationTime) : 0;
+                const dateB = b.messages.length > 0 ? +new Date(b.messages[b.messages.length - 1]?.creationTime) : 0;
+
+                return sortValue !== "desc" ? dateB - dateA : dateA - dateB;
             });
         });
-    }
-    useEffect(() => handleSortChange('asc'), [])
-
+    };
 
     return (
         <div className={'chat_list_container'}>
