@@ -3,21 +3,21 @@ import {IManager} from "../../interfaces";
 import {IRole, options} from "../../lists/roleList";
 import {IPossibilitiesManager, possibilitiesManager} from "../../lists/possibilitiesManagerList";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
-import {fetchChangePossibilitiesManager} from "../../store/slices/managers";
+import {fetchChangePossibilitiesManager, fetchDeleteManager} from "../../store/slices/managers";
 import {useNavigate} from "react-router-dom";
+import ShadowWindow from "../ShadowWindow";
 
 interface DetailedManagerItemProps {
     manager: IManager
 }
 
-const DetailedManagerItem:FC<DetailedManagerItemProps> = ({manager}) => {
+const DetailedManagerItem: FC<DetailedManagerItemProps> = ({manager}) => {
     const dispatch = useAppDispatch()
-    const isAuth = useAppSelector(state => state.manager.isAuth)
     const navigation = useNavigate()
     const status = useAppSelector(state => state.managers.status)
     const [isCreate, setIsCreate] = useState(false)
-
-
+    const [visibleWindow, setVisibleWindow] = useState(false);
+    const statusDeleteManager = useAppSelector(state => state.managers.statusDelete)
 
     const [checkboxStates, setCheckboxStates] = useState(
         manager ? Object.keys(possibilitiesManager).reduce((acc, key) => {
@@ -28,13 +28,20 @@ const DetailedManagerItem:FC<DetailedManagerItemProps> = ({manager}) => {
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setIsCreate(true)
-        const { id, checked } = event.target;
-        setCheckboxStates((prevState) => ({ ...prevState, [id]: checked }));
+        const {id, checked} = event.target;
+        setCheckboxStates((prevState) => ({...prevState, [id]: checked}));
     }
 
     function changePossibilitiesManager() {
-        if (manager.id ) dispatch(fetchChangePossibilitiesManager({managerId: manager.id, checkboxes: checkboxStates}))
+        if (manager.id) dispatch(fetchChangePossibilitiesManager({managerId: manager.id, checkboxes: checkboxStates}))
     }
+
+    function deleteManager () {
+        dispatch(fetchDeleteManager({manager_id: manager.id as string}))
+            .then(() => navigation('/managers'))
+            .then()
+    }
+
     return (
         manager ? (
             <div className={'manager_item_container'}>
@@ -50,7 +57,8 @@ const DetailedManagerItem:FC<DetailedManagerItemProps> = ({manager}) => {
                                     id={key}
                                     onChange={event => handleCheckboxChange(event)}
                                     checked={checkboxStates[key]}/>
-                                <span style={{paddingBottom: '5px' }}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</span>
+                                <span
+                                    style={{paddingBottom: '5px'}}>{possibilitiesManager[key as keyof IPossibilitiesManager]}</span>
                             </div>
                         )
                     )}
@@ -61,12 +69,25 @@ const DetailedManagerItem:FC<DetailedManagerItemProps> = ({manager}) => {
                     className={'change_possibilities_button'}>
                     {status === 'loading' ? 'загрузка...' : 'Сохранить'}
                 </button>
-            </div>
-        ) : (
-            <h3>not found</h3>
-        )
-    );
+                <button
+                    className={'error_button'}
+                    onClick={() => setVisibleWindow(true)}
+                >
+                    Удалить менеджера
+                </button>
+                {visibleWindow &&
+                    <ShadowWindow
+                        text={`менеджера ${manager.name}`}
+                        onClose={() => setVisibleWindow(false)}
+                        deleteFunc={deleteManager}
+                        status={statusDeleteManager} />
+                    }
+                    </div>
+                    ) : (
+                    <h3>not found</h3>
+                    )
+                    );
 
-};
+                };
 
-export default DetailedManagerItem;
+                export default DetailedManagerItem;

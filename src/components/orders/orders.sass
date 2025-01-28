@@ -104,12 +104,16 @@
   width: 100%
 .buttons_change_container
   @include default_container(row, 0, 10px)
-  justify-content: flex-start
+  justify-content: space-between
+.buttons_change_container_order
+  @extend .buttons_change_container
   width: 100%
 .search_orders_container
   @include default_container(column, 10px)
-
   align-items: center
+.container_menu
+  @include default_container(row, 0, 10px)
+  justify-content: space-between
 .label_search
   font-size: 18px
   font-weight: 500

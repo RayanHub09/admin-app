@@ -195,6 +195,9 @@ const OrdersSlice = createSlice({
             state.filteredOrders = state.filteredOrders.map(order =>
                 order.id === orderId ? {...order, status: {statusName: newStatus, date: currentTimeInSeconds}} : order
             ) as IOrder[]
+            state.sortedOrders = state.sortedOrders.map(order =>
+                order.id === orderId ? {...order, status: {statusName: newStatus, date: currentTimeInSeconds}} : order
+            ) as IOrder[]
         },
         changeOrder(state, action) {
             const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
@@ -235,7 +238,8 @@ const OrdersSlice = createSlice({
             })
         },
         pushNewOrderSnapshot(state, action) {
-            state.orders = [...state.orders, action.payload]
+            state.orders = [action.payload, ...state.orders]
+            console.log(state.orders)
         },
         deleteOrderSnapshot(state, action) {
             state.orders = [...state.orders.filter(order => order.id !== action.payload)]
@@ -262,7 +266,23 @@ const OrdersSlice = createSlice({
         },
         deleteOrder(state, action) {
             state.orders = state.orders.filter(order => order.id !== action.payload)
+
+        },
+        addDeliveryIdNumber(state, action) {
+            const [id, deliveryId, deliveryNumber] = action.payload;
+
+            state.orders = state.orders.map(order => {
+                if (order.id === id) {
+                    return {
+                        ...order,
+                        idDelivery  : deliveryId,
+                        numberDelivery: deliveryNumber
+                    };
+                }
+                return order;
+            });
         }
+
 
     },
     extraReducers: builder => {
@@ -326,5 +346,5 @@ export const OrderReducer = OrdersSlice.reducer
 export const {
     getAllOrders, searchOrder, changeStatusOrder, changeOrder, resetSort, sortOrders,
     clearSearch, cancelOrder, resetStatus, changeOrderSnapshot, pushNewOrderSnapshot,
-    deleteOrderSnapshot, deleteOrder
+    deleteOrderSnapshot, deleteOrder, addDeliveryIdNumber
 } = OrdersSlice.actions

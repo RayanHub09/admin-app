@@ -6,13 +6,13 @@ import {IDelivery} from "../interfaces";
 import ChangeDetailedDeliveryItem from "../components/deliveries/ChangeDetailedDeliveryItem";
 import CalculateDeliveryCost from "../components/deliveries/CalculateDeliveryCost";
 import {
-    fetchCancelDelivery,
-    fetchDeleteDelivery,
+    fetchCancelDelivery, fetchDeleteDelivery,
     resetStatus
 } from "../store/slices/deliveries";
 import {fetchChangeStatusOrder} from "../store/slices/orders";
 import NotFoundPage from "./NotFoundPage";
 import CalculateWeight from "../components/deliveries/CalculateWeight";
+import ShadowWindow from "../components/ShadowWindow";
 
 const DeliveryPage = () => {
     const writeCommentsDelivery = useAppSelector(state => state.manager.manager.writeCommentsDelivery);
@@ -25,6 +25,7 @@ const DeliveryPage = () => {
     const [visibleFieldsWeight, setVisibleFieldsWeight] = useState(false)
     const manager = useAppSelector(state => state.manager.manager);
     const dispatch = useAppDispatch()
+    const navigation = useNavigate();
     const status = useAppSelector(state => state.deliveries.status);
     const {id} = useParams<{ id: string }>();
     const delivery: IDelivery | undefined = useAppSelector(state =>
@@ -33,15 +34,13 @@ const DeliveryPage = () => {
         const delivery = state.deliveries.deliveries.find((delivery) => delivery.id === id);
         return delivery ? delivery.orders.map(order => order.id) : [];
     });
-    const navigation = useNavigate()
-    const statusDeleteDelivery = useAppSelector(state => state.deliveries.statusDelete)
+    const [visibleWindow, setVisibleWindow] = useState(false)
+    const [statusDeleteDelivery, setStatusDeleteDelivery] = useState('')
 
     useEffect(() => {
+        window.scrollTo(0, 0)
         setVisible(true)
-    }, []);
-
-    useEffect(() => {
-        window.scrollTo(0, 0);
+        setVisibleWindow(false)
     }, []);
 
     function deleteDeliveryItem() {
@@ -53,11 +52,13 @@ const DeliveryPage = () => {
                 .then(() => dispatch(resetStatus()));
         }
     }
-
     function deleteDelivery() {
-        dispatch(fetchDeleteDelivery({delivery_id: id as string})).then(() => {
-            navigation('/deliveries')
-        })
+        setStatusDeleteDelivery('loading')
+        dispatch(fetchDeleteDelivery({ delivery_id: id as string}))
+            .then(() => {
+                navigation('/deliveries');
+            })
+            .then(() => setStatusDeleteDelivery(''))
     }
 
     if (!delivery) {
@@ -66,52 +67,77 @@ const DeliveryPage = () => {
 
     return (
         <div className={'delivery_page_container'}>
-            <div className={'buttons_change_container'}>
-                {(manager.role === 'admin' || changeStatusDelivery || changeDeliveryNumber || writeCommentsDelivery) &&
-                    <button
-                        onClick={() => setChangeMode(!changeMode)}
-                        className={'change_button'}>
-                        {changeMode ? 'Вернуться к посылке' : 'Изменить'}
-                    </button>
-                }
-                {(manager.role === 'admin' || (cancelDelivery && !changeMode && delivery.status.statusName !== 'Отменен')) &&
-                    <button
-                        onClick={deleteDeliveryItem}
-                        className={'change_button'}>
-                        {status === 'loading' ? 'загрузка...' : 'Отменить посылку'}
-                    </button>
-                }
-                {(manager.role === 'admin' || (calculateDeliveryCost && !changeMode && !delivery?.deliveryCost)) && !visibleFieldsWeight &&
-                    <button
-                        onClick={() => setVisible(!visible)}
-                        className={'change_button'}
-                        style={!visible ? {alignSelf: 'flex-end'} : {}}
-                    >
-                        {!visible ? 'Закрыть' : 'Расчитать стоимость доставки'}
-                    </button>
-                }
+            <div className={'container_menu'}>
+                <div className={'buttons_change_container'}>
+                    {(manager.role === 'admin' || changeStatusDelivery || changeDeliveryNumber || writeCommentsDelivery) &&
+                        <button
+                            onClick={() => setChangeMode(!changeMode)}
+                            className={'change_button'}>
+                            {changeMode ? 'Вернуться к посылке' : 'Изменить'}
+                        </button>
+                    }
+                    {(manager.role === 'admin' || (cancelDelivery && !changeMode && delivery.status.statusName !== 'Отменен')) && visible && !visibleFieldsWeight &&
+                        <button
+                            onClick={deleteDeliveryItem}
+                            className={'change_button'}>
+                            {status === 'loading' ? 'загрузка...' : 'Отменить посылку'}
+                        </button>
+                    }
+                    {(manager.role === 'admin' || (calculateDeliveryCost && !changeMode && !delivery?.deliveryCost)) && !visibleFieldsWeight &&
+                        <button
+                            onClick={() => {
+                                setVisible(!visible)
+                                setVisibleWindow(false)
+                            }}
+                            className={'change_button'}
+                            style={!visible ? {alignSelf: 'flex-end'} : {}}
+                        >
+                            {!visible ? 'Закрыть' : 'Расчитать стоимость доставки'}
+                        </button>
+                    }
+
+                    {(manager.role === 'admin' || (manager.changeWeight === true && delivery.deliveryCost === 0 && delivery.deliveryCostYen === 0)) && visible &&
+                        <button
+                            onClick={() => {
+                                setVisibleFieldsWeight(!visibleFieldsWeight)
+                                setVisibleWindow(false)
+                            }}
+                            className={'change_button'}>{
+                            visibleFieldsWeight ? 'Закрыть' : 'Вес и габариты'
+                        }</button>}
+                </div>
                 {manager.role === 'admin' &&
                     <button
-                        onClick={deleteDelivery}
+                        style={{alignSelf: 'center'}}
+                        onClick={() => {
+                            setVisibleWindow(!visibleWindow)
+                            setVisible(true)
+                            setVisibleFieldsWeight(false)
+                        }}
                         className={'error_button'}>{
-                        statusDeleteDelivery === 'loading' ? 'Удаление...' : 'Удалить посылку'
-                    }</button>}
-                {(manager.role === 'admin' || (manager.changeWeight === true && delivery.deliveryCost === 0 && delivery.deliveryCostYen === 0)) && visible &&
-                    <button
-                        onClick={() => setVisibleFieldsWeight(!visibleFieldsWeight)}
-                        className={'change_button'}>{
-                        visibleFieldsWeight ? 'Закрыть' : 'Вес и габариты'
-                    }</button>}
+                         'Удалить посылку'
+                    }</button>
+                }
+                {visibleWindow &&
+                    <ShadowWindow
+                        text={`посылку с номером ${delivery.number}`}
+                        onClose={() => setVisibleWindow(false)}
+                        deleteFunc={deleteDelivery}
+                        status={statusDeleteDelivery}
+                    />
+                }
             </div>
-            {manager.role === 'admin' || (!changeMode && !delivery?.deliveryCost) ?
-                <CalculateDeliveryCost visible={visible} id={id as string}/>
-                : null}
-            {visibleFieldsWeight &&
-                <CalculateWeight delivery={delivery as IDelivery}/>
-            }
-            {changeMode ?
-                <ChangeDetailedDeliveryItem delivery={delivery as IDelivery}/>
-                : <DetailedDeliveryItem delivery={delivery as IDelivery}/>}
+
+                {manager.role === 'admin' || (!changeMode && !delivery?.deliveryCost)  ?
+                    <CalculateDeliveryCost visible={visible} id={id as string}/>
+                    : null}
+                {visibleFieldsWeight  &&
+                    <CalculateWeight delivery={delivery as IDelivery}/>
+                }
+                {changeMode && visibleWindow ?
+                    <ChangeDetailedDeliveryItem delivery={delivery as IDelivery}/>
+                    : <DetailedDeliveryItem delivery={delivery as IDelivery}/>}
+
         </div>
     );
 };

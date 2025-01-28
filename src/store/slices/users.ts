@@ -1,7 +1,8 @@
 import {IOrder, IUser} from "../../interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {collection, db, getDocs, query} from "../../firebase";
+import {collection, db, deleteDoc, doc, getDocs, query} from "../../firebase";
 import serializeData from "../../Serializer";
+import {deleteManager, fetchGetAllManagers} from "./managers";
 
 
 
@@ -11,6 +12,7 @@ interface IState {
     error: string | null
     status: 'loading' | 'succeeded' | 'failed' | null
     statusGet: 'loading' | 'succeeded' | 'failed' | null
+    statusDelete: 'loading' | 'succeeded' | 'failed' | null
     isSearching: boolean
 }
 
@@ -20,6 +22,7 @@ const initialState:IState = {
     error: null,
     status: null,
     statusGet: null,
+    statusDelete: null,
     isSearching: false
 }
 export const fetchGetAllUsers = createAsyncThunk(
@@ -43,6 +46,20 @@ export const fetchGetAllUsers = createAsyncThunk(
         }
     }
 )
+
+export const fetchDeleteUser = createAsyncThunk(
+    'managers/fetchDeleteManager',
+    async ({user_id}: {user_id: string}, thunkAPI) => {
+        try {
+            const messageRef = doc(db, `users`, user_id);
+            await deleteDoc(messageRef)
+            await thunkAPI.dispatch(deleteUser(user_id))
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
+
 const UsersSlice = createSlice({
     name: 'users',
     initialState,
@@ -67,11 +84,29 @@ const UsersSlice = createSlice({
                     (phoneNumber === '' || user.phoneNumber.includes(phoneNumber)) &&
                     (email === '' || user.email.includes(email))
             })
+        },
+        deleteUser(state, action) {
+            state.users = state.users.filter(user => user.id !== action.payload)
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchDeleteUser.fulfilled, (state) => {
+                state.statusDelete = 'succeeded'
+                state.error = null
+            })
+            .addCase(fetchDeleteUser.rejected, (state, action) => {
+                state.statusDelete = 'failed'
+                state.error = action.payload as string
+            })
+            .addCase(fetchDeleteUser.pending, (state) => {
+                state.statusDelete = 'loading'
+                state.error = null
+            })
     }
 })
 
 export const UserReducer = UsersSlice.reducer
 export const {
-    getAllUsers, searchUser, clearSearch
+    getAllUsers, searchUser, clearSearch, deleteUser
 } = UsersSlice.actions

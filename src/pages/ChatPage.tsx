@@ -9,6 +9,7 @@ const ChatPage = () => {
     const { id } = useParams<{ id: string }>()
     const chat: IChat | undefined = useAppSelector(state =>
         state.messages.chats.find(chat => chat.id === id))
+
     if (!chat) {
         return <NotFoundPage />
     }

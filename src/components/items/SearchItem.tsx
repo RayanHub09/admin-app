@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
-import {searchItem, clearSearchItem, sortItems, resetSort} from "../../store/slices/items";
+import { searchItem, clearSearchItem, sortItems, resetSort } from "../../store/slices/items";
 import { statusItem } from "../../lists/statusItem";
 
 interface IStatuses {
@@ -25,6 +25,9 @@ const SearchItem = () => {
     const [name, setName] = useState('');
     const [sortValue, setSortValue] = useState('');
 
+    // Создаем реф для поля ввода "Наименование"
+    const nameInputRef = useRef<HTMLInputElement>(null);
+
     useEffect(() => {
         dispatch(clearSearchItem());
         setName('');
@@ -35,20 +38,28 @@ const SearchItem = () => {
         setSearchNumberOrder('');
         setStatuses(initializeStatuses());
         setSortValue('');
+
+        // Устанавливаем фокус на поле "Наименование" при загрузке компонента
+        if (nameInputRef.current) {
+            nameInputRef.current.focus();
+        }
     }, [dispatch]);
 
-
     const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = event.target.value
-        setSortValue(value)
+        const value = event.target.value;
+        setSortValue(value);
         if (value === "asc") {
-            dispatch(sortItems(true))
+            dispatch(sortItems(true));
         } else if (value === "desc") {
-            dispatch(sortItems(false))
+            dispatch(sortItems(false));
         } else {
-            dispatch(resetSort())
+            dispatch(resetSort());
         }
     };
+
+    useEffect(() => {
+        dispatch(sortItems(false));
+    }, [dispatch]);
 
     const searchItemF = useCallback(() => {
         const startDateInSeconds = startDate ? Math.floor(new Date(startDate).getTime() / 1000).toString() : '';
@@ -67,8 +78,14 @@ const SearchItem = () => {
         setStatuses(initializeStatuses());
     }, [dispatch]);
 
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            searchItemF();
+        }
+    };
+
     return (
-        <div className={'search_items_container'}>
+        <div className={'search_items_container'} onKeyDown={handleKeyDown}>
             <div className={'fields_search_container'}>
                 <div className={'field_search'}>
                     <label className={'label_search'}>Номер заказа</label>
@@ -108,9 +125,11 @@ const SearchItem = () => {
                 <div className={'field_search'}>
                     <label className={'label_search'}>Наименование</label>
                     <input
+                        ref={nameInputRef} // Устанавливаем реф на поле "Наименование"
                         value={name}
                         onChange={event => setName(event.target.value)}
-                        type={"text"} />
+                        type={"text"}
+                    />
                 </div>
             </div>
 
@@ -130,18 +149,18 @@ const SearchItem = () => {
             <div className={'buttons_change_container'} style={{ justifyContent: "center" }}>
                 <button
                     onClick={searchItemF}
-                    className={'change_button'}>Найти</button>
+                    className={'change_button'}>Найти
+                </button>
                 <button
                     onClick={searchClearFields}
-                    className={'change_button'}>Сбросить</button>
+                    className={'change_button'}>Сбросить
+                </button>
             </div>
             <div className={'sort_container'}>
                 <select className={'fields_sort'} onChange={handleSortChange} value={sortValue}>
-                    <option value="" disabled>Выбрать сортировку</option>
-                    <option value="asc">Сначала старые</option>
                     <option value="desc">Сначала новые</option>
+                    <option value="asc">Сначала старые</option>
                 </select>
-
             </div>
         </div>
     );

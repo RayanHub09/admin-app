@@ -87,13 +87,31 @@
             },
             deleteItems(state, action) {
                 state.items = state.items.filter(item => !action.payload.includes(item.id))
-            }
+            },
+            addIdNumberItem(state, action) {
+                const [id, idDelivery, numberDelivery, idOrder, numberOrder] = action.payload;
 
+                state.items = state.items.map(item => {
+                    if (item.id === id) {
+                        return {
+                            ...item,
+                            idDelivery: idDelivery,
+                            numberDelivery: numberDelivery,
+                            idOrder: idOrder,
+                            numberOrder: numberOrder
+                        };
+                    }
+                    return item;
+                });
+            },
+            addNewItems(state, action) {
+                state.items = [...action.payload, ...state.items]
+            }
         }
     })
 
     export const ItemsReducer = ItemsSlice.reducer
 
     export const {getAllItems, searchItem, clearSearchItem, pushNewItems,
-        sortItems, resetSort, deleteItems
+        sortItems, resetSort, deleteItems, addNewItems, addIdNumberItem
     } = ItemsSlice.actions

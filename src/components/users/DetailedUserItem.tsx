@@ -9,6 +9,9 @@ import {clearSearchDelivery, searchDelivery} from "../../store/slices/deliveries
 import {clearSearchItem, searchItem} from "../../store/slices/items";
 import ItemsList from "../items/ItemsList";
 import Item from "../items/Item";
+import {fetchDeleteUser} from "../../store/slices/users";
+import {useNavigate} from "react-router-dom";
+import ShadowWindow from "../ShadowWindow";
 
 interface DetailedUserItemProps {
     user: IUser
@@ -27,8 +30,11 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
     const [numberOrder, setNumberOrder] = useState('')
     const [numberDelivery, setNumberDelivery] = useState('')
     const [name, setName] = useState('')
+    const navigation = useNavigate()
     const [markName, setMarkName] = useState('')
     const dispatch = useAppDispatch()
+    const [visibleWindow, setVisibleWindow] = useState(false)
+    const statusDeleteUser = useAppSelector(state => state.users.statusDelete)
 
     useEffect(() => {
         setName('')
@@ -68,6 +74,12 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
         setMarkName('')
         setName('')
     }
+
+    function deleteUser() {
+        dispatch(fetchDeleteUser({user_id: user.id}))
+            .then(() => navigation('/users'))
+    }
+
     return (
         <div className={'detailed_user_item_container'}>
             <div className={'user_information'}>
@@ -82,10 +94,19 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                 <span style={{fontWeight: 'bold'}}>Страна</span>
                 <span>{user.country}</span>
             </div>
-            <div className={'container_list_del_user'}>
-
-
-            </div>
+            <button
+                onClick={() => setVisibleWindow(true)}
+                className={'error_button'}
+                style={{alignSelf: 'flex-start'}}
+            >Удалить покупателя
+            </button>
+            {visibleWindow &&
+                <ShadowWindow
+                    text={`пользователя ${user.name} ${user.surname} ${user.patronymic}`}
+                    onClose={() => setVisibleWindow(false)}
+                    deleteFunc={deleteUser}
+                    status={statusDeleteUser}/>
+            }
             <div className={'container_list_del_user'}>
                 <div className={'fields_search'}>
                     <h3 className={'title'}>Список посылок</h3>
@@ -98,10 +119,12 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                             <button
                                 disabled={!numberDelivery}
                                 onClick={searchingDelivery}
-                                className={'default_button'}>Найти</button>
+                                className={'default_button'}>Найти
+                            </button>
                             <button
                                 onClick={clearFieldsSearchDelivery}
-                                className={'default_button'}>Сбрость</button>
+                                className={'default_button'}>Сбрость
+                            </button>
                         </div>}
                 </div>
                 {filteredDeliveries.length !== 0 ?
@@ -109,9 +132,9 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                         <DeliveriesList deliveries={filteredDeliveries}/> :
                         <span className={'nothing_found'}>Пока нет посылок</span>
                     :
-                    (isSearchingDelivery ? (<NotFoundText />) : deliveries.length !== 0 ?
+                    (isSearchingDelivery ? (<NotFoundText/>) : deliveries.length !== 0 ?
                         <DeliveriesList deliveries={deliveries}/> :
-                        <span className={'nothing_found'}>Пока нет посылок</span>   )
+                        <span className={'nothing_found'}>Пока нет посылок</span>)
                 }
             </div>
             <div className={'container_list_del_user'}>
@@ -138,14 +161,14 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                 </div>
                 {filteredOrders.length !== 0 ?
                     orders.length !== 0 ?
-                            <OrderGrid orders={filteredOrders}/> :
-                            <span className={'nothing_found'}>Пока нет заказов</span>
+                        <OrderGrid orders={filteredOrders}/> :
+                        <span className={'nothing_found'}>Пока нет заказов</span>
 
-                :
-                    (isSearchingOrder ? (<NotFoundText />) : orders.length !== 0 ?
+                    :
+                    (isSearchingOrder ? (<NotFoundText/>) : orders.length !== 0 ?
                         <OrderGrid orders={orders}/> :
-                        <span className={'nothing_found'}>Пока нет заказов</span>   )
-                    }
+                        <span className={'nothing_found'}>Пока нет заказов</span>)
+                }
             </div>
 
             <div className={'container_list_del_user'}>
@@ -175,31 +198,33 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                         </div>}
                 </div>
                 <div className={'items_list_all_container'}>
-                    {(filteredItems.length == 0 && isSearchingItems) ? (<NotFoundText />) :
-                        <div className={'items_list'}>
-                            <h4 className={'label_order'}>Наменование</h4>
-                            <h4 className={'label_order'}>Производитель</h4>
-                            <h4 className={'label_order'}>Цена(1шт.)</h4>
-                            <h4 className={'label_order'}>Вес(1шт.)</h4>
-                            <h4 className={'label_order'}>Кол-во</h4>
-                            <h4 className={'label_order'}>Номер заказа</h4>
-                            <h4 className={'label_order'}>Номер посылки</h4>
-                            <h4 className={'label_order'}>Покупатель</h4>
-                            <h4 className={'label_order'}>Комментарий</h4>
-                            {isSearchingItems
-                                ?
-                                filteredItems.map((item, index) => (
-                                    <Item item={item} key={index}/>
-                                ))
-                                :
-                                items.map((item, index) => (
-                                    <Item item={item} key={index}/>
-                                ))
-                            }
-                        </div>
+                    {(filteredItems.length === 0 && isSearchingItems) ? (<NotFoundText/>) :
+                        (items.length !== 0 ?
+                            <div className={'items_list'}>
+                                <h4 className={'label_order'}>Наменование</h4>
+                                <h4 className={'label_order'}>Производитель</h4>
+                                <h4 className={'label_order'}>Цена(1шт.)</h4>
+                                <h4 className={'label_order'}>Вес(1шт.)</h4>
+                                <h4 className={'label_order'}>Кол-во</h4>
+                                <h4 className={'label_order'}>Номер заказа</h4>
+                                <h4 className={'label_order'}>Номер посылки</h4>
+                                <h4 className={'label_order'}>Покупатель</h4>
+                                <h4 className={'label_order'}>Комментарий</h4>
+                                {isSearchingItems
+                                    ?
+                                    filteredItems.map((item, index) => (
+                                        <Item item={item} key={index}/>
+                                    ))
+                                    :
+                                    items.map((item, index) => (
+                                        <Item item={item} key={index}/>
+                                    ))
+                                }
+                            </div> : <span className={'nothing_found'}>Пока нет товаров</span>)
                     }
                 </div>
             </div>
+
         </div>
     );
 };

@@ -32,7 +32,8 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({delivery}) => {
                 <span className={'field'}>{delivery.orders.reduce((acc, item) =>
                     acc += item.itemsCnt, 0)}</span>
                 <h3 className={'label_order'}>Габариты(см)</h3>
-                <span className={'field'}>{delivery.sizeSm?.width}x{delivery.sizeSm?.height}x{delivery.sizeSm?.length}</span>
+                {delivery.sizeSm? <span className={'field'}>{delivery.sizeSm?.width}x{delivery.sizeSm?.height}x{delivery.sizeSm?.length}</span> :
+                    <span className={'field'}></span>}
                 <h3 className={'label_order'}>Вес(кг)</h3>
                 <span className={'field'}>{delivery.weight}</span>
                 <h3 className={'label_order'}>Стоимость доставки</h3>

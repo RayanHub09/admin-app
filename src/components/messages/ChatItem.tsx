@@ -15,8 +15,8 @@ const ChatItem: FC<ChatItemProps> = ({chat}) => {
         state.users.users.find(user => user.id === chat.uid))
     const manager = useAppSelector(state => state.manager.manager)
     const department = Object.keys(options).find(key => options[key as keyof IRole] === chat.department)
-    const messages = chat.messages
-    const unreadMessages = chat.messages.filter((message: IMessage) => {
+    const messages = chat?.messages
+    const unreadMessages = chat?.messages?.filter((message: IMessage) => {
         return message?.uid === chat.uid && !message?.read
     }).length
 
@@ -46,9 +46,9 @@ const ChatItem: FC<ChatItemProps> = ({chat}) => {
 
                     </div>
                 </div>
-                {(chat.messages.length !== 0 && messages[messages.length - 1]?.uid === chat.uid && unreadMessages !== 0) &&
+                {(chat?.messages?.length !== 0 && messages[messages.length - 1]?.uid === chat.uid && unreadMessages !== 0) &&
                     <span className={'unread_messages'}>Непрочитанное сообщение</span>}
-                {(chat.messages.length !== 0 && messages[messages.length - 1]?.uid === chat.uid && unreadMessages === 0) &&
+                {(chat?.messages?.length !== 0 && messages[messages.length - 1]?.uid === chat.uid && unreadMessages === 0) &&
                     <span className={'unread_messages_yellow'}>Нет ответа</span>}
 
             </div>

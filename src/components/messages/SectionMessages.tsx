@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
-import { IRole, options } from "../../lists/roleList";
+import React, {useEffect, useState} from 'react';
+import {useAppSelector} from "../../hooks/redux-hooks";
+import {IRole, options} from "../../lists/roleList";
 import ChatItem from "./ChatItem";
-import { useLocation } from "react-router-dom";
+import {useLocation} from "react-router-dom";
 import './messages.sass';
 import {IChat} from "../../interfaces";
 
@@ -18,36 +18,35 @@ const SectionMessages = () => {
         setSortValue('')
     }, [chats, section]);
 
-    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = event.target.value;
-        setSortValue(value);
-
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement> | string) => {
+        if (typeof event === 'string') {
+            setSortValue(event)
+        }
+        else {
+            const value = event.target.value;
+            setSortValue(value);
+        }
         setSortedChats(prevChats => {
             const sorted = [...prevChats];
             return sorted.sort((a, b) => {
                 if (a.messages.length > 0 && b.messages.length > 0) {
                     const dateA = +new Date(a.messages[a.messages.length - 1]?.creationTime);
                     const dateB = +new Date(b.messages[b.messages.length - 1]?.creationTime);
-                    return value === "desc" ? dateA - dateB : dateB - dateA;
+                    return sortValue !== "desc" ? dateA - dateB : dateB - dateA;
                 }
                 if (a.messages.length === 0) return 1;
                 if (b.messages.length === 0) return -1;
                 return 0;
             });
         });
-    };
+    }
+    useEffect(() => handleSortChange('asc'), [])
 
-    const resetSort = () => {
-        setSortValue('');
-        const filteredChats = chats.filter(chat => options[section as keyof IRole] === chat.department);
-        setSortedChats(filteredChats);
-    };
 
     return (
         <div className={'chat_list_container'}>
             <div style={{ paddingBottom: '10px' }} className={'sort_container'}>
                 <select className={'fields_sort'} onChange={handleSortChange} value={sortValue}>
-                    <option value="" disabled>Выбрать сортировку</option>
                     <option value="asc">Сначала новые</option>
                     <option value="desc">Сначала старые</option>
                 </select>

@@ -1,7 +1,8 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
-import {addDoc, collection, db, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
+import {addDoc, collection, db, deleteDoc, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
 import {IManager, IOrder} from "../../interfaces";
+import {deleteChat} from "./messages";
 
 interface IAuthManager {
     email: string | null
@@ -15,12 +16,14 @@ interface IState {
     managers: IManager[]
     error: string | null
     status: 'loading' | 'succeeded' | 'failed' | null
+    statusDelete : 'loading' | 'succeeded' | 'failed' | null
 }
 
 const initialState: IState = {
     managers: [],
     error: null,
-    status: null
+    status: null,
+    statusDelete: null
 }
 export const fetchSignUpManager = createAsyncThunk(
     'worker/fetchCreateWorker',
@@ -74,6 +77,19 @@ export const fetchChangePossibilitiesManager = createAsyncThunk(
     }
 )
 
+export const fetchDeleteManager = createAsyncThunk(
+    'managers/fetchDeleteManager',
+    async ({manager_id}: {manager_id: string}, thunkAPI) => {
+        try {
+            const messageRef = doc(db, `managers`, manager_id);
+            await deleteDoc(messageRef)
+            await thunkAPI.dispatch(deleteManager(manager_id))
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
+
 const ManagersSlice = createSlice({
     name: 'Managers',
     initialState,
@@ -93,6 +109,9 @@ const ManagersSlice = createSlice({
             state.managers = state.managers.map(manager =>
                 manager.id === managerId ? { ...manager, ...checkboxes } : manager
             ) as IManager[]
+        },
+        deleteManager(state, action) {
+            state.managers = state.managers.filter(manager => manager.id !== action.payload)
         }
     },
     extraReducers: (builder) => {
@@ -100,6 +119,18 @@ const ManagersSlice = createSlice({
             .addCase(fetchGetAllManagers.fulfilled, (state, action) => {
                 state.managers = action.payload
                 state.status = 'succeeded'
+                state.error = null
+            })
+            .addCase(fetchDeleteManager.fulfilled, (state) => {
+                state.statusDelete = 'succeeded'
+                state.error = null
+            })
+            .addCase(fetchDeleteManager.rejected, (state, action) => {
+                state.statusDelete = 'failed'
+                state.error = action.payload as string
+            })
+            .addCase(fetchDeleteManager.pending, (state) => {
+                state.statusDelete = 'loading'
                 state.error = null
             })
             .addMatcher(
@@ -131,4 +162,4 @@ const ManagersSlice = createSlice({
 })
 
 export const ManagersReducer = ManagersSlice.reducer
-export const {addWorker, getAllManagers, setError, changePossibilitiesManager} = ManagersSlice.actions
+export const {addWorker, setError, changePossibilitiesManager, deleteManager, getAllManagers} = ManagersSlice.actions

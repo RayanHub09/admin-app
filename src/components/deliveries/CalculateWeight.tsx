@@ -8,17 +8,16 @@ interface IDeliveryProps {
 }
 
 const CalculateWeight: FC<IDeliveryProps> = ({delivery}) => {
-    const [weight, setWeight] = useState(delivery.weight.toString() === '0' ? '' : delivery.weight.toString())
-    const [size, setSize] = useState('')
+    const [weight, setWeight] = useState(delivery.weight?.toString())
+    const [size, setSize] = useState(delivery?.sizeSm ? delivery?.sizeSm?.width + ',' + delivery?.sizeSm?.length + ',' + delivery?.sizeSm?.height : '')
     const [error, setError] = useState('')
     const dispatch = useAppDispatch()
     const status = useAppSelector(state => state.deliveries.status)
+    const statusDeleteDelivery = useAppSelector(state => state.deliveries.statusDelete)
 
     function changeWeightDelivery() {
         const parsedWeight = +weight.replace(',', '.');
         const parsedSize = size.replace(' ', '').split(',').map(Number);
-
-        // Проверка корректности введенных данных
         const isWeightValid = !isNaN(parsedWeight);
         const isSizeValid = parsedSize.length === 3 && parsedSize.every(dim => !isNaN(dim));
 
@@ -41,8 +40,6 @@ const CalculateWeight: FC<IDeliveryProps> = ({delivery}) => {
             setTimeout(() => setError(''), 2000);
         }
     }
-
-
     return (
         <div className={'calculate_delivery_container'}>
             <div className={'calculate_delivery_container_input'}>

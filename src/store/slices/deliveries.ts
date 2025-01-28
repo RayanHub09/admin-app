@@ -1,12 +1,7 @@
 import {IDelivery, IOrder} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, deleteDoc, doc, getDoc, getDocs, query, updateDoc} from "../../firebase";
-import serializeData from "../../Serializer";
-import {convertStringToDate, getDate} from "../../functions/changeDate";
-import {RootState} from "../index";
-import {arrayUnion, serverTimestamp, Timestamp} from "firebase/firestore";
-import {deleteChat} from "./messages";
-import {useAppSelector} from "../../hooks/redux-hooks";
+import {serverTimestamp} from "firebase/firestore";
 
 
 interface IState {
@@ -243,7 +238,7 @@ export const fetchChangeWeightDelivery = createAsyncThunk(
                 'sizeSm.length': +length
             }
             await updateDoc(deliveryDocRef, newData)
-            await thunkAPI.dispatch(changeWeight([deliveryId, weight]))
+            await thunkAPI.dispatch(changeWeight([deliveryId, weight, width, height, length]))
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message)
         }
@@ -402,12 +397,17 @@ const DeliveriesSlice = createSlice({
             state.deliveries = state.deliveries.filter(delivery => delivery.id !== action.payload)
         },
         changeWeight(state, action) {
-            const [deliveryId, weight] = action.payload;
+            const [deliveryId, weight, width, height, length] = action.payload;
             const deliveryIndex = state.deliveries.findIndex(delivery => delivery.id === deliveryId);
             if (deliveryIndex !== -1) {
                 const updatedDelivery = {
                     ...state.deliveries[deliveryIndex],
-                    weight: weight
+                    weight: weight,
+                    sizeSm: {
+                        width: width,
+                        length: length,
+                        height: height
+                    }
                 }
                 state.deliveries = [
                     ...state.deliveries.slice(0, deliveryIndex),
