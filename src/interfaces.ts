@@ -33,8 +33,9 @@ export interface IReItem {
     uid: string
     idOrder: string
     numberOrder: string
-    numberDelivery: string
-    idDelivery: string
+    numberDelivery?: string
+    idDelivery?: string
+    numberLot?: string
     statusOrder: string
     amount: number
     comment: string
@@ -135,6 +136,7 @@ export interface IDelivery {
     uid: string
     weight: number
     sizeSm: ISize
+    trackLink: string
 }
 
 export interface ISize {

@@ -20,15 +20,16 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
     const [status, setStatus] = useState(delivery.status.statusName)
     const [comment, setComment] = useState(delivery.comment)
     const [error, setError] = useState('')
+    const [trackLink, setTrackLink] = useState(delivery.trackLink)
     const manager = useAppSelector(state => state.manager.manager);
 
     function changeDelivery() {
-        if (numbersDeliveries.includes(number)) {
+        if (numbersDeliveries.includes(number) && delivery.number !== number) {
              setError('Данный номер уже занят. Попробуйте другой.')
             setTimeout(() => setError(''), 4000)
         } else {
             dispatch(fetchChangeDelivery({deliveryId: delivery.id, newStatus: status,
-                newComment: comment, newNumber: number}))
+                newComment: comment, newNumber: number, newTrackLink: trackLink}))
                 .then(() => dispatch(resetStatus()))
         }
 
@@ -107,7 +108,10 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
                 <h3 className={'label_order'}>Телефон</h3>
                 <span className={'field'}>{delivery.customer.phoneNumber}</span>
                 <h3 className={'label_order'}>Номера накладных</h3>
-                <span className={'field'}>{}</span>
+                <input
+                    value={trackLink}
+                    onChange={(event) => setTrackLink(event.target.value)}
+                    className={'input_field'}/>
                 <h3 className={'label_order'}>Комментарий</h3>
                 {(manager.role === 'admin' || writeCommentsDelivery) ?
                     <input

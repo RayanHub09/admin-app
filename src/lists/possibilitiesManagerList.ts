@@ -10,6 +10,7 @@ export interface IPossibilitiesManager {
     calculateDeliveryCost: string
     changeWeight: string
     chatManagement: string
+    // trackLink : string
 }
 
 export const possibilitiesManager:IPossibilitiesManager = {

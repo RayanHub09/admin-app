@@ -82,7 +82,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     value={role}
                     onChange={event => setRole(event.target.value)}
                     className={'choose_role'}>
-                    <option disabled={true}>Выберете роль</option>
+                    <option disabled={true}>Выберете отдел</option>
                     {Object.keys(options).map((key, index) =>
                         <option value={key} key={index}>{options[key as keyof IRole]}</option>
                     )}

@@ -1,8 +1,9 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, deleteDoc, doc, getDocs, query, updateDoc} from "../../firebase";
-import {IOrder} from "../../interfaces"
-import {serverTimestamp} from "firebase/firestore";
+import {IItem, IOrder, IPart, IReItem, IStatus} from "../../interfaces"
+import {addDoc, serverTimestamp, Timestamp} from "firebase/firestore";
 import {statusOrder} from "../../lists/statusOrder";
+import {FormDataItem} from "../../components/orders/CreateOrder";
 
 
 
@@ -33,6 +34,7 @@ const initialState: IState = {
     statusGet: null,
     statusDelete: null
 }
+
 
 export const fetchGetAllOrders = createAsyncThunk(
     'orders/fetchGetAllOrders',
@@ -156,6 +158,67 @@ export const fetchDeleteOrder = createAsyncThunk(
     }
 )
 
+export const fetchCreateOrder = createAsyncThunk(
+    'orders/fetchCreateOrder',
+    async ({
+        commentOrder, numberOrder, userId, priceYen, priceRu, count, items, numberLot
+           } : {
+        commentOrder:string, numberOrder:string, userId:string, priceYen:number, priceRu:number,
+        count:number, items:FormDataItem[], numberLot:string
+    }, thunkAPI) => {
+        try {
+            const newOrder = {
+                id: '',
+                comment: commentOrder,
+                date: Timestamp.now(),
+                items: items.map((item) => ({
+                    id: `${numberLot}/${item.name}/${item.markName}`,
+                    dateOrder: Timestamp.now(),
+                    uid: userId,
+                    numberLot: numberLot,
+                    amount: item.count,
+                    comment: item.comment,
+                    part: {
+                        discontinued: false,
+                        discontinuedTitleEn: '',
+                        discontinuedTitleRu: '',
+                        markName: item.markName,
+                        name: item.name,
+                        nameEn: '',
+                        nameRu: '',
+                        notOriginalReplacements: [],
+                        oldPartNumbers: [],
+                        partNo: '',
+                        priceEur: 0,
+                        priceRub: +item.priceRub,
+                        priceUsd: 0,
+                        priceYen: +item.priceYen,
+                        sameTimeReplacements: [],
+                        weight: +item.weight
+                    },
+                    selected: true
+                })),
+                itemsCnt: count,
+                number: numberOrder,
+                priceRu: priceRu,
+                priceYen: priceYen,
+                status: {
+                    archived: false,
+                    date: Timestamp.now(),
+                    readyToPackage: false,
+                    statusName: 'Не оплачен'
+                },
+                uid: userId
+            }
+            const docRef = await addDoc(collection(db, '/orders'), newOrder)
+            await updateDoc(docRef, { id: docRef.id})
+
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
+
 const OrdersSlice = createSlice({
     name: 'orders',
     initialState,
@@ -238,8 +301,15 @@ const OrdersSlice = createSlice({
             })
         },
         pushNewOrderSnapshot(state, action) {
-            state.orders = [action.payload, ...state.orders]
+            const newOrder = action.payload;
+            state.orders = [...state.orders.filter(order => order.number !== newOrder.number), newOrder]
             console.log(state.orders)
+        // const orderExists = state.orders.some(order => order.id === newOrder.id)
+            // if (!orderExists) {
+            //     state.orders = [newOrder, ...state.orders];
+            // } else {
+            //     state.orders = [...state.orders.filter(order => order.id !== newOrder.id), newOrder]
+            // }
         },
         deleteOrderSnapshot(state, action) {
             state.orders = [...state.orders.filter(order => order.id !== action.payload)]
@@ -307,6 +377,17 @@ const OrdersSlice = createSlice({
             })
             .addCase(fetchDeleteOrder.fulfilled, (state, action) => {
                 state.statusDelete = 'succeeded'
+                state.error = null
+            })
+            .addCase(fetchCreateOrder.pending, (state, action) => {
+                state.status = 'loading'
+            })
+            .addCase(fetchCreateOrder.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.payload as string
+            })
+            .addCase(fetchCreateOrder.fulfilled, (state, action) => {
+                state.status = 'succeeded'
                 state.error = null
             })
             .addMatcher(

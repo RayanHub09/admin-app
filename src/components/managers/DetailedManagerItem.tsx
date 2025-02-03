@@ -77,7 +77,7 @@ const DetailedManagerItem: FC<DetailedManagerItemProps> = ({manager}) => {
                 </button>
                 {visibleWindow &&
                     <ShadowWindow
-                        text={`менеджера ${manager.name}`}
+                        text={`Вы уверены, что хотите удалить менеджера ${manager.name}?`}
                         onClose={() => setVisibleWindow(false)}
                         deleteFunc={deleteManager}
                         status={statusDeleteManager} />

@@ -17,6 +17,7 @@ import ChatPage from "../../pages/ChatPage";
 import UsersPage from "../../pages/UsersPage";
 import UserPage from "../../pages/UserPage";
 import OfflinePage from "../../pages/OfflinePage";
+import CreateOrderPage from "../../pages/CreateOrderPage";
 
 
 const Router = () => {
@@ -26,6 +27,7 @@ const Router = () => {
             <Route path="/" element={<SignInPage />} />
             <Route path={'/managers'} element={<PrivateRouter element={<ManagersPage />} /> } />
             <Route path={'/orders'} element={<PrivateRouter element={<OrdersPage />} /> } />
+            <Route path={'/orders/create'} element={<PrivateRouter element={<CreateOrderPage />} /> } />
             <Route path={'/messages/:name'} element={<PrivateRouter element={<MessagesPage />} /> } />
             <Route path={'/messages/:name/:id'} element={<PrivateRouter element={<ChatPage />} /> } />
             <Route path={'/users'} element={<PrivateRouter element={<UsersPage />} /> } />

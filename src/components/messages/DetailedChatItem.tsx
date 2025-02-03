@@ -25,7 +25,6 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
     const [loadingDelete, setLoadingDelete] = useState<{ [key: string]: boolean }>({});
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const statusDeleteChat = useAppSelector(state => state.messages.statusDeleteChat);
-    const statusDeleteMessage = useAppSelector(state => state.messages.statusChange);
     const [visibleWindow, setVisibleWindow] = useState(false);
     const [visibleChatDeleteWindow, setVisibleChatDeleteWindow] = useState(false); // Новое состояние для окна удаления чата
     const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
@@ -49,16 +48,14 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ block: 'end', behavior: 'auto' });
         }
-        const unreadMessages = chat.messages.filter(message => message.uid !== manager.id && !message.read).map(message => message.id);
+        const unreadMessages = chat.messages?.filter(message => message.uid !== manager.id && !message.read).map(message => message.id);
         dispatch(fetchChangeReadMessage({ chat_id: chat?.id, messages_id: unreadMessages }));
     }, [statusSendMessage]);
 
-    if (!chat?.messages) {
-        return <NotFoundPage />;
-    }
+
 
     const confirmDeleteChat = () => {
-        setVisibleChatDeleteWindow(true); // Показываем окно подтверждения удаления чата
+        setVisibleChatDeleteWindow(true)
     };
 
     const deleteChat = () => {
@@ -70,16 +67,16 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
     return (
         <div className={'detailed_chat_item'}>
             <div className={'info_user'}>
-                <h2>{user?.name} {user?.surname}</h2>
+                <h2>{chat.theme}</h2>
             </div>
-            {chat.messages.length !== 0 ?
+            {(chat.messages ? chat.messages.length !== 0 : chat.messages) ?
                 <div className={'chat_messages_container'}>
                     {chat.messages.map((message: IMessage, index) =>
                         <div
                             key={message.id}
                             className={chat.uid === message.uid ? 'user_message message' : 'manager_message message'}>
                             {chat.uid === message.uid ? <h4>{user?.name} {user?.surname}</h4> : <h4>Менеджер</h4>}
-                            <p style={{ paddingLeft: '10px' }}>{message.text}</p>
+                            <p style={{ paddingLeft: '10px'}}>{message.text}</p>
                             {message.creationTime && <span style={{ paddingRight: '10px' }} className={'status_message'}>
                                 {getDate(message.creationTime)[1].split(':')[0]}:{getDate(message.creationTime)[1].split(':')[1]}<span>  </span>
                                 {getDate(message.creationTime)[0].split('.')[0]}.{getDate(message.creationTime)[0].split('.')[1]}.
@@ -137,7 +134,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
             }
             <InputMessage chat_id={chat?.id} uid={chat?.uid} />
             {visibleWindow && <ShadowWindow
-                text={`сообщение ${chat.messages.find( message => message.id === messageToDelete)?.text}`}
+                text={`Вы уверены, что хотите удалить сообщение ${chat.messages.find( message => message.id === messageToDelete)?.text}?`}
                 onClose={() => setVisibleWindow(false)}
                 deleteFunc={() => {
                     if (messageToDelete) {
@@ -148,7 +145,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                 status={loadingDelete[messageToDelete as string] ? 'loading' : ''}
             />}
             {visibleChatDeleteWindow && <ShadowWindow
-                text={`этот чат?`}
+                text={`Вы уверены, что хотите удалить этот чат?`}
                 onClose={() => setVisibleChatDeleteWindow(false)}
                 deleteFunc={() => {
                     deleteChat();

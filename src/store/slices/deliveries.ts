@@ -1,7 +1,7 @@
 import {IDelivery, IOrder} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, deleteDoc, doc, getDoc, getDocs, query, updateDoc} from "../../firebase";
-import {serverTimestamp} from "firebase/firestore";
+import {arrayUnion, serverTimestamp, Timestamp} from "firebase/firestore";
 
 
 interface IState {
@@ -50,10 +50,10 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                     priceRu: order.priceRu,
                     priceYen: order.priceYen,
                     status: {
-                        archived: data.status.archived || false,
-                        date: data.status.date.seconds,
-                        readyToPackage: data.status.readyToPackage,
-                        statusName: data.status.statusName
+                        archived: order.status.archived || false,
+                        date: order.status.date.seconds,
+                        readyToPackage: order.status.readyToPackage,
+                        statusName: order.status.statusName
                     },
                     uid: order.uid
                 }));
@@ -68,7 +68,7 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                     deliveryCostYen: data.deliveryCostYen,
                     deliveryMethod: data.deliveryMethod,
                     number: data.number,
-                    orders: serializedOrders,
+                    orders: serializedOrders as IOrder[],
                     partsCostRu: data.partsCostRu,
                     partsCostYen: data.partsCostYen,
                     ruDelivery: data.ruDelivery,
@@ -79,10 +79,12 @@ export const fetchGetAllDeliveries = createAsyncThunk(
                     },
                     uid: data.uid,
                     weight: data.weight,
-                    sizeSm: data.sizeSm
+                    sizeSm: data.sizeSm,
+                    trackLink: data.trackLink
                 };
                 return serializedData;
             });
+            console.log(1)
             thunkAPI.dispatch(getAllDeliveries(deliveries));
             return deliveries;
         } catch (error: any) {
@@ -97,8 +99,9 @@ export const fetchChangeDelivery = createAsyncThunk(
                deliveryId,
                newStatus,
                newComment,
-               newNumber
-           }: { deliveryId: string, newStatus: string, newComment: string, newNumber: string }, thunkAPI) => {
+               newNumber,
+               newTrackLink
+           }: { deliveryId: string, newStatus: string, newComment: string, newNumber: string, newTrackLink: string }, thunkAPI) => {
         const deliveryDocRef = doc(db, 'deliveries', deliveryId)
         try {
             const updateData: { [key: string]: string | any } = {};
@@ -106,11 +109,12 @@ export const fetchChangeDelivery = createAsyncThunk(
                 updateData['status.statusName'] = newStatus
                 updateData['status.date'] = serverTimestamp()
             }
-            ;
-            if (newComment !== undefined) updateData['comment'] = newComment;
-            if (newNumber !== undefined) updateData['number'] = newNumber;
+            if (newComment !== undefined) updateData['comment'] = newComment
+            if (newNumber !== undefined) updateData['number'] = newNumber
+            if (newTrackLink !== undefined) updateData['trackLink'] = newTrackLink
+
             await updateDoc(deliveryDocRef, updateData)
-            const updatedDelivery = {deliveryId, newStatus, newComment, newNumber}
+            const updatedDelivery = {deliveryId, newStatus, newComment, newNumber, newTrackLink}
             thunkAPI.dispatch(changeDelivery(updatedDelivery))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
@@ -138,30 +142,41 @@ export const fetchCalculateDeliveryCost = createAsyncThunk(
         }
     }
 )
-
 export const fetchCancelDelivery = createAsyncThunk(
     'deliveries/fetchDeleteDelivery',
     async ({deliveryId}: { deliveryId: string }, thunkAPI) => {
         try {
-            const deliveryDocRef = doc(db, 'deliveries', deliveryId)
-            const deliveryDoc = await getDoc(deliveryDocRef)
-            const deliveryData = deliveryDoc.data()
+            const deliveryDocRef = doc(db, 'deliveries', deliveryId);
+            const deliveryDoc = await getDoc(deliveryDocRef);
+            const deliveryData = deliveryDoc.data();
+
             const updatedOrders = deliveryData?.orders.map((order: IOrder) => ({
                 ...order,
-                ['status.statusName']: 'На складе в Японии',
-                ['status.date']: serverTimestamp()
-            }))
-            await updateDoc(deliveryDocRef, {
-                ['status.statusName']: 'Отменен',
-                orders: updatedOrders
-            })
-            thunkAPI.dispatch(cancelDelivery({deliveryId}));
+                status: {
+                    ...order.status,
+                    date: Timestamp.now(),
+                    statusName: 'На складе в Японии',
+                    readyToPackage: true
+                }
+            }));
 
+            await updateDoc(deliveryDocRef, {
+                orders: updatedOrders,
+                status: {
+                    ...deliveryData?.status,
+                    date: Timestamp.now(),
+                    statusName: 'Отменен'
+                }
+            });
+
+            // Обновляем локальное состояние в Redux
+            thunkAPI.dispatch(cancelDelivery({deliveryId, updatedOrders}));
         } catch (e: any) {
-            thunkAPI.rejectWithValue(e.message)
+            thunkAPI.rejectWithValue(e.message);
         }
     }
-)
+);
+
 
 export const fetchChangeStatusOrderDelivery = createAsyncThunk(
     'deliveries/fetchChangeNumberOrder',
@@ -172,12 +187,19 @@ export const fetchChangeStatusOrderDelivery = createAsyncThunk(
             const deliveryData = deliveryDoc.data()
             const orders = deliveryData?.orders || []
             const orderIndex = orders.findIndex((order: IOrder) => order.id === orderId)
-            orders[orderIndex]['status.statusName'] = newStatus;
-            orders[orderIndex]['status.date'] = serverTimestamp()
+            const newOrder = {
+                ...orders[orderIndex],
+                status: {
+                    ...orders[orderIndex].status,
+                    statusName: newStatus,
+                    date: serverTimestamp()
+                }
+            }
+            console.log(0)
             await updateDoc(deliveryDocRef, {
-                orders: orders
+                ...deliveryData,
+                orders: [...orders, newOrder]
             })
-            console.log(newStatus)
             thunkAPI.dispatch(changeStatusOrderDelivery({orderId, newStatus, deliveryId}))
         } catch (e: any) {
             thunkAPI.rejectWithValue(e.message)
@@ -195,22 +217,36 @@ export const fetchChangeOrderDelivery = createAsyncThunk(
            }: { orderId: string, newStatus: string, newComment: string, newNumber: string, deliveryId: string }, thunkAPI) => {
         try {
             const deliveryDocRef = doc(db, 'deliveries', deliveryId);
-            const deliveryDoc = await getDoc(deliveryDocRef)
-            const deliveryData = deliveryDoc.data()
-            const orders = deliveryData?.orders || []
+            const deliveryDoc = await getDoc(deliveryDocRef);
+            const deliveryData = deliveryDoc.data();
+            const orders = deliveryData?.orders || [];
             const orderIndex = orders.findIndex((order: IOrder) => order.id === orderId)
-            orders[orderIndex]['status.statusName'] = newStatus
-            orders[orderIndex]['comment'] = newComment
-            orders[orderIndex]['number'] = newNumber
-            await updateDoc(deliveryDocRef, {
-                orders: orders
+            const updatedOrders = orders.map((order: IOrder, index: string) => {
+                if (index === orderIndex) {
+                    return {
+                        ...order,
+                        comment: newComment,
+                        number: newNumber,
+                        status: {
+                            ...order.status,
+                            statusName: newStatus,
+                            date: Timestamp.now()
+                        }
+                    }
+                }
+                return order
             })
-            thunkAPI.dispatch(changeOrderDelivery({orderId, newStatus, newComment, newNumber, deliveryId}))
+            await updateDoc(deliveryDocRef, {
+                orders: updatedOrders
+            })
+            thunkAPI.dispatch(changeOrderDelivery({orderId, newStatus, newComment, newNumber, deliveryId}));
         } catch (e: any) {
-            thunkAPI.rejectWithValue(e.message)
+            console.log(e);
+            return thunkAPI.rejectWithValue(e.message);
         }
     }
-)
+);
+
 
 export const fetchDeleteDelivery = createAsyncThunk(
     'chats/fetchDeleteMessage',
@@ -244,12 +280,29 @@ export const fetchChangeWeightDelivery = createAsyncThunk(
         }
     }
 )
+
+
 const DeliveriesSlice = createSlice({
     name: 'deliveries',
     initialState,
     reducers: {
         getAllDeliveries(state, action) {
-            state.deliveries = action.payload
+            console.log(0)
+            state.deliveries = action.payload.map((delivery: IDelivery) => ({
+                ...delivery,
+                orders: delivery.orders.map((order: IOrder) => ({
+                    ...order,
+                    date: order.date,
+                    status: {
+                        archived: order.status.archived || false,
+                        date: order.status.date,
+                        readyToPackage: order.status.readyToPackage,
+                        statusName: order.status.statusName,
+                    },
+                })),
+
+            }));
+            console.log(state.deliveries)
         },
         searchDelivery(state, action) {
             const [number, startDate, endDate, status, methods, uid] = action.payload
@@ -281,13 +334,14 @@ const DeliveriesSlice = createSlice({
         },
         changeDelivery(state, action) {
             const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
-            const {deliveryId, newStatus, newComment, newNumber} = action.payload
+            const {deliveryId, newStatus, newComment, newNumber, newTrackLink} = action.payload
             state.deliveries = state.deliveries.map(delivery =>
                 delivery.id === deliveryId ? {
                     ...delivery,
                     status: {statusName: newStatus, date: currentTimeInSeconds},
                     comment: newComment,
-                    number: newNumber
+                    number: newNumber,
+                    trackLink: newTrackLink
                 } : delivery
             ) as IDelivery[]
         },
@@ -308,19 +362,28 @@ const DeliveriesSlice = createSlice({
             console.log(state.deliveries)
         },
         cancelDelivery(state, action) {
-            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
-            const {deliveryId} = action.payload
-            const newDelivery = {...state.deliveries.filter(order => order.id === deliveryId)[0]}
-            newDelivery.status.statusName = 'Отменен'
-            newDelivery.status.date = currentTimeInSeconds
-            newDelivery.orders.map(order => {
-                order.status.statusName = 'На складе в Японии'
-                order.status.date = currentTimeInSeconds
-            })
-            state.deliveries = state.deliveries.map(delivery => delivery.id === deliveryId
-                ? newDelivery
-                : delivery
-            ) as IDelivery[]
+            const {deliveryId, updatedOrders} = action.payload;
+            state.deliveries = state.deliveries.map(delivery => {
+                if (delivery.id === deliveryId) {
+                    return {
+                        ...delivery,
+                        status: {
+                            ...delivery.status,
+                            statusName: 'Отменен',
+                            date: Math.floor(Date.now() / 1000).toString(),
+                        },
+                        orders: updatedOrders.map((order: IOrder) => ({
+                            ...order,
+                            stаtus: {
+                                ...order.status,
+                                statusName: 'На складе в Японии',
+                                date: Math.floor(Date.now() / 1000).toString()
+                            }
+                        })),
+                    };
+                }
+                return delivery;
+            });
         },
         changeStatusOrderDelivery(state, action) {
             const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()

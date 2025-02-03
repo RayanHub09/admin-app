@@ -17,6 +17,7 @@ const OrderPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const [visibleWindow, setVisibleWindow] = useState(false);
     const [statusDeleteOrder, setStatusDeleteOrder] = useState('');
+    const status = useAppSelector(state => state.orders.statusDelete)
     const { id } = useParams<{ id: string }>();
     const order: IOrder | undefined = useAppSelector(state =>
         state.orders.orders.find(order => order.id === id)
@@ -25,6 +26,7 @@ const OrderPage: React.FC = () => {
     const navigation = useNavigate();
 
     function deleteOrder() {
+        console.log(status)
         setStatusDeleteOrder('loading');
         dispatch(fetchDeleteOrder({ order_id: order?.id as string }))
             .then(() => {
@@ -64,15 +66,15 @@ const OrderPage: React.FC = () => {
                     </button>}
                 {visibleWindow &&
                     <ShadowWindow
-                        text={`заказ под номером ${order.number}`}
+                        text={`Вы уверены, что хотите удалить заказ под номером ${order.number}?`}
                         onClose={() => setVisibleWindow(false)}
                         deleteFunc={deleteOrder}
-                        status={statusDeleteOrder}
+                        status={status}
                     />
                 }
             </div>
             <div>
-                {changeMode ? <ChangeDetailedOrderItem order={order as IReOrder} /> : <DetailedOrderItem order={order} />}
+                {changeMode ? <ChangeDetailedOrderItem order={order as IReOrder} /> : <DetailedOrderItem key={order.id} order={order as IReOrder} />}
             </div>
         </div>
     );

@@ -41,7 +41,7 @@
                     const itemDate = item.dateOrder
                     return (numberOrder === '' || item.numberOrder.includes(numberOrder)) &&
                         (uid === '' || item.uid === uid) &&
-                        (numberDelivery === '' || item.numberDelivery.includes(numberDelivery)) &&
+                        (numberDelivery === '' || item?.numberDelivery?.includes(numberDelivery)) &&
                         (markName === '' || item.part.markName.includes(markName)) &&
                         (id === '' || item.id.includes(id)) &&
                         (startDate === '' || itemDate >= startDate) &&
@@ -105,8 +105,20 @@
                 });
             },
             addNewItems(state, action) {
-                state.items = [...action.payload, ...state.items]
+                const newItems = action.payload;
+
+                const updatedItems = state.items.map(existingItem => {
+                    const newItem = newItems.find((item:IItem) => item.id === existingItem.id);
+                    return newItem ? newItem : existingItem;
+                });
+
+                const uniqueNewItems = newItems.filter((newItem:IItem) =>
+                    !state.items.some(existingItem => existingItem.id === newItem.id)
+                );
+
+                state.items = [...updatedItems, ...uniqueNewItems];
             }
+
         }
     })
 

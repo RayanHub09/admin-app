@@ -34,7 +34,6 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
 
     function changeOrder() {
         if (numbersOrders.includes(number) && order.number !== number) {
-            console.log()
             setError('Данный номер уже занят. Попробуйте другой.')
             setTimeout(() => setError(''), 4000)
         } else {

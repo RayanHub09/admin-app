@@ -144,3 +144,9 @@
 @media (max-width: 950px)
   .detailed_order_item_container ,.detailed_order_item
     overflow: scroll
+.create_order_form
+  @include default_container(column, 0px, 10px)
+.items_grid
+  display: grid
+  grid-template-columns: repeat(8, 1fr)
+  border: #a5a5a5 2px solid

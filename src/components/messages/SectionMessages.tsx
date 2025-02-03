@@ -15,28 +15,34 @@ const SectionMessages = () => {
     useEffect(() => {
         const filteredChats = chats.filter(chat => options[section as keyof IRole] === chat.department);
         setSortedChats(filteredChats);
+        setSortValue('asc')
+        setSortedChats(prevChats => {
+            return filteredChats.sort((a: IChat, b: IChat) => {
+                const hasMessagesA = a?.messages && Array.isArray(a.messages) && a.messages.length > 0;
+                const hasMessagesB = b?.messages && Array.isArray(b.messages) && b.messages.length > 0;
+                const dateA = hasMessagesA ? +(a.messages[a.messages.length - 1]?.creationTime) : +(new Date(a.creationDate))
+                const dateB = hasMessagesB ? +(b.messages[b.messages.length - 1]?.creationTime) : +(new Date(b.creationDate))
+                return sortValue === "asc" ? +dateB - +dateA : +dateA - +dateB;
+            });
+        })
     }, [chats, section]);
 
     useEffect(() => {
-        handleSortChange(sortValue);
-    }, [sortValue]);
-
-    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement> | string) => {
-        if (typeof event === 'string') {
-            setSortValue(event)
-        } else {
-            const value = event.target.value;
-            setSortValue(value);
-        }
+        const filteredChats = chats.filter(chat => options[section as keyof IRole] === chat.department);
         setSortedChats(prevChats => {
-            const sorted = [...prevChats];
-            return sorted.sort((a, b) => {
-                const dateA = a.messages.length > 0 ? +new Date(a.messages[a.messages.length - 1]?.creationTime) : 0;
-                const dateB = b.messages.length > 0 ? +new Date(b.messages[b.messages.length - 1]?.creationTime) : 0;
-
-                return sortValue !== "desc" ? dateB - dateA : dateA - dateB;
+            return filteredChats.sort((a: IChat, b: IChat) => {
+                const hasMessagesA = a?.messages && Array.isArray(a.messages) && a.messages.length > 0;
+                const hasMessagesB = b?.messages && Array.isArray(b.messages) && b.messages.length > 0;
+                const dateA = hasMessagesA ? +(a.messages[a.messages.length - 1]?.creationTime) : +(new Date(a.creationDate))
+                const dateB = hasMessagesB ? +(b.messages[b.messages.length - 1]?.creationTime) : +(new Date(b.creationDate))
+                return sortValue === "asc" ? +dateB - +dateA : +dateA - +dateB;
             });
         });
+    }, [sortValue])
+
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const newSortValue = event.target.value;
+        setSortValue(newSortValue);
     };
 
     return (

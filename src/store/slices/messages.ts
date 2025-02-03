@@ -1,6 +1,6 @@
 import {IChat, IMessage, IReItem} from "../../interfaces"
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit"
-import {collection, db, deleteDoc, doc, getDocs, query} from "../../firebase"
+import {addDoc, collection, db, deleteDoc, doc, getDocs, query} from "../../firebase"
 import {serverTimestamp, setDoc, Timestamp, updateDoc} from "firebase/firestore"
 import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage"
 import {IRole, options} from "../../lists/roleList";
@@ -22,6 +22,8 @@ interface IState {
     statusGet: 'loading' | 'succeeded' | 'failed' | null
     statusDeleteMessage: 'loading' | 'succeeded' | 'failed' | null
     statusDeleteChat: 'loading' | 'succeeded' | 'failed' | null
+    statusCreateChat : 'loading' | 'succeeded' | 'failed' | null
+    statusGetMessage: 'loading' | 'succeeded' | 'failed' | null
     temporaryMessage: string | null
     statusChange: 'loading' | 'succeeded' | 'failed' | null
     unreadMessages: number
@@ -37,6 +39,8 @@ const initialState: IState = {
     statusChange: null,
     statusSend: null,
     statusGet: null,
+    statusGetMessage: null,
+    statusCreateChat: null,
     temporaryMessage: null,
     unreadMessages: 0
 }
@@ -76,7 +80,6 @@ export const fetchGetAllChats = createAsyncThunk(
                     return serializedMessage;
                 })
             }
-            console.log(chats)
             thunkAPI.dispatch(getAllMessages(chats));
         } catch (e: any) {
             return thunkAPI.rejectWithValue(e.message);
@@ -88,30 +91,37 @@ export const fetchPushNewMessage = createAsyncThunk(
     'messages/fetchPushNewMessage',
     async ({ text, mid, chat_id, img }: { text: string; mid: string; chat_id: string; img: File | null }, thunkAPI) => {
         try {
-            const id = generateUUID()
-            const storage = getStorage()
-            const time = serverTimestamp()
-            const storageRef = ref(storage, `files/${img?.name}`)
-            const snapshot = await uploadBytes(storageRef, img as File)
-            const downloadURL = await getDownloadURL(storageRef)
-            const file = { uri: downloadURL, name: id + img?.name }
+            const storage = getStorage();
+            const time = serverTimestamp();
 
-            const messagesRef = collection(db, `chat_rooms/${chat_id}/messages`)
-            const newMessageRef = doc(messagesRef, id)
-            const messageData = {
-                id,
-                text: text ? text : '',
-                read: false,
-                attachedFiles: img !== null ? [file] : [],
-                creationTime: time,
-                uid: mid
+            let file = null;
+            if (img) {
+                const storageRef = ref(storage, `files/${img.name}`);
+                await uploadBytes(storageRef, img);
+                const downloadURL = await getDownloadURL(storageRef);
+                file = { uri: downloadURL, name: `${mid}_${img.name}` };
             }
-            await setDoc(newMessageRef, messageData)
+
+            const messagesRef = collection(db, `chat_rooms/${chat_id}/messages`);
+            const newMessageRef = doc(messagesRef);
+
+            const messageData = {
+                id: newMessageRef.id,
+                text: text || '',
+                read: false,
+                attachedFiles: file ? [file] : [],
+                creationTime: time,
+                uid: mid,
+            };
+
+            await setDoc(newMessageRef, messageData);
+            return messageData;
         } catch (e: any) {
-            return thunkAPI.rejectWithValue(e.message)
+            console.error('Error pushing new message:', e);
+            return thunkAPI.rejectWithValue(e.message);
         }
     }
-)
+);
 
 export const fetchChangeReadMessage = createAsyncThunk(
     'chats/fetchChangeReadMessage',
@@ -121,7 +131,6 @@ export const fetchChangeReadMessage = createAsyncThunk(
         for (const message_id of messages_id) {
             const messageDocRef = doc(db, `chat_rooms/${chat_id}/messages/${message_id}`)
             try {
-                console.log(messages_id)
                 await updateDoc(messageDocRef, { read: true })
             } catch (e: any) {
                 return thunkAPI.rejectWithValue(e.message)
@@ -154,6 +163,25 @@ export const fetchDeleteChat = createAsyncThunk(
         }
     }
 )
+
+export const fetchCreateChat = createAsyncThunk(
+    'chats/fetchCreateChat',
+    async ({theme, uid, department} : {theme : string, uid : string, department : string}, thunkAPI) => {
+        try {
+            const data = {
+                department: department,
+                theme: theme,
+                uid: uid,
+                creationDate: Timestamp.now(),
+            }
+            const docRef = await addDoc(collection(db, '/chat_rooms'), data)
+            await updateDoc(docRef, {id: docRef.id})
+            return docRef.id
+        } catch (e:any) {
+            return thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
 const ChatsSlice = createSlice({
     name: 'chats',
     initialState,
@@ -173,15 +201,39 @@ const ChatsSlice = createSlice({
             state.statusSend = null
         },
         pushNewMessage(state, action) {
-            console.log(action.payload.messageData)
-            state.temporaryMessage = null
-            const chatIndex = state.chats.findIndex(chat => chat.id === action.payload.chat_id)
-            const time = action.payload.messageData.creationTime?.seconds
-            const new_message = {...action.payload.messageData, creationTime : time}
-            if (state.chats[chatIndex]?.messages) {
-                state.chats[chatIndex].messages = [...state.chats[chatIndex].messages, new_message]
+            state.temporaryMessage = null;
+            const chatIndex = state.chats.findIndex(chat => chat.id === action.payload.chat_id);
+            const time = action.payload.messageData.creationTime?.seconds;
+            const new_message = { ...action.payload.messageData, creationTime: time };
+
+            if (state.chats[chatIndex].messages) {
+                const messageExists = state.chats[chatIndex].messages.some(message =>
+                                message.id === new_message.id)
+                if (!messageExists) state.chats[chatIndex] = {...state.chats[chatIndex], messages : [...state.chats[chatIndex].messages, new_message]}
+            } else {
+                state.chats[chatIndex] = {...state.chats[chatIndex], messages : [new_message]}
+
             }
-        },
+            // if (state.chats[chatIndex]?.messages) {
+            //     if (state.chats[chatIndex].messages.length === 0) {
+            //
+            //     } else {
+            //         const messages = state.chats[chatIndex].messages
+            //         const messageExists = messages.some(message =>
+            //             message.id === new_message.id &&
+            //             message.text === new_message.text &&
+            //             message.creationTime === new_message.creationTime
+            //         )
+            //         if (!messageExists) {
+            //             state.chats[chatIndex].messages.push(new_message);
+            //         }
+            //     }
+            //
+            //
+            // }
+
+        }
+        ,
         setTemporaryMessage(state, action) {
             state.temporaryMessage = action.payload
         },
@@ -207,18 +259,21 @@ const ChatsSlice = createSlice({
                 state.chats[chatIndex].messages = state.chats[chatIndex].messages.filter(message => message.id !== message_id)
             }
         },
+
         pushNewChat(state, action) {
-            state.chats = [...state.chats, action.payload]
+            const time = action.payload.newChat?.creationDate.seconds
+            const new_chat = {...action.payload.newChat, creationDate : time}
+            state.chats = [...state.chats, new_chat]
         },
         changeMessage(state, action) {
             const { chat_id, messageData } = action.payload;
             const find_chat = state.chats.find(chat => chat.id === chat_id);
 
-            if (!find_chat) {
+            if (!find_chat?.messages) {
                 return state;
             }
 
-            const updatedMessages = find_chat.messages.filter(message => message.id !== messageData?.id);
+            const updatedMessages = find_chat.messages?.filter(message => message.id !== messageData?.id);
             const new_chat = {
                 ...find_chat,
                 messages: [...updatedMessages, messageData]
@@ -232,13 +287,15 @@ const ChatsSlice = createSlice({
         setParam(state, action) {
             state.isSorting = true
             state.paramSort = action.payload
-            console.log(state.paramSort)
         },
         resetSort(state) {
             state.isSorting = false
         },
         deleteChat(state, action) {
             state.chats = state.chats.filter(chat => chat.id !== action.payload)
+        },
+        createChat(state, action) {
+            state.chats = [...state.chats, action.payload]
         }
 
 
@@ -246,7 +303,6 @@ const ChatsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-
             .addMatcher(
                 (action) => ([fetchDeleteChat.rejected.type].includes(action.type)),
                 (state, action: PayloadAction<string>) => {
@@ -330,13 +386,34 @@ const ChatsSlice = createSlice({
                     state.error = action.payload as string
                 }
             )
+            .addMatcher(
+                (action) => ([fetchCreateChat.rejected.type].includes(action.type)),
+                (state, action: PayloadAction<string>) => {
+                    state.statusCreateChat = 'failed'
+                    state.error = action.payload as string
+                }
+            )
+            .addMatcher(
+                (action) => ([fetchCreateChat.fulfilled.type].includes(action.type)),
+                (state) => {
+                    state.statusCreateChat = null
+                    state.error = null
+
+                }
+            )
+            .addMatcher(
+                (action) => ([fetchCreateChat.pending.type].includes(action.type)),
+                (state) => {
+                    state.statusCreateChat = 'loading'
+                }
+            )
     }
 })
 
 export const ChatReducer = ChatsSlice.reducer
 export const {
     getAllMessages, pushNewMessage, setTemporaryMessage, resetStatus, changeReadMessage,
-    deleteMessage, pushNewChat, changeMessage, setParam, resetSort, deleteChat
+    deleteMessage, pushNewChat, changeMessage, setParam, resetSort, deleteChat, createChat
 
 } = ChatsSlice.actions
 

@@ -34,37 +34,41 @@ function App() {
 
     useEffect(() => {
         const db = getFirestore();
-        const chatRoomsRef = collection(db, 'chat_rooms')
+        const chatRoomsRef = collection(db, 'chat_rooms');
 
-        return onSnapshot(chatRoomsRef, (querySnapshot) => {
+        const unsubscribe = onSnapshot(chatRoomsRef, (querySnapshot) => {
             querySnapshot.forEach((doc) => {
-                const chatRoomId = doc.id
+                const chatRoomId = doc.id;
                 const messagesRefInChatRoom = collection(db, `chat_rooms/${chatRoomId}/messages`);
-
                 return onSnapshot(messagesRefInChatRoom, (querySnapshot1) => {
                     querySnapshot1.docChanges().forEach((change) => {
+                        console.log(change.type)
                         if (change.type === 'added') {
-
+                            console.log(change.doc.data())
                             dispatch(pushNewMessage({
                                 messageData: {
                                     ...change.doc.data(),
                                     id: change.doc.id
                                 },
-                                chat_id: change.doc.ref.path.split('/')[1]
+                                chat_id: chatRoomId
                             }));
                         } else if (change.type === 'modified') {
                             dispatch(changeMessage({
-                                chat_id: change.doc.ref.path.split('/')[1],
+                                chat_id: chatRoomId,
                                 messageData: {
                                     ...change.doc.data(),
-                                    id: change.doc.id}
-                            }))
+                                    id: change.doc.id
+                                }
+                            }));
                         }
-                    })
-                })
-            })
-        })
-    }, [])
+                    });
+                });
+            });
+        });
+
+        return () => unsubscribe(); // Очистка подписки при размонтировании компонента
+    }, [dispatch]); // Добавьте dispatch в зависимости
+
 
     useEffect(() => {
         const db = getFirestore()
@@ -72,9 +76,17 @@ function App() {
         return onSnapshot(ChatsRef, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
-                    dispatch(pushNewChat(change.doc.data() as IChat))
+
+                    const chatData = change.doc.data();
+                    dispatch(pushNewChat({
+                        newChat: {
+                            ...chatData,
+                            id: change.doc.id
+                        }
+                    }))
+
                 } else if (change.type === 'removed') {
-                    console.log()
+
                 }
             })
         })
@@ -101,7 +113,20 @@ function App() {
                     dispatch(pushNewOrderSnapshot(updatedOrder));
                     dispatch(addNewItems(updatedItems))
                 } else if (change.type === 'removed') {
-                    dispatch(deleteOrderSnapshot(change.doc.data().id));
+
+                } else if (change.type === 'modified') {
+                    const updatedItems = order.items.map(item => ({
+                        ...item,
+                        idOrder: order.id,
+                        numberOrder: order.number
+                    }))
+                    const updatedOrder = {
+                        ...order,
+                        items: updatedItems
+                    };
+
+                    dispatch(pushNewOrderSnapshot(updatedOrder));
+                    dispatch(addNewItems(updatedItems))
                 }
             });
         });
@@ -140,13 +165,17 @@ function App() {
             dispatch(fetchGetAllDeliveries())
                 .then((data) => {
                     const deliveries = data.payload as IDelivery[];
-
+                    console.log(deliveries)
                     if (Array.isArray(deliveries) && deliveries.length > 0) {
                         return deliveries.reduce((acc, delivery) => {
                             return [
                                 ...acc,
                                 ...(delivery.orders ? delivery.orders.map((order) => ({
                                     ...order,
+                                    status : {
+                                        ...order.status,
+                                        statusName : 'yt'
+                                    },
                                     numberDelivery: delivery.number,
                                     idDelivery: delivery.id
                                 } as IReOrder)) : [])
@@ -154,8 +183,10 @@ function App() {
                         }, [] as IReOrder[]);
                     }
                     return [];
+
                 })
                 .then((ordersWithDeliveryInfo) => {
+                    console.log(ordersWithDeliveryInfo)
                     return dispatch(fetchGetAllOrders()).then((data) => {
                         return { orders: data.payload as IOrder[], ordersWithDeliveryInfo };
                     });
