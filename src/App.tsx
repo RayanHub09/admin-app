@@ -6,30 +6,27 @@ import {useAppDispatch, useAppSelector} from "./hooks/redux-hooks";
 import {fetchGetAllManagers} from "./store/slices/managers";
 import {
     addDeliveryIdNumber,
-    changeOrderSnapshot,
-    deleteOrderSnapshot,
     fetchGetAllOrders,
     pushNewOrderSnapshot
 } from "./store/slices/orders";
 import {
-    changeDeliverySnapshot,
     deleteDeliverySnapshot,
     fetchGetAllDeliveries,
     pushNewDeliverySnapshot
 } from "./store/slices/deliveries";
-import {addIdNumberItem, addNewItems, getAllItems, pushNewItems} from "./store/slices/items";
+import {addIdNumberItem, addNewItems, getAllItems} from "./store/slices/items";
 import {IChat, IDelivery, IOrder, IReItem, IReOrder} from "./interfaces";
 import {fetchAutoSignIn} from "./store/slices/manager";
 import {useNavigate} from "react-router-dom";
-import {changeMessage, fetchGetAllChats, pushNewChat, pushNewMessage} from "./store/slices/messages";
+import {changeMessage, deleteChat, fetchGetAllChats, pushNewChat, pushNewMessage} from "./store/slices/messages";
 import {fetchGetAllUsers} from "./store/slices/users";
-import {collection, getFirestore, onSnapshot, serverTimestamp} from "firebase/firestore";
+import {collection, getFirestore, onSnapshot} from "firebase/firestore";
+
 
 
 function App() {
     const dispatch = useAppDispatch()
     const manager = useAppSelector(state => state.manager)
-    const uid = useAppSelector(state => state.manager?.manager?.id)
     const navigation = useNavigate()
 
     useEffect(() => {
@@ -76,7 +73,6 @@ function App() {
         return onSnapshot(ChatsRef, (snapshot) => {
             snapshot.docChanges().forEach((change) => {
                 if (change.type === 'added') {
-
                     const chatData = change.doc.data();
                     dispatch(pushNewChat({
                         newChat: {
@@ -84,9 +80,8 @@ function App() {
                             id: change.doc.id
                         }
                     }))
-
                 } else if (change.type === 'removed') {
-
+                    dispatch(deleteChat(change.doc.id))
                 }
             })
         })
@@ -151,11 +146,22 @@ function App() {
                     dispatch(deleteDeliverySnapshot(change.doc.data().id));
                 }
             });
-        });
-
-        // Функция очистки для отписки от изменений
+        })
         return () => unsubscribe();
     }, [dispatch]);
+
+    // useEffect(() => {
+    //     const db = getFirestore()
+    //     const ManagersRef = collection(db, 'managers')
+    //     return onSnapshot(ManagersRef, (snapshot) => {
+    //         snapshot.docChanges().forEach((change) => {
+    //             if (change.type === 'removed') {
+    //                 dispatch(fetchAutoSignIn())
+    //                 console.log(manager.token)
+    //             }
+    //         })
+    //     })
+    // }, []);
 
     useEffect(() => {
         if (manager.isAuth) {
@@ -165,7 +171,6 @@ function App() {
             dispatch(fetchGetAllDeliveries())
                 .then((data) => {
                     const deliveries = data.payload as IDelivery[];
-                    console.log(deliveries)
                     if (Array.isArray(deliveries) && deliveries.length > 0) {
                         return deliveries.reduce((acc, delivery) => {
                             return [
@@ -186,7 +191,6 @@ function App() {
 
                 })
                 .then((ordersWithDeliveryInfo) => {
-                    console.log(ordersWithDeliveryInfo)
                     return dispatch(fetchGetAllOrders()).then((data) => {
                         return { orders: data.payload as IOrder[], ordersWithDeliveryInfo };
                     });
@@ -225,6 +229,7 @@ function App() {
 
     useEffect(() => {
         if (manager.token) {
+            console.log(manager.token)
             navigation('/orders')
             dispatch(fetchAutoSignIn())
         }

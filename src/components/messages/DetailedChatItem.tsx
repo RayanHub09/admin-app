@@ -5,7 +5,6 @@ import InputMessage from "./InputMessage";
 import 'firebase/database';
 import { fetchChangeReadMessage, fetchDeleteChat, fetchDeleteMessage } from "../../store/slices/messages";
 import { useLocation, useNavigate } from "react-router-dom";
-import NotFoundPage from "../../pages/NotFoundPage";
 import { getDate } from "../../functions/changeDate";
 import ShadowWindow from "../ShadowWindow";
 
@@ -26,17 +25,16 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
     const statusDeleteChat = useAppSelector(state => state.messages.statusDeleteChat);
     const [visibleWindow, setVisibleWindow] = useState(false);
-    const [visibleChatDeleteWindow, setVisibleChatDeleteWindow] = useState(false); // Новое состояние для окна удаления чата
+    const [visibleChatDeleteWindow, setVisibleChatDeleteWindow] = useState(false);
     const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
-
     const deleteMessage = (messageId: string) => {
         setLoadingDelete(prev => ({ ...prev, [messageId]: true }));
         dispatch(fetchDeleteMessage({ chat_id: chat.id, message_id: messageId }))
-            .then(() => {setLoadingDelete(prev => ({ ...prev, [messageId]: false }))
+            .then(() => { setLoadingDelete(prev => ({ ...prev, [messageId]: false })) })
+            .then(() => setVisibleWindow(false));
+    }
 
-        })
-            .then(() => setVisibleWindow(false))
-    };
+
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -52,10 +50,8 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
         dispatch(fetchChangeReadMessage({ chat_id: chat?.id, messages_id: unreadMessages }));
     }, [statusSendMessage]);
 
-
-
     const confirmDeleteChat = () => {
-        setVisibleChatDeleteWindow(true)
+        setVisibleChatDeleteWindow(true);
     };
 
     const deleteChat = () => {
@@ -76,15 +72,39 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                             key={message.id}
                             className={chat.uid === message.uid ? 'user_message message' : 'manager_message message'}>
                             {chat.uid === message.uid ? <h4>{user?.name} {user?.surname}</h4> : <h4>Менеджер</h4>}
-                            <p style={{ paddingLeft: '10px'}}>{message.text}</p>
+                            <p style={{ paddingLeft: '10px' }}>{message.text}</p>
+                            {message.attachedFiles?.length !== 0 &&
+                                message.attachedFiles.map((file, index) => {
+                                    const isImage = file.name.split('.')[file.name.split('.').length - 1] === 'jpg' ||
+                                                    file.name.split('.')[file.name.split('.').length - 1] === 'png' ||
+                                                    file.name.split('.')[file.name.split('.').length - 1] === 'jpeg'
+                                    return (
+                                        <div
+                                            style={{display:'flex'}}
+                                            key={index}>
+                                            {isImage ? (
+                                                <img
+                                                    src={file.uri}
+                                                    alt="attached file"
+                                                    className={'img'}
+                                                />
+                                            ) : (
+                                                <a
+                                                    href={file.uri}
+                                                    title={file.name}
+                                                    download={file.name}>
+                                                    {file.name.slice(0, 5)}...{file.name.split('.')[1]}
+                                                </a>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            }
                             {message.creationTime && <span style={{ paddingRight: '10px' }} className={'status_message'}>
                                 {getDate(message.creationTime)[1].split(':')[0]}:{getDate(message.creationTime)[1].split(':')[1]}<span>  </span>
                                 {getDate(message.creationTime)[0].split('.')[0]}.{getDate(message.creationTime)[0].split('.')[1]}.
                                 {getDate(message.creationTime)[0].split('.')[2]}
                             </span>}
-                            {message.attachedFiles?.length !== 0 &&
-                                <img src={message.attachedFiles[0].uri} alt="attached file" />
-                            }
                             <div className={'message_change_container'}>
                                 {role === 'admin' &&
                                     <button
@@ -108,9 +128,10 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                             </div>
                         </div>
                     )}
-                    {statusSendMessage === 'loading' && temporaryMessage &&
+                    {statusSendMessage === 'loading'  &&
                         <div className={'manager_message message'}>
-                            <h4>{manager.name}</h4>
+                            <h4>Менеджер</h4>
+
                             <p style={{ paddingLeft: '10px' }}>{temporaryMessage}</p>
                             <span className={'status_message'}>Отправка...</span>
                         </div>
@@ -140,7 +161,6 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                     if (messageToDelete) {
                         deleteMessage(messageToDelete);
                     }
-
                 }}
                 status={loadingDelete[messageToDelete as string] ? 'loading' : ''}
             />}
@@ -157,4 +177,5 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
 };
 
 export default DetailedChatItem;
+
 

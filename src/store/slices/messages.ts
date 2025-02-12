@@ -89,17 +89,21 @@ export const fetchGetAllChats = createAsyncThunk(
 
 export const fetchPushNewMessage = createAsyncThunk(
     'messages/fetchPushNewMessage',
-    async ({ text, mid, chat_id, img }: { text: string; mid: string; chat_id: string; img: File | null }, thunkAPI) => {
+    async ({ text, mid, chat_id, files }: { text: string; mid: string; chat_id: string; files: File[] | null }, thunkAPI) => {
         try {
             const storage = getStorage();
             const time = serverTimestamp();
 
-            let file = null;
-            if (img) {
-                const storageRef = ref(storage, `files/${img.name}`);
-                await uploadBytes(storageRef, img);
-                const downloadURL = await getDownloadURL(storageRef);
-                file = { uri: downloadURL, name: `${mid}_${img.name}` };
+            let uploadedFiles: { uri: string; name: string }[] = [];
+
+            // Загружаем все файлы и получаем их URL
+            if (files) {
+                uploadedFiles = await Promise.all(files.map(async (file) => {
+                    const storageRef = ref(storage, `files/${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(storageRef);
+                    return { uri: downloadURL, name: `${mid}_${file.name}` };
+                }));
             }
 
             const messagesRef = collection(db, `chat_rooms/${chat_id}/messages`);
@@ -109,7 +113,7 @@ export const fetchPushNewMessage = createAsyncThunk(
                 id: newMessageRef.id,
                 text: text || '',
                 read: false,
-                attachedFiles: file ? [file] : [],
+                attachedFiles: uploadedFiles, // Используем загруженные файлы
                 creationTime: time,
                 uid: mid,
             };

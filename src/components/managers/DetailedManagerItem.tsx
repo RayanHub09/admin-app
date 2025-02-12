@@ -6,6 +6,7 @@ import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchChangePossibilitiesManager, fetchDeleteManager} from "../../store/slices/managers";
 import {useNavigate} from "react-router-dom";
 import ShadowWindow from "../ShadowWindow";
+import {fetchAutoSignIn, resetError} from "../../store/slices/manager";
 
 interface DetailedManagerItemProps {
     manager: IManager
@@ -39,7 +40,7 @@ const DetailedManagerItem: FC<DetailedManagerItemProps> = ({manager}) => {
     function deleteManager () {
         dispatch(fetchDeleteManager({manager_id: manager.id as string}))
             .then(() => navigation('/managers'))
-            .then()
+            .then(() => dispatch(fetchAutoSignIn()))
     }
 
     return (

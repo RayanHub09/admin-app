@@ -173,8 +173,6 @@ export const fetchCreateOrder = createAsyncThunk(
                 date: Timestamp.now(),
                 items: items.map((item) => ({
                     id: `${numberLot}/${item.name}/${item.markName}`,
-                    dateOrder: Timestamp.now(),
-                    uid: userId,
                     numberLot: numberLot,
                     amount: item.count,
                     comment: item.comment,

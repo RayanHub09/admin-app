@@ -2,7 +2,8 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
 import {addDoc, collection, db, deleteDoc, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
 import {IManager, IOrder} from "../../interfaces";
-import {deleteChat} from "./messages";
+
+
 
 interface IAuthManager {
     email: string | null
@@ -79,16 +80,25 @@ export const fetchChangePossibilitiesManager = createAsyncThunk(
 
 export const fetchDeleteManager = createAsyncThunk(
     'managers/fetchDeleteManager',
-    async ({manager_id}: {manager_id: string}, thunkAPI) => {
+    async ({ manager_id }: { manager_id: string }, thunkAPI) => {
         try {
-            const messageRef = doc(db, `managers`, manager_id);
+            const messageRef = await doc(db, `managers`, manager_id)
             await deleteDoc(messageRef)
             await thunkAPI.dispatch(deleteManager(manager_id))
-        } catch (e:any) {
-            return thunkAPI.rejectWithValue(e.message)
+
+            const auth = getAuth()
+            const user = auth.currentUser
+            if (!user) {
+                return thunkAPI.rejectWithValue("Пользователь не аутентифицирован")
+            }
+            await user.delete()
+
+        } catch (e: any) {
+            console.log('1234567890-')
+            return thunkAPI.rejectWithValue(e.message || "Ошибка при удалении пользователя");
         }
     }
-)
+);
 
 const ManagersSlice = createSlice({
     name: 'Managers',

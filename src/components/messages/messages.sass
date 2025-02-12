@@ -11,7 +11,7 @@ $background_color: rgb(244, 244, 244)
   color: white
   cursor: pointer
   margin-top: 10px
-  //width: 70%
+//width: 70%
 
 @media (max-width: 920px)
   .sections_list_container
@@ -25,25 +25,31 @@ $background_color: rgb(244, 244, 244)
   color: white
   display: flex
   column-gap: 5px
+
   &:hover
     background: rgba(0, 107, 174, 0.6)
+
 .active_section_messages
   background: rgba(0, 107, 174, 0.8)
+
 @media (max-width: 920px)
   .section_messages, .active_section_messages
     padding-left: 40px
     padding-right: 40px
+
 @media (max-width: 800px)
   .section_messages, .active_section_messages
     padding-left: 30px
     padding-right: 30px
+
 @media (max-width: 620px)
   .section_messages, .active_section_messages
     padding-left: 5px
     padding-right: 5px
+
 .list_messages
   @include default_container(column, 0px 0px)
-  //width: 70%
+//width: 70%
 
 .chat_item_container
   @include default_container(row, 0px, 0px)
@@ -53,8 +59,10 @@ $background_color: rgb(244, 244, 244)
   cursor: pointer
   border-bottom: rgba(106, 106, 106, 0.25) 2px solid
   transition: all 1s
+
   &:hover
     background: rgba(106, 106, 106, 0.3)
+
 .chat_notifications
   position: absolute
   right: 15px
@@ -67,6 +75,7 @@ $background_color: rgb(244, 244, 244)
 
 .notifications_chat_item_container
   background: rgba(230, 230, 230, 0.54)
+
 .chat_list_container
   @include default_container(column, 0px, 0px)
   width: 70%
@@ -77,10 +86,12 @@ $background_color: rgb(244, 244, 244)
   position: relative
   color: black
   font-size: 16px
+
 .detailed_chat_item
   @include default_container(column, 10px, 0px)
   width: 70%
   height: 100%
+
 @media (max-width: 920px)
   .detailed_chat_item, .chat_list_container
     width: 100%
@@ -105,9 +116,11 @@ $background_color: rgb(244, 244, 244)
   @include default_container(column, 5px, 0px)
 
 .manager_message
-  border-radius:  10px 10px 0px 10px
+  border-radius: 10px 10px 0px 10px
+
 .user_message
-  border-radius:  10px 10px 10px 0px
+  border-radius: 10px 10px 10px 0px
+
 .user_message::before
   content: ""
   position: absolute
@@ -118,6 +131,7 @@ $background_color: rgb(244, 244, 244)
   background-color: #fff
   transform: rotate(60deg)
   z-index: 2
+
 .user_message::after
   content: ""
   position: absolute
@@ -138,6 +152,7 @@ $background_color: rgb(244, 244, 244)
   background-color: #fff
   transform: rotate(30deg)
   z-index: 2
+
 .manager_message::after
   content: ""
   position: absolute
@@ -149,16 +164,28 @@ $background_color: rgb(244, 244, 244)
   z-index: 3
 
 
-
 .user_message
   align-self: flex-start
+
 .manager_message
   align-self: flex-end
+
 .send_messages_container
   @include default_container(row, 0px, 10px)
   width: 100%
 
+.container_send
+  @include default_container(column, 10px, 10px)
 
+.container_error_send
+  padding: 7px
+  border-radius: 5px
+  font-size: 16px
+  border: none
+  transition: all 1s
+  cursor: pointer
+  background: rgba(255, 0, 0, 0.5)
+  color: white
 
 .send_messages
   flex-grow: 2
@@ -178,6 +205,7 @@ $background_color: rgb(244, 244, 244)
   cursor: pointer
   transition: all 1s
   border-radius: 10px
+
   &:hover
     background: rgba(106, 106, 106, 0.60)
 
@@ -199,12 +227,15 @@ $background_color: rgb(244, 244, 244)
 .custom-input-file
   @include default_container(row, 0px, 10px)
   align-items: center
+
 .button_send_messages
   width: 40px
   height: 40px
+
 .button_send_messages:disabled
   cursor: not-allowed
   background: rgba(0, 107, 174, 0.8)
+
 .info_user
   text-align: center
   background: rgba(0, 107, 174, 1)
@@ -224,6 +255,7 @@ $background_color: rgb(244, 244, 244)
   background: rgba(174, 0, 0, 0.44)
   padding: 1px 7px
   border-radius: 20px
+
 .unread_messages_yellow
   align-self: center
   color: black
@@ -243,6 +275,7 @@ $background_color: rgb(244, 244, 244)
   font-size: 25px
   text-align: center
   padding-top: 20px
+
 .default_button_delete
   align-self: flex-end
   background: none
@@ -254,25 +287,69 @@ $background_color: rgb(244, 244, 244)
 
   &:hover
     opacity: 0.5
+
   &:disabled
     opacity: 0.5
+
 .user_efault_button_delete
   align-self: flex-start
+
 .yellow
   background: rgba(255, 255, 0, 0.25)
   border: 1px yellow solid
   font-size: 11px
   padding: 3px
   border-radius: 8px
+
 .message_change_container
   @include default_container(row, 0px, 10px)
+
 .notifications_container
   @include default_container(row, 2px, 2px)
+
 @media (max-width: 700px)
   .notifications_container
     flex-wrap: wrap
+
 .no_messages
   color: #006bae
+
 .create_chat_form
   @include default_container(column, 10px, 2px)
   align-items: stretch
+
+.container_chat
+  @include default_container(row, 10px, 10px)
+
+.files_container
+  @include default_container(row, 5px, 10px)
+  width: 100%
+  overflow: scroll
+
+.file
+  @include default_container(row, 0px, 6px)
+  border: rgba(165, 165, 165, 0.69) 2px solid
+  padding: 5px
+  border-radius: 10px
+
+
+
+.delete_file_button
+  border: none
+  align-self: flex-end
+  color: #fb9a9a
+  background: none
+  padding: 0
+  cursor: pointer
+  transition: all 1s
+
+
+  &:hover
+    opacity: 0.6
+
+.img
+  max-width: 90%
+  max-height: 700px
+
+.file_
+  width: 200px

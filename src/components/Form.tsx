@@ -1,33 +1,28 @@
-import React, {FC, useState} from 'react';
-import './components.sass'
+import React, {FC, useEffect, useState} from 'react';
+import './components.sass';
 import {options, IRole} from "../lists/roleList";
 import {possibilitiesManager, IPossibilitiesManager} from "../lists/possibilitiesManagerList";
 import {generatePassword} from "../functions/generatePassword";
 
 interface FormProps {
     text_button: string,
-    isCreate: boolean
+    isCreate: boolean,
     handleClick: (email: string, password: string, role?: string | undefined, name?: string | undefined,
-                  checkboxes?: { [key: string]: boolean }
-    ) => void;
+                  checkboxes?: { [key: string]: boolean }) => void;
 }
 
-
 const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
-
-    const [password, setPassword] = useState('')
-
+    const [password, setPassword] = useState('');
     const [checkboxStates, setCheckboxStates] = useState(
         Object.keys(possibilitiesManager).reduce((acc, key) => {
-                acc[key] = false
-                return acc
-            }, {} as { [key: string]: boolean }
-        )
-    )
-    const [email, setEmail] = useState('')
-    const [name, setName] = useState('')
-    const [role, setRole] = useState<string | undefined>('Выберете роль')
-    const [visibilityPassword, setVisibilityPassword] = useState(false)
+            acc[key] = false;
+            return acc;
+        }, {} as { [key: string]: boolean })
+    );
+    const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
+    const [role, setRole] = useState<string>('Выберете отдел'); // Изменено здесь
+    const [visibilityPassword, setVisibilityPassword] = useState(false);
 
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const {id, checked} = event.target;
@@ -35,17 +30,19 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
     };
 
     function clickFunction() {
-        setRole('Выберете роль')
-        setEmail('')
-        setPassword('')
-        setName('')
-        handleClick(email, password, role, name, {...checkboxStates})
+        handleClick(email, password, role === 'Выберете отдел' ? undefined : role, name, {...checkboxStates});
     }
+
+    useEffect(() => {
+        setRole('Выберете отдел');
+        setEmail('');
+        setPassword('');
+        setName('');
+    }, []);
 
     return (
         <div className={!isCreate ? 'form_signin' : 'form_create_manager'}>
-            {
-                isCreate &&
+            {isCreate &&
                 <input
                     value={name}
                     onChange={event => setName(event.target.value)}
@@ -65,27 +62,31 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     type={visibilityPassword || isCreate ? 'text' : 'password'}
                     value={password}
                     onChange={event => setPassword(event.target.value)}
-                />}
-            {isCreate && (password === '' ? <button
-                onClick={() => setPassword(generatePassword(10))}
-                    style={{border: '1px black solid', borderRadius: '0px'}}
-                    className={'button_generate'}>Сгенерировать пароль</button>
-                : <input
-                    placeholder={'Введите пароль'}
-                    type={visibilityPassword || isCreate ? 'text' : 'password'}
-                    value={password}
-                    onChange={event => setPassword(event.target.value)}
-                />)}
-
+                />
+            }
+            {isCreate && (password === '' ?
+                    <button
+                        onClick={() => setPassword(generatePassword(10))}
+                        style={{border: '1px black solid', borderRadius: '0px'}}
+                        className={'button_generate'}
+                    >
+                        Сгенерировать пароль
+                    </button>
+                    :
+                    <input
+                        placeholder={'Введите пароль'}
+                        type={visibilityPassword || isCreate ? 'text' : 'password'}
+                        value={password}
+                        onChange={event => setPassword(event.target.value)}
+                    />
+            )}
             {isCreate &&
-                <select
-                    value={role}
-                    onChange={event => setRole(event.target.value)}
-                    className={'choose_role'}>
-                    <option disabled={true}>Выберете отдел</option>
-                    {Object.keys(options).map((key, index) =>
+                <select value={role} onChange={event => setRole(event.target.value)}>
+                    <option value="Выберете отдел" disabled={true}>Выберете отдел</option>
+                    {/* Значение по умолчанию */}
+                    {Object.keys(options).map((key, index) => (
                         <option value={key} key={index}>{options[key as keyof IRole]}</option>
-                    )}
+                    ))}
                 </select>
             }
             {isCreate && (
@@ -112,15 +113,13 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                         checked={visibilityPassword}
                         onChange={() => setVisibilityPassword(!visibilityPassword)}
                     />
-            </span>
+                </span>
             }
-            <button
-                className={'default_button'}
-                onClick={clickFunction}
-            >
+            <button className={'default_button'} onClick={clickFunction}>
                 {text_button}
             </button>
         </div>
     );
 };
+
 export default Form;

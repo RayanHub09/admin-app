@@ -53,14 +53,22 @@ const DeliveryItem: FC<IDeliveryProps> = ({ delivery }) => {
             >
                 {delivery.orders.reduce((acc, item) => acc + item.itemsCnt, 0)}
             </Link>
-            <Link
-                onMouseEnter={() => setIsOnMouseEnter(true)}
-                onMouseLeave={() => setIsOnMouseEnter(false)}
-                to={`/deliveries/${delivery.id}`}
-                className={(!isOnMouseEnter ? (delivery.status.statusName !== 'Отменен' ? 'field_link ' : 'cancel_field field_link ') : 'field_link_chosen')}
-            >
-                {delivery.deliveryCost}
-            </Link>
+            {(delivery.deliveryCost && delivery.deliveryCostYen) ? <Link
+            onMouseEnter={() => setIsOnMouseEnter(true)}
+            onMouseLeave={() => setIsOnMouseEnter(false)}
+            to={`/deliveries/${delivery.id}`}
+            className={(!isOnMouseEnter ? (delivery.status.statusName !== 'Отменен' ? 'field_link ' : 'cancel_field field_link ') : 'field_link_chosen')}
+        >
+            <h4>{changeCost(delivery.deliveryCostYen.toString())}¥</h4>{changeCost(delivery.deliveryCost.toString())}₽
+        </Link>
+            : <Link
+                    onMouseEnter={() => setIsOnMouseEnter(true)}
+                    onMouseLeave={() => setIsOnMouseEnter(false)}
+                    to={`/deliveries/${delivery.id}`}
+                    className={(!isOnMouseEnter ? (delivery.status.statusName !== 'Отменен' ? 'field_link ' : 'cancel_field field_link ') : 'field_link_chosen')}
+                >
+
+                </Link>}
             <Link
                 onMouseEnter={() => setIsOnMouseEnter(true)}
                 onMouseLeave={() => setIsOnMouseEnter(false)}

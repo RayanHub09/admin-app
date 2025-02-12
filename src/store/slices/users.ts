@@ -3,6 +3,7 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {collection, db, deleteDoc, doc, getDocs, query} from "../../firebase";
 import serializeData from "../../Serializer";
 import {deleteManager, fetchGetAllManagers} from "./managers";
+import {getAuth} from "firebase/auth";
 
 
 
@@ -54,6 +55,14 @@ export const fetchDeleteUser = createAsyncThunk(
             const messageRef = doc(db, `users`, user_id);
             await deleteDoc(messageRef)
             await thunkAPI.dispatch(deleteUser(user_id))
+
+            const auth = getAuth()
+            const user = auth.currentUser
+            if (!user) {
+                return thunkAPI.rejectWithValue("Пользователь не аутентифицирован")
+            }
+            await user.delete()
+
         } catch (e:any) {
             return thunkAPI.rejectWithValue(e.message)
         }

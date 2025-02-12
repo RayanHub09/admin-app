@@ -149,10 +149,12 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                     {deliveries.length !== 0 &&
                         <div className={'fields_search'}>
                             <input
+                                style={{alignSelf: "center"}}
                                 value={numberDelivery}
                                 onChange={event => setNumberDelivery(event.target.value)}
                                 placeholder={'Номер посылки'}/>
                             <button
+                                style={{alignSelf: "center"}}
                                 disabled={!numberDelivery}
                                 onClick={searchingDelivery}
                                 className={'default_button'}>Найти
@@ -180,11 +182,13 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                         <div className={'fields_search'}>
                             <input
                                 value={numberOrder}
+                                style={{alignSelf: "center"}}
                                 onChange={event => setNumberOrder(event.target.value)}
                                 placeholder={'Номер заказа'}/>
                             <button
                                 onClick={searchingOrder}
                                 disabled={!numberOrder}
+                                style={{alignSelf: "center"}}
                                 className={'default_button'}>
                                 Найти
                             </button>
@@ -213,14 +217,17 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                     {items.length !== 0 &&
                         <div className={'fields_search'}>
                             <input
+                                style={{alignSelf: "center"}}
                                 value={markName}
                                 onChange={event => setMarkName(event.target.value)}
                                 placeholder={'Производитель'}/>
                             <input
+                                style={{alignSelf: "center"}}
                                 value={name}
                                 onChange={event => setName(event.target.value)}
                                 placeholder={'Наименование'}/>
                             <button
+                                style={{alignSelf: "center"}}
                                 onClick={searchingItem}
                                 disabled={!markName && !name}
                                 className={'default_button'}>

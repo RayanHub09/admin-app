@@ -49,7 +49,7 @@ const DetailedDeliveryItem: FC<IDeliveryProps> = ({ delivery }) => {
                 {(delivery.deliveryCost && delivery.deliveryCostYen) ? <span
                     style={{fontWeight: '500'}}
                     className={'field'}>
-                        {delivery.deliveryCostYen}¥ ({delivery.deliveryCost}₽)
+                        {changeCost(delivery.deliveryCostYen.toString())}¥ ({changeCost(delivery.deliveryCost.toString())}₽)
                 </span> : <span className={'field'}></span>}
                 <h3 className={'label_order'}>Стоимость товара</h3>
                 <span className={'field'}><h4>{changeCost(delivery.partsCostYen.toString())}¥</h4>{changeCost(delivery.partsCostRu.toString())}₽</span>

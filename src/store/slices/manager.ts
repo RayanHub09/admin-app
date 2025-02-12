@@ -74,7 +74,8 @@ export const fetchAutoSignIn = createAsyncThunk(
             if (!token) {
                 return;
             }
-
+            await thunkAPI.dispatch(resetError())
+            console.log(token)
             // Получаем текущего пользователя
             const user = getAuth().currentUser;
 
@@ -90,6 +91,7 @@ export const fetchAutoSignIn = createAsyncThunk(
             thunkAPI.dispatch(setManager(Manager[0]))
 
         } catch (error: any) {
+            console.log('=====', error)
             return thunkAPI.rejectWithValue(error.message);
         }
     }
@@ -108,11 +110,6 @@ const ManagerSlice = createSlice({
         setManager(state, action) {
             state.manager = action.payload
         },
-        autoSignIn(state, action) {
-            state.manager = action.payload;
-            state.token = action.payload.token;
-            state.isAuth = true;
-        },
         removeManager(state) {
             state.manager.id = null
             state.manager.email = null
@@ -120,6 +117,12 @@ const ManagerSlice = createSlice({
             state.status = null
             state.isAuth = false
             localStorage.removeItem('token')
+        },
+        resetError(state) {
+            state.error = null
+            state.isAuth = true
+            state.status = 'succeeded'
+            // state.token = st
         }
     },
     extraReducers: (builder) => {
@@ -148,13 +151,12 @@ const ManagerSlice = createSlice({
                     state.status = 'failed'
                     state.error = action.payload as string
                     state.isAuth = false
-                    console.log(state.error)
                 }
             )
 
     },
 });
 
-export const { setManager, removeManager, signIn, autoSignIn } = ManagerSlice.actions;
+export const { setManager, removeManager, signIn, resetError } = ManagerSlice.actions;
 
 export const ManagerReducer = ManagerSlice.reducer;

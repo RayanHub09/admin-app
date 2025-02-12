@@ -9,7 +9,7 @@ const signOut = require('../image/signOut.png')
 
 const Header = () => {
     const dispatch = useAppDispatch()
-    const loading = useAppSelector(state => state.manager.status)
+    const status = useAppSelector(state => state.orders.statusGet)
     const isAuth = useAppSelector(state => state.manager.isAuth)
     const worker = useAppSelector(state => state.manager.manager)
     const navigation = useNavigate()
@@ -17,14 +17,16 @@ const Header = () => {
     return (
         <header>
             <h2>{worker?.email}</h2>
-            {loading === 'succeeded' && isAuth && <NavBar/>}
-            {isAuth && loading === 'succeeded' &&
-               <img
-                    className={'button_out'}
-                    onClick={() => dispatch(removeManager())}
-                    title={'Выйти'}
-                    src={signOut}
-                    alt={'Выйти'}/>
+            {isAuth && status === 'succeeded' &&
+                <>
+                    <NavBar/>
+                    <img
+                        className={'button_out'}
+                        onClick={() => dispatch(removeManager())}
+                        title={'Выйти'}
+                        src={signOut}
+                        alt={'Выйти'}/>
+                </>
             }
         </header>
     );

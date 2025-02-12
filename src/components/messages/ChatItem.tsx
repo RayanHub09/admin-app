@@ -15,7 +15,7 @@ const ChatItem: FC<ChatItemProps> = ({ chat }) => {
     );
     const manager = useAppSelector(state => state.manager.manager);
     const department = Object.keys(options).find(key => options[key as keyof IRole] === chat.department);
-    const messages = chat?.messages || []; // Убедимся, что messages всегда массив
+    const messages = chat?.messages || [];
     const unreadMessages = messages.filter((message: IMessage) => message?.uid === chat.uid && !message?.read).length;
     const lastMessage = messages[messages.length - 1];
     const lastMessageText = lastMessage ?
@@ -28,7 +28,10 @@ const ChatItem: FC<ChatItemProps> = ({ chat }) => {
         <Link to={`/messages/${department}/${chat.id}`} className={'link_chat'}>
             <div className={unreadMessages !== 0 ? 'chat_item_container notifications_chat_item_container' : 'chat_item_container'}>
                 <div>
-                    <h4>{user?.name} {user?.surname}</h4>
+                    <div className={'container_chat'}>
+                        <h4>{user?.name} {user?.surname}</h4>
+                        <p>Тема: {chat.theme}</p>
+                    </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         {messages.length !== 0 ?
                             <>
@@ -42,6 +45,7 @@ const ChatItem: FC<ChatItemProps> = ({ chat }) => {
                                     </p> :
                                     <p style={{ alignSelf: "center" }} className={'status_message'}>
                                         отправка...
+
                                     </p>
                                 }
                             </> :
