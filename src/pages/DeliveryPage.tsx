@@ -41,7 +41,13 @@ const DeliveryPage = () => {
         window.scrollTo(0, 0)
         setVisible(true)
         setVisibleWindow(false)
-    }, []);
+    }, [])
+
+    useEffect(() => {
+        if (!delivery) {
+            navigation('/deliveries')
+        }
+    }, [delivery])
 
     function deleteDeliveryItem() {
         if (id != null) {
@@ -65,6 +71,8 @@ const DeliveryPage = () => {
     if (!delivery) {
         return <NotFoundPage/>
     }
+
+
 
     return (
         <div className={'delivery_page_container'}>

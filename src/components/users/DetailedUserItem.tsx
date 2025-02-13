@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
-import {IDelivery, IOrder, IUser} from "../../interfaces";
+import {IDelivery, IOrder, IReItem, IUser} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import DeliveriesList from "../deliveries/DeliveriesList";
 import OrderGrid from "../orders/OrderGrid";
@@ -256,7 +256,7 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                                 {isSearchingItems
                                     ?
                                     filteredItems.map((item, index) => (
-                                        <Item item={item} key={index}/>
+                                        <Item item={item as IReItem} key={index}/>
                                     ))
                                     :
                                     items.map((item, index) => (

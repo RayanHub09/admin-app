@@ -161,10 +161,10 @@ export const fetchDeleteOrder = createAsyncThunk(
 export const fetchCreateOrder = createAsyncThunk(
     'orders/fetchCreateOrder',
     async ({
-        commentOrder, numberOrder, userId, priceYen, priceRu, count, items, numberLot
+        commentOrder, userId, priceYen, priceRu, count, items, orderNumber
            } : {
-        commentOrder:string, numberOrder:string, userId:string, priceYen:number, priceRu:number,
-        count:number, items:FormDataItem[], numberLot:string
+        commentOrder:string, userId:string, priceYen:number, priceRu:number,
+        count:number, items:FormDataItem[], orderNumber:string
     }, thunkAPI) => {
         try {
             const newOrder = {
@@ -172,8 +172,7 @@ export const fetchCreateOrder = createAsyncThunk(
                 comment: commentOrder,
                 date: Timestamp.now(),
                 items: items.map((item) => ({
-                    id: `${numberLot}/${item.name}/${item.markName}`,
-                    numberLot: numberLot,
+                    id: `${Date.now().toString()}/${item.name}/${item.markName}`,
                     amount: item.count,
                     comment: item.comment,
                     part: {
@@ -197,7 +196,7 @@ export const fetchCreateOrder = createAsyncThunk(
                     selected: true
                 })),
                 itemsCnt: count,
-                number: numberOrder,
+                number: orderNumber,
                 priceRu: priceRu,
                 priceYen: priceYen,
                 status: {
@@ -210,6 +209,7 @@ export const fetchCreateOrder = createAsyncThunk(
             }
             const docRef = await addDoc(collection(db, '/orders'), newOrder)
             await updateDoc(docRef, { id: docRef.id})
+            return docRef.id
 
         } catch (e:any) {
             return thunkAPI.rejectWithValue(e.message)

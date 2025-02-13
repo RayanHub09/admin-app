@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Item from "./Item";
 import { useAppSelector } from "../../hooks/redux-hooks";
 import NotFoundText from "../NotFoundText";
@@ -14,6 +14,8 @@ const ItemsListAll = () => {
     if (items.length === 0) {
         return <div className={'container'} style={{fontSize: '30px'}}>Пока нет товаров</div>
     }
+
+    // useEffect
     return (
         <div className={'items_list_all_container'}>
             {(isSearching && filteredItems.length === 0) ? (

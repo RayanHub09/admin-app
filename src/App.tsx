@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import {useAppDispatch, useAppSelector} from "./hooks/redux-hooks";
 import {fetchGetAllManagers} from "./store/slices/managers";
 import {
-    addDeliveryIdNumber,
+    addDeliveryIdNumber, deleteOrder,
     fetchGetAllOrders,
     pushNewOrderSnapshot
 } from "./store/slices/orders";
@@ -14,13 +14,14 @@ import {
     fetchGetAllDeliveries,
     pushNewDeliverySnapshot
 } from "./store/slices/deliveries";
-import {addIdNumberItem, addNewItems, getAllItems} from "./store/slices/items";
+import {addNewItems, getAllItems} from "./store/slices/items";
 import {IChat, IDelivery, IOrder, IReItem, IReOrder} from "./interfaces";
 import {fetchAutoSignIn} from "./store/slices/manager";
 import {useNavigate} from "react-router-dom";
 import {changeMessage, deleteChat, fetchGetAllChats, pushNewChat, pushNewMessage} from "./store/slices/messages";
 import {fetchGetAllUsers} from "./store/slices/users";
 import {collection, getFirestore, onSnapshot} from "firebase/firestore";
+import {addIdNumberItem} from "./store/slices/items";
 
 
 
@@ -39,9 +40,7 @@ function App() {
                 const messagesRefInChatRoom = collection(db, `chat_rooms/${chatRoomId}/messages`);
                 return onSnapshot(messagesRefInChatRoom, (querySnapshot1) => {
                     querySnapshot1.docChanges().forEach((change) => {
-                        console.log(change.type)
                         if (change.type === 'added') {
-                            console.log(change.doc.data())
                             dispatch(pushNewMessage({
                                 messageData: {
                                     ...change.doc.data(),
@@ -97,8 +96,14 @@ function App() {
                 if (change.type === 'added') {
                     const updatedItems = order.items.map(item => ({
                         ...item,
+                        dateOrder: order.date,
+                        numberOrder: order.number,
                         idOrder: order.id,
-                        numberOrder: order.number
+                        numberDelivery: '',
+                        idDelivery: '',
+                        statusOrder: order.status.statusName,
+                        uid: order.uid,
+
                     }))
                     const updatedOrder = {
                         ...order,
@@ -108,18 +113,23 @@ function App() {
                     dispatch(pushNewOrderSnapshot(updatedOrder));
                     dispatch(addNewItems(updatedItems))
                 } else if (change.type === 'removed') {
-
+                    dispatch(deleteOrder(order.id))
                 } else if (change.type === 'modified') {
                     const updatedItems = order.items.map(item => ({
                         ...item,
+                        dateOrder: order.date,
+                        numberOrder: order.number,
                         idOrder: order.id,
-                        numberOrder: order.number
+                        numberDelivery: '',
+                        idDelivery: '',
+                        statusOrder: order.status.statusName,
+                        uid: order.uid,
                     }))
                     const updatedOrder = {
                         ...order,
                         items: updatedItems
                     };
-
+                    console.log(updatedItems)
                     dispatch(pushNewOrderSnapshot(updatedOrder));
                     dispatch(addNewItems(updatedItems))
                 }
@@ -229,7 +239,6 @@ function App() {
 
     useEffect(() => {
         if (manager.token) {
-            console.log(manager.token)
             navigation('/orders')
             dispatch(fetchAutoSignIn())
         }

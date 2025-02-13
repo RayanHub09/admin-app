@@ -7,7 +7,9 @@ interface ItemsListProps {
     itemsList: IItem[]
 }
 const ItemsList:FC<ItemsListProps> = ({itemsList}) => {
-    useEffect(() => {}, [itemsList.length])
+    useEffect(() => {
+        console.log(itemsList)
+    }, [])
     return (
         <div className={'items_list_container'}>
             <h3>Список товаров</h3>

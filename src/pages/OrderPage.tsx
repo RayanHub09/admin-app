@@ -17,7 +17,6 @@ const OrderPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const [visibleWindow, setVisibleWindow] = useState(false);
     const [statusDeleteOrder, setStatusDeleteOrder] = useState('');
-    const status = useAppSelector(state => state.orders.statusDelete)
     const { id } = useParams<{ id: string }>();
     const order: IOrder | undefined = useAppSelector(state =>
         state.orders.orders.find(order => order.id === id)
@@ -25,28 +24,36 @@ const OrderPage: React.FC = () => {
     const manager = useAppSelector(state => state.manager.manager);
     const navigation = useNavigate();
 
-    function deleteOrder() {
-        console.log(status)
+    const deleteOrder = async () => {
         setStatusDeleteOrder('loading');
-        dispatch(fetchDeleteOrder({ order_id: order?.id as string }))
-            .then(() => {
-                if (order?.items) {
-                    dispatch(deleteItems(order.items.map(item => item.id)));
-                }
-            })
-            .then(() => {
-                setStatusDeleteOrder('');
-                navigation('/orders');
-            });
-    }
+        try {
+            await dispatch(fetchDeleteOrder({ order_id: order?.id as string })).unwrap();
+            if (order?.items) {
+                await dispatch(deleteItems(order.items.map(item => item.id)));
+            }
+            navigation('/orders');
+        } catch (error) {
+            console.error("Ошибка при удалении заказа:", error);
+            setStatusDeleteOrder('error');
+        } finally {
+            setStatusDeleteOrder('');
+        }
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
+    useEffect(() => {
+        if (!order) {
+            navigation('/orders')
+        }
+    }, [order])
+
     if (!order) {
         return <NotFoundPage />;
     }
+
 
     return (
         <div className={'order_page_container'}>
@@ -69,7 +76,7 @@ const OrderPage: React.FC = () => {
                         text={`Вы уверены, что хотите удалить заказ под номером ${order.number}?`}
                         onClose={() => setVisibleWindow(false)}
                         deleteFunc={deleteOrder}
-                        status={status}
+                        status={statusDeleteOrder} // Обновлено, чтобы использовать состояние из компонента
                     />
                 }
             </div>

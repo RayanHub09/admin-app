@@ -1,45 +1,51 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {fetchCreateOrder} from "../../store/slices/orders";
 import {useNavigate} from "react-router-dom";
+import {pushNewMessage} from "../../store/slices/messages";
+import {pushNewItems} from "../../store/slices/items";
 
 type FormDataOrder = {
     comment: string;
-    number: string;
     userId: string;
 };
 
 export type FormDataItem = {
     comment: string;
-    numberLot: string;
     markName: string;
     name: string;
+    nameEn: string;
     priceRub: string;
+    priceEur: number;
+    priceUsd: number;
     priceYen: string;
     weight: string;
-    count : string
+    count: string;
 };
 
-const initialStateOrder:FormDataOrder = {
+const initialStateOrder: FormDataOrder = {
     comment: '',
-    number: '',
-    userId: 'Выберете пользователя',
-}
+    userId: 'Выберите пользователя',
+};
 
-const initialStateItem:FormDataItem = {
+const initialStateItem: FormDataItem = {
     comment: '',
-    numberLot: '',
     markName: '',
     name: '',
+    nameEn: '',
     priceRub: '',
     priceYen: '',
+    priceUsd: 0,
+    priceEur: 0,
     weight: '',
     count: ''
-}
+};
 
 const CreateOrder = () => {
+    const [eur, setEur] = useState(0);
+    const [usd, setUsd] = useState(0);
     const users = useAppSelector(state => state.users.users)
-    const ordersNumber = useAppSelector(state => state.orders.orders).map(order => order.number)
+    const orderNumber = Date.now().toString()
     const [formDataOrder, setFormDataOrder] = useState<FormDataOrder>(initialStateOrder);
     const [items, setItems] = useState<FormDataItem[]>([]);
     const [errorOrder, setErrorOrder] = useState('')
@@ -50,22 +56,14 @@ const CreateOrder = () => {
     const [showItemFields, setShowItemFields] = useState(false)
     const status = useAppSelector(state => state.orders.status)
 
-    const handleChangeItem = (key: keyof FormDataItem) => (value: string) => {
-        setFormDataItem(prev => ({...prev, [key]: value}));
-    };
-
-    const handleChange = (key: keyof FormDataOrder) => (value: string) => {
-        setFormDataOrder(prev => ({...prev, [key]: value}));
-    };
 
     const fieldsOrder = [
-        {key: 'number', name: 'Номер заказа'},
         {key: 'comment', name: 'Комментарий'}
     ];
 
     const fieldsItem = [
-        {key: 'numberLot', name: 'Номер лота'},
         {key: 'name', name: 'Наименование'},
+        {key: 'nameEn', name: 'Наименование(анг.)'},
         {key: 'markName', name: 'Марка'},
         {key: 'weight', name: 'Вес(1шт.)кг'},
         {key: 'priceRub', name: 'Цена (руб.)'},
@@ -74,72 +72,112 @@ const CreateOrder = () => {
         {key: 'comment', name: 'Комментарий'}
     ]
 
+    useEffect(() => {
+        getExchangeRates(); // Получаем курсы валют при первом рендере
+    }, []);
+
+    const handleChangeItem = (key: keyof FormDataItem) => (value: string) => {
+        setFormDataItem(prev => ({ ...prev, [key]: value }));
+    };
+
+    const handleChange = (key: keyof FormDataOrder) => (value: string) => {
+        setFormDataOrder(prev => ({ ...prev, [key]: value }));
+    };
+
     const createNewOrder = () => {
-        const requiredOrderFields = ['number', 'priceRu', 'priceYen', 'userId'];
-        const isOrderEmpty = requiredOrderFields.some(field => formDataOrder[field as keyof FormDataOrder] === '')
+        const requiredOrderFields = ['userId'];
+        const isOrderEmpty = requiredOrderFields.some(field => formDataOrder[field as keyof FormDataOrder] === '');
 
         if (isOrderEmpty) {
             setErrorOrder('Пожалуйста, заполните все обязательные поля заказа.');
             setTimeout(() => setErrorOrder(''), 3000);
             return;
         }
-        if (ordersNumber.includes(formDataOrder.number)) {
-            setErrorOrder('Такой номер заказа уже существует!');
+
+        if (items.length === 0) {
+            setErrorOrder('Вы не добавили ни одного товара!');
             setTimeout(() => setErrorOrder(''), 3000);
             return;
         }
 
-        if (items.length === 0) {
-            setErrorOrder('Вы не добавили ни одного товара!');
-            setTimeout(() => setErrorOrder(''), 3000)
-            return;
-        }
-        const totalCount = items.reduce((acc, item) => {
-            const countValue = +item.count;
-            return acc + countValue;
-        }, 0);
+        const totalCount = items.reduce((acc, item) => acc + Number(item.count), 0);
+        const totalPriceRu = items.reduce((acc, item) => acc + Number(item.priceRub), 0);
+        const totalPriceYen = items.reduce((acc, item) => acc + Number(item.priceYen), 0);
 
-        const totalPriceRu = items.reduce((acc, item) => {
-            const priceValue = +item.priceRub;
-            return acc + priceValue;
-        }, 0);
-
-        const totalPriceYen = items.reduce((acc, item) => {
-            const priceValue = +item.priceYen;
-            return acc + priceValue;
-        }, 0);
         setShowItemFields(false)
-        dispatch(fetchCreateOrder({commentOrder : formDataOrder.comment, numberOrder : formDataOrder.number, userId : formDataOrder.userId, count : totalCount,
-                                    priceRu : totalPriceRu, priceYen : totalPriceYen, items : items, numberLot:formDataItem.numberLot}))
-            .then(() => {
-                setFormDataOrder(initialStateOrder)
-                setItems([])
-                navigation('/orders')
-            })
+        dispatch(fetchCreateOrder({
+            commentOrder: formDataOrder.comment,
+            userId: formDataOrder.userId,
+            count: totalCount,
+            priceRu: totalPriceRu,
+            priceYen: totalPriceYen,
+            items: items,
+            orderNumber: orderNumber
+        })).then((action) => {
+            if (fetchCreateOrder.fulfilled.match(action)) {
+                const id = action.payload;
+                console.log(items, id, orderNumber)
+                dispatch(pushNewItems([items, orderNumber, id]));
+                setFormDataOrder(initialStateOrder);
+                setItems([]);
+                navigation('/orders');
+            } else {
+                console.error("Ошибка при создании заказа:", action.error);
+            }
+        }).catch((error) => {
+            console.error("Ошибка при создании заказа:", error);
+        });
+
+
 
     };
 
     const handleAddItem = () => {
-        const requiredFields = ['numberLot', 'name', 'markName', 'weight', 'priceRub', 'priceYen', 'count']
-        const isEmpty = requiredFields.some(field => formDataItem[field as keyof FormDataItem] === '')
-        const isNotNumber = (value: string) => isNaN(Number(value)) || value.trim() === ''
+        const requiredFields = ['name', 'markName', 'weight', 'priceRub', 'priceYen', 'count'];
+        const isEmpty = requiredFields.some(field => formDataItem[field as keyof FormDataItem] === '');
+        const isNotNumber = (value: string) => isNaN(Number(value)) || value.trim() === '';
 
         if (isEmpty) {
             setErrorItem('Пожалуйста, заполните все обязательные поля товара.');
-            setTimeout(() => setErrorItem(''), 3000)
+            setTimeout(() => setErrorItem(''), 3000);
             return;
         }
 
-        if (isNotNumber(formDataItem.weight) || isNotNumber(formDataItem.priceRub) || isNotNumber(formDataItem.priceYen)
-            || isNotNumber(formDataItem.count)) {
+        if (isNotNumber(formDataItem.weight) || isNotNumber(formDataItem.priceRub) || isNotNumber(formDataItem.priceYen) || isNotNumber(formDataItem.count)) {
             setErrorItem('Введены некорректные данные!');
-            setTimeout(() => setErrorItem(''), 3000)
+            setTimeout(() => setErrorItem(''), 3000);
             return;
         }
 
-        setItems(prev => [...prev, formDataItem]);
+        const priceRub = Number(formDataItem.priceRub);
+        const priceEur = priceRub * eur;
+        const priceUsd = priceRub * usd;
+
+        const newItem: FormDataItem = {
+            ...formDataItem,
+            priceEur: Number(priceEur.toFixed(2)),
+            priceUsd: Number(priceUsd.toFixed(2)),
+        };
+
+        setItems(prev => [...prev, newItem]);
         setFormDataItem(initialStateItem);
         setErrorItem('');
+    };
+
+    const getExchangeRates = async () => {
+        const url = `https://open.er-api.com/v6/latest/RUB`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Сеть не отвечает');
+            }
+            const data = await response.json();
+            setEur(data.rates.EUR);
+            setUsd(data.rates.USD);
+        } catch (error) {
+            console.error('Ошибка при получении курсов валют:', error);
+        }
     };
 
     return (
@@ -149,7 +187,7 @@ const CreateOrder = () => {
                 onChange={event => handleChange('userId')(event.target.value)}
                 className='input_field'
             >
-                <option disabled>Выберете пользователя</option>
+                <option disabled value={'Выберите пользователя'}>Выберете пользователя</option>
                 {users.map(user => (
                     <option key={user.id} value={user.id}>
                         {user?.name} {user?.surname} {user?.patronymic}

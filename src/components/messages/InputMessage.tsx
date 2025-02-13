@@ -9,6 +9,7 @@ import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 interface InputMessageProps {
     uid: string;
     chat_id: string;
+    onSendMessage: (message: string) => void;
 }
 
 const sendImage = require('../../image/send.png');
@@ -20,7 +21,7 @@ const MAX_FILES_COUNT = 5;
 const MESSAGE_LIMIT = 4;
 const MESSAGE_INTERVAL_MS = 35000;
 
-const InputMessage: FC<InputMessageProps> = ({uid, chat_id}) => {
+const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
     const [message, setMessage] = useState('');
     const [img, setImg] = useState<File | null>(null);
     const [messageCount, setMessageCount] = useState(0);
@@ -72,12 +73,15 @@ const InputMessage: FC<InputMessageProps> = ({uid, chat_id}) => {
             } else {
                 setMessageCount(prev => prev + 1);
             }
-            console.log(files)
-            dispatch(fetchPushNewMessage({chat_id, mid, text: message, files}))
-            setMessage('');
-            setFiles([])
-            setImg(null);
-            setErrorMessage(null);
+            dispatch(fetchPushNewMessage({ chat_id, mid, text: message, files }))
+                .then(() => {
+                    // Вызываем функцию обратного вызова
+                    setMessage('');
+                    onSendMessage(message);
+                    setFiles([]);
+                    setImg(null);
+                    setErrorMessage(null);
+                });
         }
     }
 

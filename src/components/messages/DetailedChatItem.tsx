@@ -33,6 +33,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
             .then(() => { setLoadingDelete(prev => ({ ...prev, [messageId]: false })) })
             .then(() => setVisibleWindow(false));
     }
+    const [visible, setVisible] = useState(false)
 
 
 
@@ -52,6 +53,10 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
 
     const confirmDeleteChat = () => {
         setVisibleChatDeleteWindow(true);
+    };
+    const handleSendMessage = (message: string) => {
+        // Здесь вы можете обработать сообщение, например, отправить его в Redux или просто вывести в консоль
+        console.log('Отправлено сообщение:', message);
     };
 
     const deleteChat = () => {
@@ -153,7 +158,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                     Удалить чат
                 </button>
             }
-            <InputMessage chat_id={chat?.id} uid={chat?.uid} />
+            <InputMessage chat_id={chat?.id} uid={chat?.uid} onSendMessage={handleSendMessage} />
             {visibleWindow && <ShadowWindow
                 text={`Вы уверены, что хотите удалить сообщение ${chat.messages.find( message => message.id === messageToDelete)?.text}?`}
                 onClose={() => setVisibleWindow(false)}

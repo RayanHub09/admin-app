@@ -1,27 +1,27 @@
-    import {IItem, IReItem} from "../../interfaces";
-    import {createSlice} from "@reduxjs/toolkit";
-    import {convertStringToDate, getDate} from "../../functions/changeDate";
+import {IItem, IReItem} from "../../interfaces";
+import {createSlice} from "@reduxjs/toolkit";
+import {convertStringToDate, getDate} from "../../functions/changeDate";
 
-    interface IState {
-        items: IReItem[]
-        sortedItems: IReItem[]
-        filteredItems: IReItem[]
-        filteredSortedItems: IReItem[]
-        isSearching: boolean
-        isSorting: boolean
-        paramSort: boolean | null
-    }
+interface IState {
+    items: IReItem[]
+    sortedItems: IReItem[]
+    filteredItems: IReItem[]
+    filteredSortedItems: IReItem[]
+    isSearching: boolean
+    isSorting: boolean
+    paramSort: boolean | null
+}
 
-    const initialState: IState = {
-        sortedItems: [],
-        items: [],
-        filteredItems: [],
-        filteredSortedItems: [],
-        isSearching: false,
-        isSorting: false,
-        paramSort: null
-    }
-    const ItemsSlice = createSlice({
+const initialState: IState = {
+    sortedItems: [],
+    items: [],
+    filteredItems: [],
+    filteredSortedItems: [],
+    isSearching: false,
+    isSorting: false,
+    paramSort: null
+}
+const ItemsSlice = createSlice({
         name: 'items',
         initialState,
         reducers: {
@@ -47,7 +47,7 @@
                         (startDate === '' || itemDate >= startDate) &&
                         (endDate === '' || itemDate <= endDate) &&
                         (!Object.values(status).includes(true) || status[item.statusOrder]);
-            })
+                })
                 if (state.isSorting) {
                     state.filteredSortedItems = [...state.filteredItems].sort((a, b) => {
                         const dateA = +a.dateOrder
@@ -62,7 +62,11 @@
             },
             pushNewItems(state, action) {
                 const [items, order_number, order_id] = [...action.payload]
-                const new_items = items.map((item: IItem)  => ({...item, idOrder: order_id, numberOrder: order_number} as IReItem))
+                const new_items = items.map((item: IItem) => ({
+                    ...item,
+                    idOrder: order_id,
+                    numberOrder: order_number
+                } as IReItem))
                 state.items = [...state.items, new_items]
             },
             sortItems(state, action) {
@@ -106,24 +110,18 @@
             },
             addNewItems(state, action) {
                 const newItems = action.payload;
-
-                const updatedItems = state.items.map(existingItem => {
-                    const newItem = newItems.find((item:IItem) => item.id === existingItem.id);
-                    return newItem ? newItem : existingItem;
-                });
-
-                const uniqueNewItems = newItems.filter((newItem:IItem) =>
-                    !state.items.some(existingItem => existingItem.id === newItem.id)
-                );
-
-                state.items = [...updatedItems, ...uniqueNewItems];
+                state.items = [
+                    ...state.items.filter(item => !newItems.some((newItem: IReItem) => newItem.id === item.id)),
+                    ...newItems.map((item: any) => ({...item, dateOrder: item.dateOrder.seconds}))
+                ];
             }
-
         }
-    })
+    }
+)
 
-    export const ItemsReducer = ItemsSlice.reducer
+export const ItemsReducer = ItemsSlice.reducer
 
-    export const {getAllItems, searchItem, clearSearchItem, pushNewItems,
-        sortItems, resetSort, deleteItems, addNewItems, addIdNumberItem
-    } = ItemsSlice.actions
+export const {
+    getAllItems, searchItem, clearSearchItem, pushNewItems,
+    sortItems, resetSort, deleteItems, addNewItems, addIdNumberItem
+} = ItemsSlice.actions
