@@ -2,6 +2,7 @@ import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/auth";
 import {addDoc, collection, db, deleteDoc, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
 import {IManager, IOrder} from "../../interfaces";
+import {getDoc} from "firebase/firestore";
 
 
 
@@ -82,23 +83,30 @@ export const fetchDeleteManager = createAsyncThunk(
     'managers/fetchDeleteManager',
     async ({ manager_id }: { manager_id: string }, thunkAPI) => {
         try {
-            const messageRef = await doc(db, `managers`, manager_id)
-            await deleteDoc(messageRef)
-            await thunkAPI.dispatch(deleteManager(manager_id))
+            const auth = getAuth();
+            const user = auth.currentUser ;
 
-            const auth = getAuth()
-            const user = auth.currentUser
             if (!user) {
-                return thunkAPI.rejectWithValue("Пользователь не аутентифицирован")
+                return thunkAPI.rejectWithValue("Пользователь не аутентифицирован");
             }
-            await user.delete()
+
+            const messageRef = doc(db, `managers`, manager_id);
+            const docSnap = await getDoc(messageRef);
+            if (!docSnap.exists()) {
+                return thunkAPI.rejectWithValue("Документ не найден");
+            }
+
+            await deleteDoc(messageRef);
+            await thunkAPI.dispatch(deleteManager(manager_id));
+            await user.delete();
 
         } catch (e: any) {
-            console.log('1234567890-')
+            console.error('Ошибка при удалении менеджера:', e);
             return thunkAPI.rejectWithValue(e.message || "Ошибка при удалении пользователя");
         }
     }
 );
+
 
 const ManagersSlice = createSlice({
     name: 'Managers',

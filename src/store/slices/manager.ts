@@ -74,21 +74,31 @@ export const fetchAutoSignIn = createAsyncThunk(
             if (!token) {
                 return;
             }
-            await thunkAPI.dispatch(resetError())
-            console.log(token)
-            // Получаем текущего пользователя
-            const user = getAuth().currentUser;
+            try {
+                const user = getAuth();
+                const q = query(collection(db, "managers"));
+                const querySnapshot = await getDocs(q);
+                const userData: IManager[] = querySnapshot.docs.map((doc) => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
+                    } as IManager
+                });
+                const Manager = userData.filter((item, index) => item.email === localStorage.getItem('email'))
+                thunkAPI.dispatch(setManager(Manager[0]))
+            } catch {
+                const q = query(collection(db, "managers"));
+                const querySnapshot = await getDocs(q);
+                const userData: IManager[] = querySnapshot.docs.map((doc) => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
+                    } as IManager
+                });
+                const Manager = userData.filter((item, index) => item.email === localStorage.getItem('email'))
+                thunkAPI.dispatch(setManager(Manager[0]))
+            }
 
-            const q = query(collection(db, "managers"));
-            const querySnapshot = await getDocs(q);
-            const userData: IManager[] = querySnapshot.docs.map((doc) => {
-                return {
-                    id: doc.id,
-                    ...doc.data()
-                } as IManager
-            });
-            const Manager = userData.filter((item, index) => item.email === localStorage.getItem('email'))
-            thunkAPI.dispatch(setManager(Manager[0]))
 
         } catch (error: any) {
             console.log('=====', error)

@@ -105,11 +105,13 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                                     );
                                 })
                             }
-                            {message.creationTime && <span style={{ paddingRight: '10px' }} className={'status_message'}>
+                            {message.creationTime ? <span style={{ paddingRight: '10px' }} className={'status_message'}>
                                 {getDate(message.creationTime)[1].split(':')[0]}:{getDate(message.creationTime)[1].split(':')[1]}<span>  </span>
                                 {getDate(message.creationTime)[0].split('.')[0]}.{getDate(message.creationTime)[0].split('.')[1]}.
                                 {getDate(message.creationTime)[0].split('.')[2]}
-                            </span>}
+                            </span> :
+                                <span className={'status_message'}>Отправка...</span>
+                            }
                             <div className={'message_change_container'}>
                                 {role === 'admin' &&
                                     <button
@@ -124,7 +126,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                                         Удалить
                                     </button>
                                 }
-                                {chat.uid !== message.uid &&
+                                {chat.uid !== message.uid  &&
                                     <span className={'status_message'}>{message.read ? 'Просмотрено' : 'Доставлено'}</span>
                                 }
                                 {index === chat.messages.length - 1 && chat.uid === message.uid &&
@@ -133,14 +135,14 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({ chat }) => {
                             </div>
                         </div>
                     )}
-                    {statusSendMessage === 'loading'  &&
-                        <div className={'manager_message message'}>
-                            <h4>Менеджер</h4>
+                    {/*{statusSendMessage === 'loading'  &&*/}
+                    {/*    <div className={'manager_message message'}>*/}
+                    {/*        <h4>Менеджер</h4>*/}
 
-                            <p style={{ paddingLeft: '10px' }}>{temporaryMessage}</p>
-                            <span className={'status_message'}>Отправка...</span>
-                        </div>
-                    }
+                    {/*        <p style={{ paddingLeft: '10px' }}>{temporaryMessage}</p>*/}
+                    {/*        <span className={'status_message'}>Отправка...</span>*/}
+                    {/*    </div>*/}
+                    {/*}*/}
                     {statusSendMessage === 'failed' &&
                         <div className={'manager_message message error'}>
                             <span className={'status_message'}>Что-то пошло не так :(</span>
