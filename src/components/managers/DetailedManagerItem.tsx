@@ -37,10 +37,13 @@ const DetailedManagerItem: FC<DetailedManagerItemProps> = ({manager}) => {
         if (manager.id) dispatch(fetchChangePossibilitiesManager({managerId: manager.id, checkboxes: checkboxStates}))
     }
 
-    function deleteManager () {
+    function deleteManager() {
         dispatch(fetchDeleteManager({manager_id: manager.id as string}))
             .then(() => navigation('/managers'))
             .then(() => dispatch(fetchAutoSignIn()))
+    }
+    if (!manager) {
+        navigation('/managers')
     }
 
     return (
@@ -81,14 +84,14 @@ const DetailedManagerItem: FC<DetailedManagerItemProps> = ({manager}) => {
                         text={`Вы уверены, что хотите удалить менеджера ${manager.name}?`}
                         onClose={() => setVisibleWindow(false)}
                         deleteFunc={deleteManager}
-                        status={statusDeleteManager} />
-                    }
-                    </div>
-                    ) : (
-                    <h3>not found</h3>
-                    )
-                    );
+                        status={statusDeleteManager}/>
+                }
+            </div>
+        ) : (
+            <h3>not found</h3>
+        )
+    );
 
-                };
+};
 
-                export default DetailedManagerItem;
+export default DetailedManagerItem;

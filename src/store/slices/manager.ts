@@ -39,6 +39,7 @@ export const fetchSignIn = createAsyncThunk(
     'user/signIn',
     async ({ email, password }: { email: string; password: string }, thunkAPI) => {
         try {
+
             const userCredential: UserCredential = await signInWithEmailAndPassword(getAuth(), email, password)
             const user = userCredential.user
             const token = await user.getIdToken()
@@ -61,6 +62,7 @@ export const fetchSignIn = createAsyncThunk(
             localStorage.setItem('email', email)
             // localStorage.removeItem('token')
         } catch (error: any) {
+            console.log(error)
             return thunkAPI.rejectWithValue(error.message)
         }
     }
@@ -107,6 +109,7 @@ export const fetchAutoSignIn = createAsyncThunk(
     }
 );
 
+
 const ManagerSlice = createSlice({
     name: 'Manager',
     initialState,
@@ -142,6 +145,7 @@ const ManagerSlice = createSlice({
                     [fetchSignIn.pending.type, fetchAutoSignIn.pending.type].includes(action.type),
                 (state) => {
                     state.status = 'loading'
+                    console.log(state.status)
                 }
             )
             .addMatcher(
@@ -149,6 +153,7 @@ const ManagerSlice = createSlice({
                     [fetchSignIn.fulfilled.type, fetchAutoSignIn.fulfilled.type].includes(action.type),
                 (state) => {
                     state.status = 'succeeded'
+                    console.log(state.status)
                     state.error = null
                     state.isAuth = true
 
@@ -161,6 +166,7 @@ const ManagerSlice = createSlice({
                     state.status = 'failed'
                     state.error = action.payload as string
                     state.isAuth = false
+                    console.log(state.status)
                 }
             )
 

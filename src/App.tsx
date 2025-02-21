@@ -22,6 +22,7 @@ import {changeMessage, deleteChat, fetchGetAllChats, pushNewChat, pushNewMessage
 import {fetchGetAllUsers} from "./store/slices/users";
 import {collection, getFirestore, onSnapshot} from "firebase/firestore";
 import {addIdNumberItem} from "./store/slices/items";
+import NavBar from "./components/NavBar";
 
 
 
@@ -244,7 +245,9 @@ function App() {
         }
     }, [])
 
-
+    useEffect(() => {
+        console.log(manager)
+    }, [])
     return (
         <div className={'App'}>
             <Header/>
