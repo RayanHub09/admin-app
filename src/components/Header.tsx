@@ -16,7 +16,8 @@ const Header = () => {
 
     return (
         <header>
-            <h2>{worker?.email}</h2>
+            {isAuth &&
+                <h2>{worker?.email}</h2>}
             {isAuth && status === 'succeeded' &&
                 <>
                     <NavBar/>

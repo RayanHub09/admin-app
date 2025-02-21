@@ -3,6 +3,8 @@ import './components.sass';
 import {options, IRole} from "../lists/roleList";
 import {possibilitiesManager, IPossibilitiesManager} from "../lists/possibilitiesManagerList";
 import {generatePassword} from "../functions/generatePassword";
+import {useAppDispatch} from "../hooks/redux-hooks";
+import {removeManager} from "../store/slices/manager";
 
 interface FormProps {
     text_button: string,
@@ -23,7 +25,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
     const [name, setName] = useState('');
     const [role, setRole] = useState<string>('Выберете отдел'); // Изменено здесь
     const [visibilityPassword, setVisibilityPassword] = useState(false);
-
+    const dispatch = useAppDispatch()
     const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const {id, checked} = event.target;
         setCheckboxStates((prevState) => ({...prevState, [id]: checked}));
@@ -62,6 +64,7 @@ const Form: FC<FormProps> = ({text_button, handleClick, isCreate}) => {
                     type={visibilityPassword || isCreate ? 'text' : 'password'}
                     value={password}
                     onChange={event => setPassword(event.target.value)}
+                    // onChange={() => dispatch(removeManager())}
                 />
             }
             {isCreate && (password === '' ?

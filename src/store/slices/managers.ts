@@ -3,7 +3,7 @@ import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/
 import {addDoc, collection, db, deleteDoc, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
 import {IManager, IOrder} from "../../interfaces";
 import {getDoc} from "firebase/firestore";
-// import { initializeApp } from 'firebase-admin/app';
+import { initializeApp } from 'firebase-admin/app';
 
 
 interface IAuthManager {
@@ -59,7 +59,6 @@ export const fetchGetAllManagers = createAsyncThunk(
                 id: doc.id,
                 ...doc.data()
             } as IManager))
-            // console.log(initializeApp)
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.message);
         }

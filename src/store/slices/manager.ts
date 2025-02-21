@@ -34,36 +34,37 @@ const initialState: IState = {
 }
 
 
-
 export const fetchSignIn = createAsyncThunk(
     'user/signIn',
     async ({ email, password }: { email: string; password: string }, thunkAPI) => {
         try {
-
-            const userCredential: UserCredential = await signInWithEmailAndPassword(getAuth(), email, password)
-            const user = userCredential.user
-            const token = await user.getIdToken()
+            const userCredential: UserCredential = await signInWithEmailAndPassword(getAuth(), email, password);
+            const user = userCredential.user;
+            const token = await user.getIdToken();
             thunkAPI.dispatch(signIn({
                 id: user.uid,
                 token,
                 email: user.email
-            }))
+            }));
             const q = query(collection(db, "managers"));
             const querySnapshot = await getDocs(q);
             const userData: IManager[] = querySnapshot.docs.map((doc) => {
                 return {
                     id: doc.id,
                     ...doc.data()
-                } as IManager
+                } as IManager;
             });
-            const Manager = userData.filter((item, index) => item.email === email)
-            thunkAPI.dispatch(setManager(Manager[0]))
-            localStorage.setItem('token', token)
-            localStorage.setItem('email', email)
-            // localStorage.removeItem('token')
+
+            const Manager = userData.find((item) => item.email === email);
+            if (!Manager) {
+                throw new Error('Manager not found');
+            }
+            thunkAPI.dispatch(setManager(Manager));
+            localStorage.setItem('token', token);
+            localStorage.setItem('email', email);
         } catch (error: any) {
-            console.log(error)
-            return thunkAPI.rejectWithValue(error.message)
+            // thunkAPI.dispatch(removeManager())
+            return thunkAPI.rejectWithValue(error.message);
         }
     }
 );
@@ -76,34 +77,23 @@ export const fetchAutoSignIn = createAsyncThunk(
             if (!token) {
                 return;
             }
-            try {
-                const user = getAuth();
-                const q = query(collection(db, "managers"));
-                const querySnapshot = await getDocs(q);
-                const userData: IManager[] = querySnapshot.docs.map((doc) => {
-                    return {
-                        id: doc.id,
-                        ...doc.data()
-                    } as IManager
-                });
-                const Manager = userData.filter((item, index) => item.email === localStorage.getItem('email'))
-                thunkAPI.dispatch(setManager(Manager[0]))
-            } catch {
-                const q = query(collection(db, "managers"));
-                const querySnapshot = await getDocs(q);
-                const userData: IManager[] = querySnapshot.docs.map((doc) => {
-                    return {
-                        id: doc.id,
-                        ...doc.data()
-                    } as IManager
-                });
-                const Manager = userData.filter((item, index) => item.email === localStorage.getItem('email'))
-                thunkAPI.dispatch(setManager(Manager[0]))
+            const user = getAuth();
+            const q = query(collection(db, "managers"));
+            const querySnapshot = await getDocs(q);
+            const userData: IManager[] = querySnapshot.docs.map((doc) => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                } as IManager;
+            });
+
+            const Manager = userData.find((item) => item.email === localStorage.getItem('email'));
+            if (!Manager) {
+                throw new Error('Manager not found');
             }
-
-
+            thunkAPI.dispatch(setManager(Manager));
         } catch (error: any) {
-            console.log('=====', error)
+            console.log('=====', error);
             return thunkAPI.rejectWithValue(error.message);
         }
     }
