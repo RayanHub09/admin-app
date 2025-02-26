@@ -56,12 +56,21 @@ export const fetchDeleteUser = createAsyncThunk(
             await deleteDoc(messageRef)
             await thunkAPI.dispatch(deleteUser(user_id))
 
-            const auth = getAuth()
-            const user = auth.currentUser
-            if (!user) {
-                return thunkAPI.rejectWithValue("Пользователь не аутентифицирован")
-            }
-            await user.delete()
+            // const auth = getAuth()
+            // const user = auth.currentUser
+            //
+            // console.log(user)
+            //
+            // deleteUser(user).then(() => {
+            //     // User deleted.
+            // }).catch((error) => {
+            //     // An error ocurred
+            //     // ...
+            // });
+            // if (!user) {
+            //     return thunkAPI.rejectWithValue("Пользователь не аутентифицирован")
+            // }
+            // await user.delete()
 
         } catch (e:any) {
             return thunkAPI.rejectWithValue(e.message)

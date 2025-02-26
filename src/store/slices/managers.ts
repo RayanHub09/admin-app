@@ -3,8 +3,6 @@ import {createUserWithEmailAndPassword, getAuth, UserCredential} from "firebase/
 import {addDoc, collection, db, deleteDoc, doc, getDocs, query, setDoc, updateDoc} from "../../firebase";
 import {IManager, IOrder} from "../../interfaces";
 import {getDoc} from "firebase/firestore";
-import { initializeApp } from 'firebase-admin/app';
-
 
 interface IAuthManager {
     email: string | null
@@ -83,12 +81,7 @@ export const fetchDeleteManager = createAsyncThunk(
     'managers/fetchDeleteManager',
     async ({ manager_id }: { manager_id: string }, thunkAPI) => {
         try {
-            // const auth = getAuth();
-            // const user = auth.currentUser ;
-            //
-            // if (!user) {
-            //     return thunkAPI.rejectWithValue("Пользователь не аутентифицирован");
-            // }
+
 
             const messageRef = doc(db, `managers`, manager_id);
             const docSnap = await getDoc(messageRef);
