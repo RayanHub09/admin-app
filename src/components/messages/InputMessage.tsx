@@ -1,7 +1,7 @@
-import React, { FC, useState, useEffect, useRef } from 'react';
+import React, {FC, useState, useEffect, useRef} from 'react';
 import 'figma-icons';
-import { fetchPushNewMessage, setTemporaryMessage } from "../../store/slices/messages";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
+import {fetchPushNewMessage, setTemporaryMessage} from "../../store/slices/messages";
+import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 
 interface InputMessageProps {
     uid: string;
@@ -18,8 +18,15 @@ const MAX_FILES_COUNT = 5;
 const MESSAGE_LIMIT = 4;
 const MESSAGE_INTERVAL_MS = 35000;
 
-const InputMessage: FC<InputMessageProps> = ({ uid, chat_id, onSendMessage }) => {
-    const [message, setMessage] = useState('');
+const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
+    const manager = useAppSelector(state => state.manager.manager)
+    const [message, setMessage] = useState('Добрый день, \n' +
+        '\n' +
+        `С уважением, менеджер ${manager.name}. Должность ${(manager.role === 'admin' && 'Managing Director') ||
+        (manager.role === 'yahoo_auctions' && 'Yahoo Department Manager') ||
+        (manager.role === 'spare_parts' && 'Parts Department Manager') ||
+        (manager.role === 'parcels' && 'Parcels Department Manager') ||
+        (manager.role === 'accounting' && 'Accounting Department Manager')}.`);
     const [files, setFiles] = useState<File[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const mid = useAppSelector(state => state.manager.manager.id);
@@ -43,9 +50,9 @@ const InputMessage: FC<InputMessageProps> = ({ uid, chat_id, onSendMessage }) =>
         }
     }, [messageCount]);
 
-    const formatTextForFirebase = (text: string) => {
-        return text.replace(/\n/g, '<br />');
-    };
+    // const formatTextForFirebase = (text: string) => {
+    //     return text.replace(/\n/g, '<br />');
+    // };
 
     const sendMessage = () => {
         console.log(message)
@@ -55,18 +62,14 @@ const InputMessage: FC<InputMessageProps> = ({ uid, chat_id, onSendMessage }) =>
                 setTimeout(() => setErrorMessage(null), 2000);
                 return;
             }
-
-            // Проверка на количество сообщений и другие условия...
-
-            const formattedMessage = formatTextForFirebase(message);
-            dispatch(fetchPushNewMessage({ chat_id, mid, text: formattedMessage, files }));
+            dispatch(fetchPushNewMessage({chat_id, mid, text: message, files}));
             dispatch(setTemporaryMessage({
-                text: formattedMessage,
+                text: message,
                 files: files.length !== 0
             }));
 
             setMessage('');
-            onSendMessage(formattedMessage);
+            onSendMessage(message);
             setFiles([]);
             setErrorMessage(null);
         }
@@ -95,19 +98,20 @@ const InputMessage: FC<InputMessageProps> = ({ uid, chat_id, onSendMessage }) =>
             <div className={'send_messages_container'}>
                 <input
                     type="file"
-                    style={{ display: "none" }}
+                    style={{display: "none"}}
                     onChange={handleFileChange}
                     id="file"
                 />
                 <label htmlFor="file" className={'custom-input-file'} style={{alignSelf: 'flex-start'}}>
-                    <img title={'Выбрать файл'} style={{ width: '26px', height: '26px', padding: '7px' }} src={addImage} />
+                    <img title={'Выбрать файл'} style={{width: '26px', height: '26px', padding: '7px'}} src={addImage}/>
                 </label>
                 <textarea
                     value={message}
-                    onChange={event => setMessage(event.target.value)}
+                    onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder={'Напишите сообщение...'}
+                    rows={3}
                     className={'send_messages'}
+                    placeholder="Введите ваше сообщение..."
                 />
                 {(message || files.length !== 0) && (
                     <button
@@ -118,14 +122,16 @@ const InputMessage: FC<InputMessageProps> = ({ uid, chat_id, onSendMessage }) =>
                         <img
                             title={'Отправить'}
                             src={sendImage}
-                            style={{ width: '20px' }}
+                            style={{width: '20px'}}
                             alt={''}
                         />
                     </button>
                 )}
             </div>
             {files.length !== 0 && (
-                <div ref={inputRef} className={'files_container'}>
+                <div
+                    ref={inputRef}
+                    className={'files_container'}>
                     {files.map((file, index) => (
                         <div key={index} className={'file'}>
                             <p>{file.name}</p>
