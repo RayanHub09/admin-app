@@ -1,10 +1,7 @@
-import React, {FC, useState, useEffect, useRef} from 'react';
+import React, { FC, useState, useEffect, useRef } from 'react';
 import 'figma-icons';
-
-import {
-    fetchPushNewMessage
-} from "../../store/slices/messages";
-import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
+import { fetchPushNewMessage, setTemporaryMessage } from "../../store/slices/messages";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
 
 interface InputMessageProps {
     uid: string;
@@ -21,16 +18,15 @@ const MAX_FILES_COUNT = 5;
 const MESSAGE_LIMIT = 4;
 const MESSAGE_INTERVAL_MS = 35000;
 
-const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
+const InputMessage: FC<InputMessageProps> = ({ uid, chat_id, onSendMessage }) => {
     const [message, setMessage] = useState('');
-    const [img, setImg] = useState<File | null>(null);
-    const [messageCount, setMessageCount] = useState(0);
-    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const mid = useAppSelector(state => state.manager.manager.id);
     const dispatch = useAppDispatch();
     const inputRef = useRef<HTMLInputElement>(null);
-    const [files, setFiles] = useState<File[]>([]);
+    const [messageCount, setMessageCount] = useState(0);
+    const [lastSentTime, setLastSentTime] = useState<number | null>(null);
 
     useEffect(() => {
         if (inputRef.current) {
@@ -47,60 +43,51 @@ const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
         }
     }, [messageCount]);
 
-    function sendMessage() {
+    const formatTextForFirebase = (text: string) => {
+        return text.replace(/\n/g, '<br />');
+    };
+
+    const sendMessage = () => {
+        console.log(message)
         if (mid) {
             if (message.length > MAX_MESSAGE_LENGTH) {
                 setErrorMessage("Превышен лимит знаков, пожалуйста, разделите ваше сообщение на два");
-                setTimeout(() => setErrorMessage(null), 2000)
+                setTimeout(() => setErrorMessage(null), 2000);
                 return;
             }
 
-            if (img && img.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                setErrorMessage("Превышен максимальный размер файла 30 Мб");
-                setTimeout(() => setErrorMessage(null), 2000)
-                return;
-            }
+            // Проверка на количество сообщений и другие условия...
 
-            if (messageCount >= MESSAGE_LIMIT) {
-                if (lastSentTime === null || Date.now() - lastSentTime > MESSAGE_INTERVAL_MS) {
-                    setMessageCount(messageCount + 1);
-                    setLastSentTime(Date.now());
-                } else {
-                    setErrorMessage("Вы отправляете слишком много сообщений за короткий промежуток времени, пожалуйста, подождите")
-                    setTimeout(() => setErrorMessage(null), 2000)
-                    return;
-                }
-            } else {
-                setMessageCount(prev => prev + 1);
-            }
-            dispatch(fetchPushNewMessage({ chat_id, mid, text: message, files }))
-                .then(() => {
-                    // Вызываем функцию обратного вызова
-                    setMessage('');
-                    onSendMessage(message);
-                    setFiles([]);
-                    setImg(null);
-                    setErrorMessage(null);
-                });
+            const formattedMessage = formatTextForFirebase(message);
+            dispatch(fetchPushNewMessage({ chat_id, mid, text: formattedMessage, files }));
+            dispatch(setTemporaryMessage({
+                text: formattedMessage,
+                files: files.length !== 0
+            }));
+
+            setMessage('');
+            onSendMessage(formattedMessage);
+            setFiles([]);
+            setErrorMessage(null);
         }
-    }
+    };
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
             sendMessage();
         }
-    }
+    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = event.target.files ? Array.from(event.target.files) : [];
         if (files.length + selectedFiles.length > MAX_FILES_COUNT) {
-            setErrorMessage(`Вы можете прикрепить не более ${MAX_FILES_COUNT} файлов за раз`)
-            setTimeout(() => setErrorMessage(null), 2000)
+            setErrorMessage(`Вы можете прикрепить не более ${MAX_FILES_COUNT} файлов за раз`);
+            setTimeout(() => setErrorMessage(null), 2000);
             return;
         }
         setFiles([...files, ...selectedFiles]);
     };
-
 
     return (
         <div className={'container_send'}>
@@ -108,54 +95,40 @@ const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
             <div className={'send_messages_container'}>
                 <input
                     type="file"
-                    style={{display: "none"}}
+                    style={{ display: "none" }}
                     onChange={handleFileChange}
                     id="file"
                 />
-                {img &&
-                    <button
-                        className={'custom-input-file'}
-                        style={!img ? {width: '40px', padding: '4px 1px'} : {width: 'auto', padding: '10px'}}
-                    >Прикрепить
-                    </button>
-                }
-                <label
-                    htmlFor="file"
-                    className={'custom-input-file'}>
-                    <img
-                        title={'Выбрать файл'}
-                        style={{width: '26px', height: '26px', padding: '7px'}}
-                        src={addImage}
-                    />
+                <label htmlFor="file" className={'custom-input-file'} style={{alignSelf: 'flex-start'}}>
+                    <img title={'Выбрать файл'} style={{ width: '26px', height: '26px', padding: '7px' }} src={addImage} />
                 </label>
-                <input
-                    ref={inputRef}
+                <textarea
                     value={message}
                     onChange={event => setMessage(event.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder={'Напишите сообщение...'}
                     className={'send_messages'}
                 />
-                {(message || img) &&
+                {(message || files.length !== 0) && (
                     <button
                         onClick={sendMessage}
-                        disabled={message === '' && img === null}
+                        disabled={message === '' && files.length === 0}
                         className={'button_send_messages'}
                     >
                         <img
                             title={'Отправить'}
                             src={sendImage}
-                            style={{width: '20px'}}
+                            style={{ width: '20px' }}
                             alt={''}
                         />
                     </button>
-                }
+                )}
             </div>
-            {files && (
-                <div className={'files_container'}>
+            {files.length !== 0 && (
+                <div ref={inputRef} className={'files_container'}>
                     {files.map((file, index) => (
                         <div key={index} className={'file'}>
-                            <p >{file.name}</p>
+                            <p>{file.name}</p>
                             <button
                                 onClick={() => setFiles(files.filter((_, i) => i !== index))}
                                 title={'Удалить'}

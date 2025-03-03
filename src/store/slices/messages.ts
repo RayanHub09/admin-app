@@ -6,7 +6,7 @@ import {getDownloadURL, getStorage, ref, uploadBytes} from "firebase/storage"
 import {IRole, options} from "../../lists/roleList";
 
 function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-'.replace(/[xy]/g, function(c) {
         const r = Math.random() * 16 | 0;
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -25,6 +25,7 @@ interface IState {
     statusCreateChat : 'loading' | 'succeeded' | 'failed' | null
     statusGetMessage: 'loading' | 'succeeded' | 'failed' | null
     temporaryMessage: string | null
+    files: boolean
     statusChange: 'loading' | 'succeeded' | 'failed' | null
     unreadMessages: number
 }
@@ -42,6 +43,7 @@ const initialState: IState = {
     statusGetMessage: null,
     statusCreateChat: null,
     temporaryMessage: null,
+    files: false,
     unreadMessages: 0
 }
 
@@ -94,15 +96,26 @@ export const fetchPushNewMessage = createAsyncThunk(
             const storage = getStorage();
             const time = serverTimestamp();
 
-            let uploadedFiles: { uri: string; name: string }[] = [];
+            let uploadedFiles: {
+                id: string
+                uri: string
+                name: string
+                mimeType: string
+                size: number
+            }[] = [];
 
-            // Загружаем все файлы и получаем их URL
             if (files) {
                 uploadedFiles = await Promise.all(files.map(async (file) => {
                     const storageRef = ref(storage, `files/${file.name}`);
                     await uploadBytes(storageRef, file);
                     const downloadURL = await getDownloadURL(storageRef);
-                    return { uri: downloadURL, name: `${mid}_${file.name}` };
+                    return {
+                        id: generateUUID() + Date.now().toString(),
+                        uri: downloadURL,
+                        name: `${mid}_${file.name}` ,
+                        mimeType: file.type,
+                        size: file.size
+                    };
                 }));
             }
 
@@ -239,7 +252,8 @@ const ChatsSlice = createSlice({
         }
         ,
         setTemporaryMessage(state, action) {
-            state.temporaryMessage = action.payload
+            state.temporaryMessage = action.payload.text
+            state.files = action.payload.files
         },
         changeReadMessage(state, action) {
             const { chat_id, messages_id } = action.payload

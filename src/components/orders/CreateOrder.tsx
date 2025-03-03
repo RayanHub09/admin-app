@@ -77,6 +77,9 @@ const CreateOrder = () => {
     }, []);
 
     const handleChangeItem = (key: keyof FormDataItem) => (value: string) => {
+        if (key === 'weight') {
+            value = value.replace(',', '.');
+        }
         setFormDataItem(prev => ({ ...prev, [key]: value }));
     };
 
@@ -105,6 +108,7 @@ const CreateOrder = () => {
         const totalPriceYen = items.reduce((acc, item) => acc + Number(item.priceYen), 0);
 
         setShowItemFields(false)
+        console.log(formDataOrder.userId)
         dispatch(fetchCreateOrder({
             commentOrder: formDataOrder.comment,
             userId: formDataOrder.userId,

@@ -173,7 +173,7 @@ export const fetchCreateOrder = createAsyncThunk(
                 date: Timestamp.now(),
                 items: items.map((item) => ({
                     id: `${Date.now().toString()}/${item.name}/${item.markName}`,
-                    amount: item.count,
+                    amount: +item.count,
                     comment: item.comment,
                     part: {
                         discontinued: false,
