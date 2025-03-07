@@ -27,7 +27,7 @@
 .input_field
   border: 2px rgba(128, 128, 128, 1) solid
 
-.order_item_container
+@mixin container_order()
   @include default_container(row, 10px)
   font-size: 20px
   column-gap: 10px
@@ -35,16 +35,20 @@
   border: #a5a5a5 2px solid
   padding: 20px
   align-items: center
+.order_item_container
+  @include container_order()
+  border: #a5a5a5 2px solid
+.cancel_field
+  @include container_order()
+  background-color: rgba(255, 0, 0, 0.15)
+.archived_field
+  @include container_order()
+  background-color: rgba(255, 221, 0, 0.37)
 
 .grey_order_item_container
-  @include default_container(row, 10px)
-  font-size: 20px
-  column-gap: 10px
-  justify-content: space-between
-  border: #a5a5a5 2px solid
+  @include container_order()
   background: rgba(148, 148, 148, 0.35)
-  padding: 20px
-  align-items: center
+
 @media (max-width: 920px)
   .order_item_container
     flex-direction: column

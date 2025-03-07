@@ -41,7 +41,7 @@ const ChatItem: FC<ChatItemProps> = ({ chat }) => {
                                 {!isNaN(+lastMessageTime[1].split(':')[0]) ?
                                     <p style={{ alignSelf: "center" }} className={'status_message'}>
                                         {lastMessageTime[1].split(':')[0]}:{lastMessageTime[1].split(':')[1]} <span> </span>
-                                        {lastMessageTime[0].split('.')[0]}.{lastMessageTime[0].split('.')[1]}
+                                        {lastMessageTime[0].split('.')[0]}.{lastMessageTime[0].split('.')[1]}.{lastMessageTime[0].split('.')[2]}
                                     </p> :
                                     <p style={{ alignSelf: "center" }} className={'status_message'}>
                                         отправка...

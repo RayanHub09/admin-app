@@ -85,13 +85,14 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                                 className={chat.uid === message.uid ? 'user_message message' : 'manager_message message'}>
                                 {chat.uid === message.uid ? <h4>{user?.name} {user?.surname}</h4> : <h4>Менеджер</h4>}
                                 <p style={{paddingLeft: '10px'}}>
-                                    {message.text.split('<br />').map((line, lineIndex) => (
+                                    {message.text.split('\n').map((line, lineIndex) => (
                                         <span key={lineIndex}>
-                    {line}
-                                            {lineIndex < message.text.split('<br />').length - 1 && <br/>}
-                </span>
+            {line}
+                                            {lineIndex < message.text.split('\n').length - 1 && <br />}
+        </span>
                                     ))}
                                 </p>
+
                                 {message.attachedFiles?.length !== 0 &&
                                     message.attachedFiles.map((file, index) => {
                                         const isImage = file.name.split('.')[file.name.split('.').length - 1] === 'jpg' ||

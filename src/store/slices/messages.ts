@@ -95,7 +95,7 @@ export const fetchPushNewMessage = createAsyncThunk(
         try {
             const storage = getStorage();
             const time = serverTimestamp();
-
+            const formattedText = text.split('\n').map(paragraph => paragraph.trim()).join('\n');
             let uploadedFiles: {
                 id: string
                 uri: string
@@ -124,7 +124,7 @@ export const fetchPushNewMessage = createAsyncThunk(
 
             const messageData = {
                 id: newMessageRef.id,
-                text: text || '',
+                text: formattedText || '',
                 read: false,
                 attachedFiles: uploadedFiles, // Используем загруженные файлы
                 creationTime: time,

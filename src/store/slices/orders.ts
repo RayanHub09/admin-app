@@ -5,6 +5,11 @@ import {addDoc, serverTimestamp, Timestamp} from "firebase/firestore";
 import {statusOrder} from "../../lists/statusOrder";
 import {FormDataItem} from "../../components/orders/CreateOrder";
 
+const sortOrdersByDate = (orders: IOrder[]) => {
+    return orders.sort((a, b) => {
+        return +b.date - +a.date; // Сортировка по дате создания
+    });
+};
 
 
 interface IState {
@@ -145,6 +150,19 @@ export const fetchCancelOrder = createAsyncThunk(
     }
 )
 
+export const fetchArchivedOrder = createAsyncThunk(
+    'orders/fetchArchivedOrder',
+    async ({orderId, archived}:{orderId: string, archived: boolean}, thunkAPI) => {
+        try {
+            const orderDocRef = doc(db, 'orders', orderId)
+            await updateDoc(orderDocRef, {['status.archived']: !archived, ['status.date']: serverTimestamp(), ['status.readyToPackage']: false}, )
+            thunkAPI.dispatch(archivedOrder({orderId, archived}))
+        } catch (e: any) {
+            thunkAPI.rejectWithValue(e.message)
+        }
+    }
+)
+
 export const fetchDeleteOrder = createAsyncThunk(
     'chats/fetchDeleteMessage',
     async ({order_id}: {order_id: string}, thunkAPI) => {
@@ -249,6 +267,7 @@ const OrdersSlice = createSlice({
         },
         changeStatusOrder(state, action) {
             const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
+            console.log(currentTimeInSeconds)
             const {orderId, newStatus} = action.payload
             state.orders = state.orders.map(order =>
                 order.id === orderId ? {...order, status: {statusName: newStatus, date: currentTimeInSeconds}} : order
@@ -271,6 +290,14 @@ const OrdersSlice = createSlice({
                     number: newNumber
                 } : order
             ) as IOrder[]
+            state.filteredOrders = state.filteredOrders.map(order =>
+                order.id === orderId ? {
+                    ...order,
+                    status: {statusName: newStatus, date: currentTimeInSeconds},
+                    comment: newComment,
+                    number: newNumber
+                } : order
+            ) as IOrder[]
         },
         clearSearch(state) {
             state.isSearching = false
@@ -285,7 +312,16 @@ const OrdersSlice = createSlice({
                     date: currentTimeInSeconds
                 } : order
             ) as IOrder[]
-
+        },
+        archivedOrder(state, action) {
+            const currentTimeInSeconds = Math.floor(Date.now() / 1000).toString()
+            const {orderId, archived} = action.payload
+            state.orders = state.orders.map(order => order.id === orderId ? {
+                    ...order,
+                    status: {archived: archived},
+                    date: currentTimeInSeconds
+                } : order
+            ) as IOrder[]
         },
         resetStatus(state) {
             state.status = null
@@ -300,14 +336,11 @@ const OrdersSlice = createSlice({
         },
         pushNewOrderSnapshot(state, action) {
             const newOrder = action.payload;
-            state.orders = [...state.orders.filter(order => order.number !== newOrder.number), newOrder]
-            console.log(state.orders)
-        // const orderExists = state.orders.some(order => order.id === newOrder.id)
-            // if (!orderExists) {
-            //     state.orders = [newOrder, ...state.orders];
-            // } else {
-            //     state.orders = [...state.orders.filter(order => order.id !== newOrder.id), newOrder]
-            // }
+            const time = newOrder.date.seconds
+            state.orders = [...state.orders.filter(order => order.number !== newOrder.number), {
+                ...newOrder,
+                date: time
+            }]
         },
         deleteOrderSnapshot(state, action) {
             state.orders = [...state.orders.filter(order => order.id !== action.payload)]
@@ -391,7 +424,7 @@ const OrdersSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeStatusOrder.pending.type, fetchCancelOrder.pending.type,
-                        fetchChangeOrder.pending.type
+                        fetchChangeOrder.pending.type, fetchArchivedOrder.pending.type
                     ].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'loading'
@@ -400,7 +433,7 @@ const OrdersSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeStatusOrder.fulfilled.type, fetchCancelOrder.fulfilled.type,
-                        fetchChangeOrder.fulfilled.type
+                        fetchChangeOrder.fulfilled.type, fetchArchivedOrder.fulfilled.type
                     ].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'succeeded'
@@ -410,7 +443,7 @@ const OrdersSlice = createSlice({
             .addMatcher(
                 (action) =>
                     [fetchChangeStatusOrder.rejected.type, fetchCancelOrder.rejected.type,
-                        fetchChangeOrder.rejected.type
+                        fetchChangeOrder.rejected.type, fetchArchivedOrder.rejected.type
                     ].includes(action.type),
                 (state, action: PayloadAction<string>) => {
                     state.status = 'failed'
@@ -425,5 +458,5 @@ export const OrderReducer = OrdersSlice.reducer
 export const {
     getAllOrders, searchOrder, changeStatusOrder, changeOrder, resetSort, sortOrders,
     clearSearch, cancelOrder, resetStatus, changeOrderSnapshot, pushNewOrderSnapshot,
-    deleteOrderSnapshot, deleteOrder, addDeliveryIdNumber
+    deleteOrderSnapshot, deleteOrder, addDeliveryIdNumber, archivedOrder
 } = OrdersSlice.actions

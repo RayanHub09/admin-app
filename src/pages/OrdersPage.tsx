@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import OrdersList from "../components/orders/OrdersList";
 import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
-import {clearSearch} from "../store/slices/orders";
+import {clearSearch, sortOrders} from "../store/slices/orders";
 import SearchOrder from "../components/orders/SearchOrder";
 import Loading from "../components/Loading";
 

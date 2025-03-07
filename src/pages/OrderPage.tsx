@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
 import { IOrder, IReOrder } from "../interfaces";
 import DetailedOrderItem from "../components/orders/DetailedOrderItem";
 import ChangeDetailedOrderItem from "../components/orders/ChangeDetailedOrderItem";
-import { fetchDeleteOrder } from "../store/slices/orders";
+import {fetchArchivedOrder, fetchDeleteOrder} from "../store/slices/orders";
 import NotFoundPage from "./NotFoundPage";
 import { deleteItems } from "../store/slices/items";
 import ShadowWindow from "../components/ShadowWindow";
@@ -21,6 +21,7 @@ const OrderPage: React.FC = () => {
     const order: IOrder | undefined = useAppSelector(state =>
         state.orders.orders.find(order => order.id === id)
     );
+    const status = useAppSelector(state => state.orders.status)
     const manager = useAppSelector(state => state.manager.manager);
     const navigation = useNavigate();
 
@@ -59,11 +60,22 @@ const OrderPage: React.FC = () => {
         <div className={'order_page_container'}>
             <div className={'buttons_change_container_order'}>
                 {(changeStatusOrder || changeOrderNumber || writeCommentsOrder || manager.role === 'admin') &&
-                    <button
-                        onClick={() => setChangeMode(!changeMode)}
-                        className={'change_button'}>
-                        {changeMode ? 'Вернуться к заказу' : 'Изменить'}
-                    </button>
+                    <div className={'container_menu'}>
+                        <button
+                            onClick={() => setChangeMode(!changeMode)}
+                            className={'change_button'}>
+                            {changeMode ? 'Вернуться к заказу' : 'Изменить'}
+                        </button>
+                        <button
+                            onClick={() => dispatch(fetchArchivedOrder({orderId : order.id, archived: order.status.archived}))}
+                            className={'change_button'}
+                        disabled={status === 'loading'}>
+                            {order.status.archived ? (status === 'loading' ? 'Загрузка...' : 'Убрать из архива') : (status === 'loading' ? 'Загрузка...' : 'Добавить в архив')}
+                        </button>
+                        {order.status.archived &&
+                            <span className={'archived'}>В архиве</span>
+                        }
+                    </div>
                 }
                 {manager.role === 'admin' &&
                     <button

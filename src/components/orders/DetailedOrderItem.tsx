@@ -33,8 +33,11 @@ const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
                 </span>
                 <h3 className={'label_order'}>Примерный вес</h3>
                 <span className={'field'}>
-                    {order.items ? order.items.reduce((acc, item) => acc + item.part.weight, 0) : 0}
-                </span>
+    {order.items
+        ? parseFloat((order.items.reduce((acc, item) => acc + item.part.weight, 0)).toFixed(3))
+        : '0'}
+</span>
+
                 <h3 className={'label_order'}>Дата заказа</h3>
                 <span className={'field'}>
                     {getDate(order.date)[1]}, {getDate(order.date)[0]}

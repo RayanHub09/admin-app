@@ -22,7 +22,7 @@ const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
     const manager = useAppSelector(state => state.manager.manager)
     const [message, setMessage] = useState('Добрый день, \n' +
         '\n' +
-        `С уважением, менеджер ${manager.name}. Должность ${(manager.role === 'admin' && 'Managing Director') ||
+        `С уважением, ${manager.name}, ${(manager.role === 'admin' && 'Managing Director') ||
         (manager.role === 'yahoo_auctions' && 'Yahoo Department Manager') ||
         (manager.role === 'spare_parts' && 'Parts Department Manager') ||
         (manager.role === 'parcels' && 'Parcels Department Manager') ||
