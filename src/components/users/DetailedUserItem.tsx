@@ -116,12 +116,12 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                 </div>
             </div>
             <div className={'buttons_change_container'}>
-                {(manager.role === 'admin' || manager.writeCommentsDelivery) && <button
+                {(manager.role === 'admin' || manager.createChat) && <button
                     onClick={() => setVisibleWindowSendMessage(true)}
                     className={'change_button'}
                 >Написать сообщение
                 </button>}
-                {<button
+                {(manager.role === 'admin' || manager.deleteUser) && <button
                     onClick={() => setVisibleWindowDelete(true)}
                     className={'error_button'}
                     style={{alignSelf: 'flex-start'}}

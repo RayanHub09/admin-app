@@ -15,8 +15,8 @@ import {
     pushNewDeliverySnapshot
 } from "./store/slices/deliveries";
 import {addNewItems, getAllItems} from "./store/slices/items";
-import {IChat, IDelivery, IOrder, IReItem, IReOrder} from "./interfaces";
-import {fetchAutoSignIn} from "./store/slices/manager";
+import {IChat, IDelivery, IManager, IOrder, IReItem, IReOrder} from "./interfaces";
+import {fetchAutoSignIn, setManager} from "./store/slices/manager";
 import {useNavigate} from "react-router-dom";
 import {changeMessage, deleteChat, fetchGetAllChats, pushNewChat, pushNewMessage} from "./store/slices/messages";
 import {fetchGetAllUsers} from "./store/slices/users";
@@ -161,18 +161,17 @@ function App() {
         return () => unsubscribe();
     }, [dispatch]);
 
-    // useEffect(() => {
-    //     const db = getFirestore()
-    //     const ManagersRef = collection(db, 'managers')
-    //     return onSnapshot(ManagersRef, (snapshot) => {
-    //         snapshot.docChanges().forEach((change) => {
-    //             if (change.type === 'removed') {
-    //                 dispatch(fetchAutoSignIn())
-    //                 console.log(manager.token)
-    //             }
-    //         })
-    //     })
-    // }, []);
+    useEffect(() => {
+        const db = getFirestore()
+        const ManagersRef = collection(db, 'managers')
+        return onSnapshot(ManagersRef, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === 'modified') {
+                    dispatch(setManager(change.doc.data() as IManager))
+                }
+            })
+        })
+    }, []);
 
     useEffect(() => {
         if (manager.isAuth) {

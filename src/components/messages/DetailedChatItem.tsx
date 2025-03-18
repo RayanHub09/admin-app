@@ -20,7 +20,6 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
     const manager = useAppSelector(state => state.manager.manager);
     const temporaryMessage = useAppSelector(state => state.messages.temporaryMessage);
     const isFiles = useAppSelector(state => state.messages.files)
-    const role = useAppSelector(state => state.manager.manager.role);
     const dispatch = useAppDispatch();
     const location = useLocation();
     const navigation = useNavigate();
@@ -133,7 +132,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                                     <span className={'status_message'}>Отправка...</span>
                                 }
                                 <div className={'message_change_container'}>
-                                    {role === 'admin' &&
+                                    {(manager.role === 'admin' || manager.deleteMessages) &&
                                         <button
                                             value={message.id}
                                             onClick={() => {
@@ -173,7 +172,7 @@ const DetailedChatItem: FC<DetailedChatItemProps> = ({chat}) => {
                     <h3 style={{alignSelf: 'center'}}>Сообщений пока нет</h3>
                 </div>
             }
-            {(manager.role === 'admin' || manager.chatManagement) &&
+            {(manager.role === 'admin' || manager.deleteChat) &&
                 <button
                     onClick={confirmDeleteChat}
                     className={'default_button_delete'}>

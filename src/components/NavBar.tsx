@@ -41,7 +41,7 @@ const NavBar = () => {
         items: 'Товары',
         orders: 'Заказы',
         deliveries: 'Посылки',
-        managers: isAdmin ? 'Менеджеры' : '',
+        ...(isAdmin ? { managers: 'Менеджеры' } : {}),
         messages: 'Сообщения',
         users: 'Покупатели',
     }
