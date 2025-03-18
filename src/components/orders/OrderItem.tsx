@@ -55,7 +55,7 @@ const OrderItem: FC<OrderItemProps> = ({ order, index }) => {
             {order.status.archived ? (
                 <span>В архиве</span>
             ) : (
-                <span >
+                <span style={{alignSelf: 'center'}}>
                     Статус: {order.status.statusName}
                 </span>
             )}
