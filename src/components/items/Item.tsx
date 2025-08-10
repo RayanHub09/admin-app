@@ -7,9 +7,10 @@ import { useAppSelector } from "../../hooks/redux-hooks";
 
 interface IItemProps {
     item: IReItem & IItem;
+    index: number
 }
 
-const Item: FC<IItemProps> = ({ item }) => {
+const Item: FC<IItemProps> = ({ item , index}) => {
     const uid = useAppSelector(state => state.orders.orders).find(order => order.number === item.numberOrder)?.uid;
     const user = useAppSelector(state => state.users.users).find(user => user.id === uid);
 
@@ -19,40 +20,40 @@ const Item: FC<IItemProps> = ({ item }) => {
 
     return (
         <>
-            <span className={'field'}>{item.id}</span>
-            <span className={'field'}>{item.part?.markName}</span>
-            <span className={'field'}>
+            <span className={index % 2 === 0 ? 'field' : 'field gray_field'}>{item.id}</span>
+            <span className={index % 2 === 0 ? 'field' : 'field gray_field'}>{item.part?.markName}</span>
+            <span className={index % 2 === 0 ? 'field' : 'field gray_field'}>
                 <h4>{changeCost(item.part?.priceYen.toString())}¥</h4>
                 {changeCost(item.part?.priceRub.toString())}₽
             </span>
-            <span className={'field'}>{item.part?.weight}</span>
-            <span className={'field'}>{item.amount}</span>
+            <span className={index % 2 === 0 ? 'field' : 'field gray_field'}>{item.part?.weight}</span>
+            <span className={index % 2 === 0 ? 'field' : 'field gray_field'}>{item.amount}</span>
 
             {item.idOrder ? (
-                <Link className={'field'} to={`/orders/${item.idOrder}`}>
+                <Link className={index % 2 === 0 ? 'field' : 'field gray_field'} to={`/orders/${item.idOrder}`}>
                     <span>{item.numberOrder}</span>
                 </Link>
             ) : (
-                <span className={'field'}></span>
+                <span className={index % 2 === 0 ? 'field' : 'field gray_field'}></span>
             )}
 
             {item.idDelivery ? (
-                <Link className={'field'} to={`/deliveries/${item.idDelivery}`}>
+                <Link className={index % 2 === 0 ? 'field' : 'field gray_field'} to={`/deliveries/${item.idDelivery}`}>
                     <span>{item.numberDelivery}</span>
                 </Link>
             ) : (
-                <span className={'field'}></span>
+                <span className={index % 2 === 0 ? 'field' : 'field gray_field'}></span>
             )}
 
             {user ? (
-                <Link className={'field'} to={`/users/${user.id}`}>
+                <Link className={index % 2 === 0 ? 'field' : 'field gray_field'} to={`/users/${user.id}`}>
                     <span>{user.name} {user.surname} {user.patronymic}</span>
                 </Link>
             ) : (
-                <span className={'field'}></span> // Обработка отсутствия пользователя
+                <span className={index % 2 === 0 ? 'field' : 'field gray_field'}></span> // Обработка отсутствия пользователя
             )}
 
-            <span className={'field'}>{item.comment}</span>
+            <span className={index % 2 === 0 ? 'field' : 'field gray_field'}>{item.comment}</span>
         </>
     );
 };

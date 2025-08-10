@@ -2,8 +2,9 @@ import React, {FC, useState} from 'react';
 import {IDelivery} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks/redux-hooks";
 import {statusesOfDelivery} from "../../lists/dateOfDelivery";
-import {fetchChangeDelivery, resetStatus} from "../../store/slices/deliveries";
+import {fetchChangeDelivery, fetchChangeOrderDelivery, resetStatus} from "../../store/slices/deliveries";
 import {getDate} from "../../functions/changeDate";
+import {fetchChangeOrder, fetchChangeStatusOrder} from "../../store/slices/orders";
 
 interface IDeliveryProps {
     delivery: IDelivery
@@ -12,7 +13,7 @@ interface IDeliveryProps {
 const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
     const dispatch = useAppDispatch()
     const numbersDeliveries = useAppSelector(state => state.deliveries.deliveries).map(delivery => delivery.number)
-    const statusFetch = useAppSelector(state => state.deliveries.status)
+    const   statusFetch = useAppSelector(state => state.deliveries.status)
     const writeCommentsDelivery = useAppSelector(state => state.manager.manager.writeCommentsDelivery)
     const changeStatusDelivery = useAppSelector(state => state.manager.manager.changeStatusDelivery)
     const changeDeliveryNumber = useAppSelector(state => state.manager.manager.changeDeliveryNumber)
@@ -30,7 +31,17 @@ const ChangeDetailedDeliveryItem:FC<IDeliveryProps> = ({delivery}) => {
         } else {
             dispatch(fetchChangeDelivery({deliveryId: delivery.id, newStatus: status,
                 newComment: comment, newNumber: number, newTrackLink: trackLink}))
+                .then(() => delivery.orders.forEach((order, index) => {
+                    dispatch(fetchChangeOrder({orderId: order.id, newStatus: status, newComment: order.comment, newNumber: order.number}))
+                }))
+                .then(() => delivery.orders.forEach((order, index) => {
+                    dispatch(fetchChangeOrderDelivery({
+                        deliveryId : delivery.id, orderId: order.id, newStatus: status,
+                        newComment: comment, newNumber: number,
+                    }))
+                }))
                 .then(() => dispatch(resetStatus()))
+
         }
 
     }

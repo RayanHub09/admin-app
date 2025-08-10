@@ -76,8 +76,8 @@ const DeliveryPage = () => {
 
     return (
         <div className={'delivery_page_container'}>
-            <div className={'container_menu'}>
-                <div className={'buttons_change_container'}>
+            <div className={'container_menu_delivery'}>
+                <div className={'buttons_change_container_delivery'}>
                     {(manager.role === 'admin' || changeStatusDelivery || changeDeliveryNumber || writeCommentsDelivery) &&
                         <button
                             onClick={() => setChangeMode(!changeMode)}

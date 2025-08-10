@@ -24,23 +24,27 @@
   border: 1px rgba(128, 128, 128, 0.5) solid
   padding: 10px
 
+.gray_field
+  background: rgba(51, 59, 64, 0.2)
+
 .input_field
   border: 2px rgba(128, 128, 128, 1) solid
 
 @mixin container_order()
   @include default_container(row, 10px)
-  font-size: 20px
   column-gap: 10px
-  justify-content: space-between
-  border: #a5a5a5 2px solid
   padding: 20px
-  align-items: center
+  text-align: center
+  justify-content: space-between
+  font-size: 20px
+
 .order_item_container
   @include container_order()
   border: #a5a5a5 2px solid
+
 .cancel_field
-  @include container_order()
   background-color: rgba(255, 0, 0, 0.15)
+
 .archived_field
   @include container_order()
   background-color: rgba(255, 221, 0, 0.26)
@@ -53,6 +57,7 @@
   .order_item_container, .grey_order_item_container, .cancel_field, .archived_field
     flex-direction: column
     align-items: center
+
 .status
   text-align: center
 
@@ -60,13 +65,12 @@
   .fast_actions
     flex-direction: column
 
-
-
 .nothing_found
   align-self: center
   text-align: center
   font-size: 20px
   padding: 20px
+
 .promote_button
   @extend %button
   background: #006bae
@@ -88,6 +92,7 @@
   &:disabled
     background: rgba(165, 165, 165, 1)
     cursor: not-allowed
+
 .change_button
   @extend %button
   background: #006bae
@@ -100,15 +105,21 @@
     cursor: not-allowed
 .detailed_order_item
   display: grid
+  width: 100%
   grid-template-columns: repeat(2, 1fr)
-
-
+.detailed_order_item_
+    display: grid
+    grid-template-columns: repeat(2, 1fr)
 .detailed_order_item_container
   @include default_container(column, 20px)
   width: 100%
-.buttons_change_container
+.buttons_change_container_delivery, .buttons_change_container
   @include default_container(row, 0, 10px)
   justify-content: space-between
+@media (max-width: 850px)
+  .buttons_change_container_delivery
+    flex-direction: column
+    row-gap: 10px
 .buttons_change_container_order
   @extend .buttons_change_container
   width: 100%
@@ -118,6 +129,15 @@
 .container_menu
   @include default_container(row, 0, 10px)
   justify-content: space-between
+.container_menu_delivery
+  @include default_container(row, 0, 10px)
+  justify-content: space-between
+
+@media(max-width: 850px)
+  .container_menu_delivery
+    flex-direction: column
+    row-gap: 10px
+    justify-content: center
 .label_search
   font-size: 18px
   font-weight: 500
@@ -136,7 +156,11 @@
 @media (max-width: 520px)
   .statuses_container
     grid-template-columns: 1fr
-
+@media(max-width: 503px)
+  .buttons_change_container_order
+    flex-direction: column
+    row-gap: 10px
+    align-items: center
 .status_container
   @include default_container(row, 0px, 5px)
 .container
@@ -146,7 +170,7 @@
   align-items: center
   justify-content: center
 @media (max-width: 950px)
-  .detailed_order_item_container ,.detailed_order_item, .items_grid
+  .detailed_order_item_container, .number_order, .detailed_order_item
     overflow: scroll
 .create_order_form
   @include default_container(column, 0px, 10px)

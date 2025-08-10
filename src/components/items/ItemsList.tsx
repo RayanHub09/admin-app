@@ -24,7 +24,7 @@ const ItemsList:FC<ItemsListProps> = ({itemsList}) => {
                 <h4 className={'label_order'}>Покупатель</h4>
                 <h4 className={'label_order'}>Комментарий</h4>
                 {itemsList.map((item, index) => (
-                    <Item item={item as IReItem} key={index}/>
+                    <Item item={item as IReItem} key={index} index={index}/>
                 ))}
             </div>
         </div>

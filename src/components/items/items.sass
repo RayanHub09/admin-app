@@ -16,10 +16,11 @@
 .items_list
   display: grid
   grid-template-columns: repeat(9, 1fr)
-  //border: 1px rgba(128, 128, 128, 0.4) solid
+  overflow: scroll
 @media (max-width: 950px)
     .items_list
       overflow: scroll
+
 
 .search_items_container
   @include default_container(column, 20px, 0px)
@@ -34,6 +35,6 @@
 
 .sort_container
   @include default_container(row, 10px, 10px)
-  align-self: flex-end
+  align-self: center
 
 

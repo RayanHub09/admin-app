@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
-import { IOrder, IReOrder } from "../interfaces";
+import React, {useEffect, useState} from 'react';
+import {useNavigate, useParams} from "react-router-dom";
+import {useAppDispatch, useAppSelector} from "../hooks/redux-hooks";
+import {IOrder, IReOrder} from "../interfaces";
 import DetailedOrderItem from "../components/orders/DetailedOrderItem";
 import ChangeDetailedOrderItem from "../components/orders/ChangeDetailedOrderItem";
 import {fetchArchivedOrder, fetchDeleteOrder} from "../store/slices/orders";
 import NotFoundPage from "./NotFoundPage";
-import { deleteItems } from "../store/slices/items";
+import {deleteItems} from "../store/slices/items";
 import ShadowWindow from "../components/ShadowWindow";
 
 const OrderPage: React.FC = () => {
@@ -17,7 +17,7 @@ const OrderPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const [visibleWindow, setVisibleWindow] = useState(false);
     const [statusDeleteOrder, setStatusDeleteOrder] = useState('');
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
     const order: IOrder | undefined = useAppSelector(state =>
         state.orders.orders.find(order => order.id === id)
     );
@@ -28,7 +28,7 @@ const OrderPage: React.FC = () => {
     const deleteOrder = async () => {
         setStatusDeleteOrder('loading');
         try {
-            await dispatch(fetchDeleteOrder({ order_id: order?.id as string })).unwrap();
+            await dispatch(fetchDeleteOrder({order_id: order?.id as string})).unwrap();
             if (order?.items) {
                 await dispatch(deleteItems(order.items.map(item => item.id)));
             }
@@ -52,7 +52,7 @@ const OrderPage: React.FC = () => {
     }, [order])
 
     if (!order) {
-        return <NotFoundPage />;
+        return <NotFoundPage/>;
     }
 
 
@@ -66,12 +66,18 @@ const OrderPage: React.FC = () => {
                             className={'change_button'}>
                             {changeMode ? 'Вернуться к заказу' : 'Изменить'}
                         </button>
-                        <button
-                            onClick={() => dispatch(fetchArchivedOrder({orderId : order.id, archived: order.status.archived}))}
-                            className={'change_button'}
-                        disabled={status === 'loading'}>
-                            {order.status.archived ? (status === 'loading' ? 'Загрузка...' : 'Убрать из архива') : (status === 'loading' ? 'Загрузка...' : 'Добавить в архив')}
-                        </button>
+                        {
+                            !changeMode &&
+                            <button
+                                onClick={() => dispatch(fetchArchivedOrder({
+                                    orderId: order.id,
+                                    archived: order.status.archived
+                                }))}
+                                className={'change_button'}
+                                disabled={status === 'loading'}>
+                                {order.status.archived ? (status === 'loading' ? 'Загрузка...' : 'Убрать из архива') : (status === 'loading' ? 'Загрузка...' : 'Добавить в архив')}
+                            </button>
+                        }
                         {order.status.archived &&
                             <span className={'archived'}>В архиве</span>
                         }
@@ -80,7 +86,9 @@ const OrderPage: React.FC = () => {
                 {manager.role === 'admin' &&
                     <button
                         onClick={() => setVisibleWindow(true)}
-                        className={'error_button'}>
+                        className={'error_button'}
+                        style={{alignSelf: 'center'}}
+                    >
                         Удалить заказ
                     </button>}
                 {visibleWindow &&
@@ -92,9 +100,9 @@ const OrderPage: React.FC = () => {
                     />
                 }
             </div>
-            <div>
-                {changeMode ? <ChangeDetailedOrderItem order={order as IReOrder} /> : <DetailedOrderItem key={order.id} order={order as IReOrder} />}
-            </div>
+            {changeMode ? <ChangeDetailedOrderItem order={order as IReOrder}/> :
+                <DetailedOrderItem key={order.id} order={order as IReOrder}/>}
+
         </div>
     );
 };

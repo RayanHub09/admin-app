@@ -33,14 +33,14 @@ const ItemsListAll = () => {
                     <h4 className={'label_order'}>Комментарий</h4>
                     {isSearching
                         ? (isSorting ? filteredSortedItems.map((item, index) => (
-                            <Item item={item} key={index} />
+                            <Item item={item} key={index} index={index} />
                         )) : filteredItems.map((item, index) => (
-                            <Item item={item} key={index} />
+                            <Item item={item} key={index} index={index} />
                         )))
                         : (isSorting ? sortedItems.map((item, index) => (
-                            <Item item={item} key={index} />
+                            <Item item={item} key={index} index={index} />
                         )) : items.map((item, index) => (
-                            <Item item={item} key={index} />
+                            <Item item={item} key={index} index={index} />
                         )))
                     }
 

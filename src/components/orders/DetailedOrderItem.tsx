@@ -17,7 +17,7 @@ const DetailedOrderItem: FC<OrderItemProps> = ({ order }) => {
     return (
         <div className={'detailed_order_item_container'}>
             <Link to={`/orders/${order.id}`} className={'link_item'}>
-                <h2>Заказ № {order.number}</h2>
+                <h2 className={'number_order'}>Заказ № {order.number}</h2>
             </Link>
             <div className={'detailed_order_item'}>
                 <h3 className={'label_order'} style={{ borderTop: '1px rgba(128, 128, 128, 0.5) solid' }}>Номер</h3>

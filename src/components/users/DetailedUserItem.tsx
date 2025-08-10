@@ -256,11 +256,11 @@ const DetailedUserItem: FC<DetailedUserItemProps> = ({user}) => {
                                 {isSearchingItems
                                     ?
                                     filteredItems.map((item, index) => (
-                                        <Item item={item as IReItem} key={index}/>
+                                        <Item item={item as IReItem} key={index} index={index}/>
                                     ))
                                     :
                                     items.map((item, index) => (
-                                        <Item item={item} key={index}/>
+                                        <Item item={item} key={index} index={index}/>
                                     ))
                                 }
                             </div> : <span className={'nothing_found'}>Пока нет товаров</span>)

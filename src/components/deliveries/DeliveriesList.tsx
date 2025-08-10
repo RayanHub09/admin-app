@@ -38,13 +38,13 @@ const DeliveriesList:FC<DeliveriesListProps> = ({deliveries}) => {
                     <h3 className={'label_order'}>Статус</h3>
                     <h3 className={'label_order'}>Комментарий</h3>
                     {isSearching
-                        ? (isSorting ? filteredSortedDeliveries.map(delivery =>
-                            <DeliveryItem delivery={delivery} key={delivery.id} />) : filteredDeliveries.map(delivery =>
-                            <DeliveryItem delivery={delivery} key={delivery.id} />))
+                        ? (isSorting ? filteredSortedDeliveries.map((delivery, index) =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} index={index} />) : filteredDeliveries.map((delivery, index) =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} index={index} />))
                         :
-                        (isSorting ? sortedDeliveries.map(delivery =>
-                            <DeliveryItem delivery={delivery} key={delivery.id} />) : deliveries.map(delivery =>
-                            <DeliveryItem delivery={delivery} key={delivery.id} />))
+                        (isSorting ? sortedDeliveries.map((delivery, index) =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} index={index} />) : deliveries.map((delivery, index) =>
+                            <DeliveryItem delivery={delivery} key={delivery.id} index={index} />))
                     }
                 </div>
             }

@@ -68,7 +68,7 @@ const ChangeDetailedOrderItem: FC<OrderItemProps> = ({order}) => {
             </div>
             <h2>Заказ № {order.number}</h2>
 
-            <div className={'detailed_order_item'}>
+            <div className={'detailed_order_item_'}>
                 <h3 className={'label_order'} style={{borderTop: '1px rgba(128, 128, 128, 0.5) solid'}}>Номер</h3>
                 {(changeOrderNumber || manager.role === 'admin') ?
                     <input

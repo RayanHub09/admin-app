@@ -76,7 +76,7 @@ const InputMessage: FC<InputMessageProps> = ({uid, chat_id, onSendMessage}) => {
     };
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (event.key === 'Enter' && event.shiftKey) {
             event.preventDefault();
             sendMessage();
         }
