@@ -47,6 +47,7 @@ const SectionMessages = () => {
 
     return (
         <div className={'chat_list_container'}>
+
             <div style={{ paddingBottom: '10px' }} className={'sort_container'}>
                 <select className={'fields_sort'} onChange={handleSortChange} value={sortValue}>
                     <option value="asc">Сначала новые</option>
@@ -62,6 +63,7 @@ const SectionMessages = () => {
                     Пока нет подходящих чатов.
                 </div>
             )}
+
         </div>
     );
 };

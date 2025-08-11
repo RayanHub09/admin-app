@@ -92,6 +92,17 @@ export const fetchGetAllDeliveries = createAsyncThunk(
         }
     }
 )
+// export const fetchChangeStatusDelivery = createAsyncThunk(
+//     'deliveries/fetchChangeStatusDelivery',
+//     async ({deliveryId}:{deliveryId:string}) => {
+//         const deliveryDocRef = doc(db, 'delivery', deliveryId)
+//         try {
+//
+//         } catch (e:any) {
+//
+//         }
+//     }
+// )
 
 export const fetchChangeDelivery = createAsyncThunk(
     'deliveries/fetchChangeDelivery',
